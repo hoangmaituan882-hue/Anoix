@@ -1,0 +1,6 @@
+{
+  "name": "TRIGGER Inc. Official Website",
+  "description": "1:1 faithful recreation of the official ANIMATION STUDIO TRIGGER website featuring works, news, recruit, goods, and media galleries.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
