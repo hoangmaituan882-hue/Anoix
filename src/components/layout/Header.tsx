@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { TriggerLogo } from './TriggerLogo';
-import { Language } from '../types';
-import { I18N } from '../data/triggerData';
+import { TriggerLogo } from '../ui/TriggerLogo';
+import { Language } from '../../types';
+import { I18N } from '../../data/triggerData';
 import { Menu, X, Globe, ExternalLink } from 'lucide-react';
 
 interface HeaderProps {

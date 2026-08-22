@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { WorkItem, Language } from '../types';
-import { WORKS_LIST, I18N } from '../data/triggerData';
+import { WorkItem, Language } from '../../types';
+import { I18N } from '../../data/triggerData';
+import { repository } from '../../lib/repository';
 import { X, Play, Filter } from 'lucide-react';
 
-interface AllWorksModalProps {
+interface FilmsLibraryModalProps {
   lang: Language;
   onClose: () => void;
   onSelectWork: (work: WorkItem) => void;
 }
 
-export const AllWorksModal: React.FC<AllWorksModalProps> = ({
+export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
   lang,
   onClose,
   onSelectWork,
@@ -18,8 +19,8 @@ export const AllWorksModal: React.FC<AllWorksModalProps> = ({
   const t = I18N[lang];
 
   const filteredWorks = filter === 'all' 
-    ? WORKS_LIST 
-    : WORKS_LIST.filter(w => w.category.toLowerCase().includes(filter.toLowerCase()));
+    ? repository.films() 
+    : repository.films().filter(w => w.category.toLowerCase().includes(filter.toLowerCase()));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-xl animate-fade-in overflow-y-auto">
@@ -56,7 +57,7 @@ export const AllWorksModal: React.FC<AllWorksModalProps> = ({
               filter === 'all' ? 'bg-[#ff3650] text-white' : 'bg-white/10 text-white/70 hover:text-white'
             }`}
           >
-            ALL ({WORKS_LIST.length})
+            ALL ({repository.films().length})
           </button>
           <button
             onClick={() => setFilter('TV Series')}

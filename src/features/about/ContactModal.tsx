@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Language } from '../types';
-import { I18N } from '../data/triggerData';
+import { Language } from '../../types';
+import { I18N } from '../../data/triggerData';
 import { X, Mail, Send, CheckCircle2 } from 'lucide-react';
 
 interface ContactModalProps {

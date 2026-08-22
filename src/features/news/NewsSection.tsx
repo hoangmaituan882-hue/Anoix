@@ -1,6 +1,7 @@
 import React from 'react';
-import { NewsItem, Language } from '../types';
-import { NEWS_LIST, I18N } from '../data/triggerData';
+import { NewsItem, Language } from '../../types';
+import { I18N } from '../../data/triggerData';
+import { repository } from '../../lib/repository';
 import { ArrowRight, Tag } from 'lucide-react';
 
 interface NewsSectionProps {
@@ -46,7 +47,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
         {/* News List */}
         <div className="news_list divide-y divide-white/20 border-t border-b border-white/20">
-          {NEWS_LIST.map((item) => (
+          {repository.news().map((item) => (
             <article
               key={item.id}
               onClick={() => onSelectNews(item)}

@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { GoodsItem, Language } from '../types';
-import { GOODS_LIST, I18N } from '../data/triggerData';
+import { GoodsItem, Language } from '../../types';
+import { I18N } from '../../data/triggerData';
+import { repository } from '../../lib/repository';
 import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag, ExternalLink } from 'lucide-react';
 
 interface GoodsSectionProps {
@@ -72,7 +73,7 @@ export const GoodsSection: React.FC<GoodsSectionProps> = ({
             className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-none py-4 scroll-smooth"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {GOODS_LIST.map((item) => (
+            {repository.goods().map((item) => (
               <div
                 key={item.id}
                 onClick={() => onSelectGoods(item)}

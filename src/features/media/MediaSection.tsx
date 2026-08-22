@@ -1,14 +1,15 @@
 import React, { useRef } from 'react';
-import { YoutubeItem, Language } from '../types';
-import { YOUTUBE_LIST, I18N } from '../data/triggerData';
+import { YoutubeItem, Language } from '../../types';
+import { I18N } from '../../data/triggerData';
+import { repository } from '../../lib/repository';
 import { ArrowRight, ChevronLeft, ChevronRight, Play, Youtube } from 'lucide-react';
 
-interface YoutubeSectionProps {
+interface MediaSectionProps {
   lang: Language;
   onSelectVideo: (video: YoutubeItem) => void;
 }
 
-export const YoutubeSection: React.FC<YoutubeSectionProps> = ({
+export const MediaSection: React.FC<MediaSectionProps> = ({
   lang,
   onSelectVideo,
 }) => {
@@ -59,7 +60,7 @@ export const YoutubeSection: React.FC<YoutubeSectionProps> = ({
             className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-none py-4 scroll-smooth"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {YOUTUBE_LIST.map((video) => (
+            {repository.videos().map((video) => (
               <div
                 key={video.id}
                 onClick={() => onSelectVideo(video)}

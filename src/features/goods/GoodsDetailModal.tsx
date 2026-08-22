@@ -1,6 +1,6 @@
 import React from 'react';
-import { GoodsItem, Language } from '../types';
-import { I18N } from '../data/triggerData';
+import { GoodsItem, Language } from '../../types';
+import { I18N } from '../../data/triggerData';
 import { X, ExternalLink, ShoppingBag, CheckCircle } from 'lucide-react';
 
 interface GoodsDetailModalProps {

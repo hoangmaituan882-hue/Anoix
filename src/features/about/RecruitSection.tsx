@@ -1,6 +1,7 @@
 import React from 'react';
-import { Language } from '../types';
-import { RECRUIT_IMAGE, I18N } from '../data/triggerData';
+import { Language } from '../../types';
+import { I18N } from '../../data/triggerData';
+import { repository } from '../../lib/repository';
 import { ArrowRight, Sparkles, Users, Award } from 'lucide-react';
 
 interface RecruitSectionProps {
@@ -24,9 +25,9 @@ export const RecruitSection: React.FC<RecruitSectionProps> = ({
       {/* Background Graphic with dark overlay */}
       <div className="absolute inset-0 z-0">
         <picture className="w-full h-full">
-          <source media="(max-width: 767px)" srcSet={RECRUIT_IMAGE} />
+          <source media="(max-width: 767px)" srcSet={repository.recruitImage()} />
           <img
-            src={RECRUIT_IMAGE}
+            src={repository.recruitImage()}
             alt="Studio TRIGGER Studio Work Environment"
             className="w-full h-full object-cover object-center opacity-30 transform hover:scale-105 transition-transform duration-1000 ease-out"
             loading="lazy"

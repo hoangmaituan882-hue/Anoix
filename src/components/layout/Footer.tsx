@@ -1,7 +1,8 @@
 import React from 'react';
-import { TriggerLogo } from './TriggerLogo';
-import { Language } from '../types';
-import { SOCIAL_LINKS, I18N } from '../data/triggerData';
+import { TriggerLogo } from '../ui/TriggerLogo';
+import { Language } from '../../types';
+import { I18N } from '../../data/triggerData';
+import { repository } from '../../lib/repository';
 import { ArrowUpRight } from 'lucide-react';
 
 interface FooterProps {
@@ -16,7 +17,7 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
       <div className="max-w-7xl mx-auto">
         {/* Social Media Directory */}
         <div id="footer_sns" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-20">
-          {SOCIAL_LINKS.map((item) => (
+          {repository.socialLinks().map((item) => (
             <a
               key={item.id}
               href={item.url}

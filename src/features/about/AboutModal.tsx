@@ -1,7 +1,7 @@
 import React from 'react';
-import { Language } from '../types';
-import { I18N } from '../data/triggerData';
-import { TriggerLogo } from './TriggerLogo';
+import { Language } from '../../types';
+import { I18N } from '../../data/triggerData';
+import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { X, Building2, Calendar, Users, Award, Heart } from 'lucide-react';
 
 interface AboutModalProps {

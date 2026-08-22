@@ -1,6 +1,6 @@
 import React from 'react';
-import { Language } from '../types';
-import { I18N, RECRUIT_IMAGE } from '../data/triggerData';
+import { Language } from '../../types';
+import { I18N } from '../../data/triggerData';
 import { X, CheckCircle, Briefcase, Mail, FileText } from 'lucide-react';
 
 interface RecruitModalProps {

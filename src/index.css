@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* Prevent horizontal scrollbars during the RTL site entrance sweep (x: 100vw) */
+html,
+body {
+  overflow-x: clip;
+}

@@ -1,6 +1,6 @@
 import React from 'react';
-import { NewsItem, Language } from '../types';
-import { I18N } from '../data/triggerData';
+import { NewsItem, Language } from '../../types';
+import { I18N } from '../../data/triggerData';
 import { X, Calendar, Tag, Share2 } from 'lucide-react';
 
 interface NewsDetailModalProps {
