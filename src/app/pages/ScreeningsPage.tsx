@@ -7,6 +7,7 @@ import { TRIGGER_EASE } from '../../lib/motion';
 import { Screening } from '../../types/screening';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
+import { Loader } from '../../components/motion/loader';
 import { ArrowLeft, CalendarDays, MapPin, Clapperboard } from 'lucide-react';
 
 interface ScreeningsPageProps {
@@ -65,7 +66,9 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
           </p>
 
           {rows === null ? (
-            <p className="text-white/50 font-bold">{lang === 'zh' ? '加载中...' : 'LOADING...'}</p>
+            <div className="flex flex-col items-center gap-3 py-12">
+              <Loader variant="dots" size={40} label="加载放映档案" className="text-[#ff3650]" />
+            </div>
           ) : rows.length === 0 ? (
             <div className="bg-[#1a1a1a] border border-white/10 rounded-3xl p-12 text-center">
               <Clapperboard className="w-10 h-10 text-[#ff3650] mx-auto mb-3" />

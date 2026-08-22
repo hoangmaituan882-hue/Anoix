@@ -4,7 +4,7 @@ import { auth } from '../../lib/cloudbase';
 import { repository } from '../../lib/repository';
 import { adminFilms, adminNews, filmToRow, rowToFilm, FilmRow, NewsRow } from '../../lib/pgAdmin';
 import { WorkItem } from '../../types';
-import { LoadingScreen } from '../../components/ui/LoadingScreen';
+import { Loader } from '../../components/motion/loader';
 import { ScreeningsAdmin } from '../../features/admin/ScreeningsAdmin';
 import { RoundsAdmin } from '../../features/admin/RoundsAdmin';
 import { ArrowLeft, LogOut, Plus, Save, Trash2, X } from 'lucide-react';
@@ -26,8 +26,8 @@ export const AdminPage: React.FC = () => {
 
   if (authState === 'checking') {
     return (
-      <div className="min-h-screen bg-[#121212] flex items-center justify-center text-white/50 font-black tracking-widest">
-        CHECKING SESSION...
+      <div className="min-h-screen bg-[#121212] flex items-center justify-center">
+        <Loader variant="comet" size={40} label="检查登录状态" className="text-[#ff3650]" />
       </div>
     );
   }

@@ -5,3 +5,105 @@ html,
 body {
   overflow-x: clip;
 }
+
+/* ============================================================
+   Light theme — systematic remap of the hardcoded dark palette.
+   The components keep their dark-first class names; everything is
+   remapped under `html.light` so no component code changes.
+   Brand colors (#ff3650 red, #e0fe3d lime, #4246ff blue) and the
+   poster/backdrop gradients stay identical in both modes.
+   ============================================================ */
+html.light {
+  color-scheme: light;
+}
+
+/* ---- page / section surfaces ---- */
+html.light .bg-\[\#121212\],
+html.light .bg-\[\#151515\],
+html.light .bg-\[\#161616\],
+html.light .bg-\[\#181818\],
+html.light .bg-\[\#111111\],
+html.light .bg-\[\#0a0a0a\] {
+  background-color: #f6f5f1;
+}
+html.light .bg-\[\#1a1a1a\],
+html.light .bg-\[\#1c1c1c\],
+html.light .bg-\[\#1c1c1c\]\/95,
+html.light .bg-\[\#181818\],
+html.light .bg-\[\#222222\],
+html.light .hover\:bg-\[\#222222\]:hover {
+  background-color: #ffffff;
+}
+html.light .bg-\[\#1c1c1c\]\/95 {
+  background-color: rgba(255, 255, 255, 0.92);
+}
+html.light .bg-black {
+  background-color: #eceae4;
+}
+
+/* ---- primary ink text ---- */
+html.light .text-\[\#f5ffe5\],
+html.light .text-white {
+  color: #1d1d1a;
+}
+html.light .text-\[\#f5ffe5\]\/80 {
+  color: rgba(29, 29, 26, 0.8);
+}
+html.light .text-white\/40 { color: rgba(29, 29, 26, 0.42); }
+html.light .text-white\/50 { color: rgba(29, 29, 26, 0.5); }
+html.light .text-white\/60 { color: rgba(29, 29, 26, 0.6); }
+html.light .text-white\/70 { color: rgba(29, 29, 26, 0.7); }
+html.light .text-white\/80 { color: rgba(29, 29, 26, 0.8); }
+html.light .text-white\/85 { color: rgba(29, 29, 26, 0.85); }
+html.light .text-white\/90 { color: rgba(29, 29, 26, 0.9); }
+
+/* ---- light-on-dark inverted buttons (cream surfaces become ink) ---- */
+html.light .bg-\[\#f5ffe5\] {
+  background-color: #1d1d1a;
+}
+html.light .text-\[\#121212\] {
+  color: #f6f5f1;
+}
+html.light .hover\:text-\[\#f5ffe5\]:hover {
+  color: #1d1d1a;
+}
+
+/* ---- subtle fills & borders ---- */
+html.light .bg-white\/5 { background-color: rgba(0, 0, 0, 0.04); }
+html.light .bg-white\/10 { background-color: rgba(0, 0, 0, 0.06); }
+html.light .bg-white\/20 { background-color: rgba(0, 0, 0, 0.1); }
+html.light .bg-white { background-color: #e8e7e2; }
+html.light .bg-black\/40 { background-color: rgba(0, 0, 0, 0.05); }
+html.light .bg-black\/50 { background-color: rgba(0, 0, 0, 0.06); }
+html.light .bg-black\/60 { background-color: rgba(0, 0, 0, 0.08); }
+/* bg-black/70+ stays dark — those are modal/drawer backdrops, which read
+   better dark even in light mode */
+
+html.light .border-white\/10 { border-color: rgba(0, 0, 0, 0.1); }
+html.light .border-white\/15 { border-color: rgba(0, 0, 0, 0.12); }
+html.light .border-white\/20 { border-color: rgba(0, 0, 0, 0.14); }
+html.light .border-white\/30 { border-color: rgba(0, 0, 0, 0.2); }
+html.light .border-white\/40 { border-color: rgba(0, 0, 0, 0.25); }
+
+/* ---- section accent text that needs darkening ---- */
+html.light .text-\[\#e0fe3d\],
+html.light .hover\:text-\[\#e0fe3d\]:hover {
+  color: #55661c;
+}
+
+/* ---- NEWS section cobalt block → pale blue tint ---- */
+html.light .bg-\[\#4246ff\] {
+  background-color: #eef1ff;
+}
+
+/* ---- RECRUIT photo overlay: dark ink gradients become paper-color ----
+   Tailwind 4 gradients paint via --tw-gradient-* custom properties. */
+html.light .from-\[\#111111\] {
+  --tw-gradient-from: #f6f5f1 var(--tw-gradient-position);
+}
+html.light .via-\[\#111111\]\/70 {
+  --tw-gradient-via: rgba(246, 245, 241, 0.7) var(--tw-gradient-position);
+}
+html.light .to-\[\#111111\]\/80 {
+  --tw-gradient-to: rgba(246, 245, 241, 0.8) var(--tw-gradient-position);
+}

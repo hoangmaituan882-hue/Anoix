@@ -21,8 +21,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
   return (
     <section
       id="cb_content_90"
-      className="relative w-full py-20 md:py-32 px-4 sm:px-8 lg:px-16 overflow-hidden select-none"
-      style={{ backgroundColor: '#4246ff' }}
+      className="relative w-full py-20 md:py-32 px-4 sm:px-8 lg:px-16 overflow-hidden select-none bg-[#4246ff]"
     >
       {/* Giant Typography Watermark Background */}
       <div className="absolute top-4 left-0 right-0 overflow-hidden pointer-events-none opacity-25 flex justify-center">

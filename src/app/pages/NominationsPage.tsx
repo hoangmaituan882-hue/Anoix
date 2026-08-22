@@ -6,6 +6,8 @@ import { TRIGGER_EASE } from '../../lib/motion';
 import { NominationRound } from '../../types/screening';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
+import { Loader } from '../../components/motion/loader';
+import { getSession, SessionUser } from '../../lib/session';
 import { ArrowLeft, Crown, Hourglass, PencilLine, Vote } from 'lucide-react';
 
 interface NominationsPageProps {
@@ -33,7 +35,15 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
   const [myVotes, setMyVotes] = useState<Record<string, number | null>>({});
   const [votingOption, setVotingOption] = useState<number | null>(null);
   const [toast, setToast] = useState('');
-  const voterId = getVoterId();
+  const [user, setUser] = useState<SessionUser | null>(null);
+
+  // Signed-in identity first (real-name vote), anonymous fingerprint fallback.
+  useEffect(() => {
+    let alive = true;
+    getSession().then((u) => { if (alive) setUser(u); });
+    return () => { alive = false; };
+  }, []);
+  const voterId = user?.uid ?? getVoterId();
 
   const reload = useCallback(async () => {
     try {
@@ -120,8 +130,22 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
           <h1 className="text-4xl sm:text-6xl font-black text-[#f5ffe5] uppercase tracking-tight mb-2">
             {lang === 'zh' ? '提名与投票' : 'NOMINATIONS'}
           </h1>
-          <p className="text-white/50 font-bold mb-8">
+          <p className="text-white/50 font-bold mb-2">
             {lang === 'zh' ? '下一场放什么,由你决定。每人每轮一票。' : 'What screens next is up to you. One vote per round.'}
+          </p>
+          <p className="text-xs font-bold mb-8">
+            {user ? (
+              <span className="text-[#e0fe3d]">
+                {lang === 'zh' ? `已以 ${user.name} 的身份实名投票` : `Voting as ${user.name}`}
+              </span>
+            ) : (
+              <span className="text-white/40">
+                {lang === 'zh' ? '当前为匿名投票 · ' : 'Anonymous vote · '}
+                <button onClick={() => navigate('/auth?redirect=/nominations')} className="text-[#ff3650] hover:text-white underline underline-offset-2 cursor-pointer">
+                  {lang === 'zh' ? '登录实名投票' : 'Sign in to vote'}
+                </button>
+              </span>
+            )}
           </p>
 
           {toast && (
@@ -131,7 +155,9 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
           )}
 
           {rounds === null ? (
-            <p className="text-white/50 font-bold">{lang === 'zh' ? '加载中...' : 'LOADING...'}</p>
+            <div className="flex justify-center py-12">
+              <Loader variant="morph" size={40} label="加载提名数据" className="text-[#ff3650]" />
+            </div>
           ) : (
             <>
               {/* Active rounds */}

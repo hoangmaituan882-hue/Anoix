@@ -9,6 +9,7 @@ import { FilmDetailPage } from './pages/FilmDetailPage';
 import { ScreeningsPage } from './pages/ScreeningsPage';
 import { NominationsPage } from './pages/NominationsPage';
 import { AdminPage } from './pages/AdminPage';
+import { AuthPage } from './pages/AuthPage';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
 import { NewsDetailModal } from '../features/news/NewsDetailModal';
@@ -134,6 +135,8 @@ const AppShell: React.FC = () => {
           />
           {/* Admin console — self-contained auth, no site chrome */}
           <Route path="/admin" element={<AdminPage />} />
+          {/* Account — login + email self-registration */}
+          <Route path="/auth" element={<AuthPage />} />
         </Routes>
 
         {/* Floating Scroll-to-Top Button */}
