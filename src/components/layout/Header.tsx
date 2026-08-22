@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TriggerLogo } from '../ui/TriggerLogo';
 import { Language } from '../../types';
 import { I18N } from '../../data/triggerData';
-import { Menu, X, Globe, ExternalLink } from 'lucide-react';
+import { Menu, X, Lock } from 'lucide-react';
 
 interface HeaderProps {
   lang: Language;
@@ -13,18 +13,9 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpenModal }) => {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const t = I18N[lang];
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleNavClick = (sectionId: string, modalName?: 'about' | 'works' | 'news' | 'recruit' | 'contact') => {
     setMobileMenuOpen(false);
@@ -44,11 +35,9 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
     <>
       <header
         id="header"
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? 'py-2 px-3 md:px-6' : 'py-3 px-3 md:px-6'
-        }`}
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       >
-        <div className="max-w-[1720px] mx-auto bg-[#1c1c1c]/95 backdrop-blur-md text-[#f5ffe5] rounded-b-2xl md:rounded-b-3xl px-4 md:px-8 py-3.5 flex items-center justify-between border-b border-white/10 shadow-2xl">
+        <div className="w-full bg-[#1c1c1c]/95 backdrop-blur-md text-[#f5ffe5] px-4 md:px-8 py-3.5 flex items-center justify-between border-b border-white/10 shadow-2xl">
           {/* Logo */}
           <div className="flex items-center gap-4">
             <h1 id="header_logo" className="flex items-center">
@@ -92,13 +81,6 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               {t.news}
             </button>
             <button
-              id="nav-recruit"
-              onClick={() => handleNavClick('cb_content_427', 'recruit')}
-              className="transition-colors duration-150 hover:text-[#ff3650] cursor-pointer"
-            >
-              {t.recruit}
-            </button>
-            <button
               id="nav-screenings"
               onClick={() => { setMobileMenuOpen(false); navigate('/screenings'); }}
               className="transition-colors duration-150 hover:text-[#ff3650] cursor-pointer"
@@ -118,6 +100,15 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               className="transition-colors duration-150 hover:text-[#ff3650] cursor-pointer"
             >
               {t.contact}
+            </button>
+            <span className="w-px h-4 bg-white/20" aria-hidden="true" />
+            <button
+              id="nav-admin"
+              onClick={() => { setMobileMenuOpen(false); navigate('/admin'); }}
+              className="inline-flex items-center gap-1.5 text-[#ff3650] hover:text-white border border-[#ff3650]/50 hover:border-[#ff3650] rounded-full px-3 py-1 transition-colors duration-150 cursor-pointer"
+            >
+              <Lock className="w-3 h-3" />
+              {lang === 'zh' ? '后台' : 'ADMIN'}
             </button>
           </nav>
 
@@ -270,12 +261,6 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               {t.news}
             </button>
             <button
-              onClick={() => handleNavClick('cb_content_427', 'recruit')}
-              className="hover:text-[#ff3650] transition-colors py-2"
-            >
-              {t.recruit}
-            </button>
-            <button
               onClick={() => { setMobileMenuOpen(false); navigate('/screenings'); }}
               className="hover:text-[#ff3650] transition-colors py-2"
             >
@@ -292,6 +277,13 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               className="hover:text-[#ff3650] transition-colors py-2"
             >
               {t.contact}
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); navigate('/admin'); }}
+              className="text-[#ff3650] hover:text-white transition-colors py-2 inline-flex items-center gap-1.5"
+            >
+              <Lock className="w-4 h-4" />
+              {lang === 'zh' ? '管理后台' : 'ADMIN'}
             </button>
           </nav>
 
