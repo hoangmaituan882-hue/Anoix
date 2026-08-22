@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { WorkItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
-import { repository } from '../../lib/repository';
+import { repository, useRepo } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { ArrowRight, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
@@ -20,6 +20,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
   onOpenAllWorks,
 }) => {
   const sliderRef = useRef<HTMLDivElement>(null);
+  const films = useRepo(repository.films);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -134,7 +135,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
               className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-none py-2 scroll-smooth cursor-grab active:cursor-grabbing select-none"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {repository.films().map((work, index) => (
+              {films.map((work, index) => (
                 // Outer motion wrapper owns the entrance transform only — no CSS
                 // transition classes here, they would fight motion's per-frame
                 // inline transform updates and make the slide-in feel sluggish.

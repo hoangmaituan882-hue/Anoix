@@ -1,7 +1,7 @@
 import React from 'react';
 import { NewsItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
-import { repository } from '../../lib/repository';
+import { repository, useRepo } from '../../lib/repository';
 import { ArrowRight, Tag } from 'lucide-react';
 
 interface NewsSectionProps {
@@ -15,6 +15,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
   onSelectNews,
   onOpenAllNews,
 }) => {
+  const news = useRepo(repository.news);
   const t = I18N[lang];
 
   return (
@@ -47,7 +48,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
         {/* News List */}
         <div className="news_list divide-y divide-white/20 border-t border-b border-white/20">
-          {repository.news().map((item) => (
+          {news.map((item) => (
             <article
               key={item.id}
               onClick={() => onSelectNews(item)}

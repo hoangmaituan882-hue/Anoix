@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language, WorkItem, NewsItem, GoodsItem } from '../types';
 import { TRIGGER_EASE } from '../lib/motion';
+import { repository } from '../lib/repository';
 import { HomePage } from './pages/HomePage';
 import { FilmDetailPage } from './pages/FilmDetailPage';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
@@ -41,6 +42,11 @@ const AppShell: React.FC = () => {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [recruitModalOpen, setRecruitModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+
+  // Pull live content from CloudBase PG once; static seed stays as fallback.
+  useEffect(() => {
+    void repository.refresh();
+  }, []);
 
   const handleOpenModal = (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => {
     switch (modalName) {

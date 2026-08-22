@@ -1,0 +1,42 @@
+name: Deploy to CloudBase
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  TCB_ENV_ID: a213-d4gzgo1mn873d99da
+  VITE_CLOUDBASE_ENV_ID: a213-d4gzgo1mn873d99da
+  VITE_API_BASE: https://anoix-api-299456-11-1407057491.sh.run.tcloudbase.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Login CloudBase CLI
+        run: npx -y @cloudbase/cli@latest login --cloudbase-api-key "$TCB_API_KEY" -e "$TCB_ENV_ID"
+        env:
+          TCB_API_KEY: ${{ secrets.TCB_API_KEY }}
+
+      - name: Deploy frontend (static hosting)
+        run: npx -y @cloudbase/cli@latest hosting deploy dist / -e "$TCB_ENV_ID"
+
+      - name: Deploy API service (CloudRun)
+        run: npx -y @cloudbase/cli@latest run deploy -s anoix-api -e "$TCB_ENV_ID"

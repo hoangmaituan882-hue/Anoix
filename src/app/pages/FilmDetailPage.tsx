@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language } from '../../types';
-import { repository } from '../../lib/repository';
+import { repository, useRepo } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
@@ -25,7 +25,8 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
 }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const work = repository.films().find((w) => w.id === id);
+  const films = useRepo(repository.films);
+  const work = films.find((w) => w.id === id);
 
   useEffect(() => {
     window.scrollTo(0, 0);
