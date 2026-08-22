@@ -20,7 +20,7 @@ CREATE TABLE films (
   director text,
   character_design text,
   series_composition text,
-  cast text[],
+  cast_list text[],
   streaming_platforms text[],
   official_url text,
   trailer_url text,
