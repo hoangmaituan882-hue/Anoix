@@ -6,6 +6,7 @@ import { TRIGGER_EASE } from '../lib/motion';
 import { repository } from '../lib/repository';
 import { HomePage } from './pages/HomePage';
 import { FilmDetailPage } from './pages/FilmDetailPage';
+import { AdminPage } from './pages/AdminPage';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
 import { NewsDetailModal } from '../features/news/NewsDetailModal';
@@ -117,6 +118,8 @@ const AppShell: React.FC = () => {
               />
             }
           />
+          {/* Admin console — self-contained auth, no site chrome */}
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
 
         {/* Floating Scroll-to-Top Button */}

@@ -5,26 +5,58 @@
  *   /api/health, /api/films, /api/films/:id, /api/news   → CloudBase PG
  *   everything else                                       → SPA (dist/index.html)
  *
+ * PG access uses an admin session token (username/password sign-in) instead
+ * of an API key: the platform's key-issuance service currently mis-signs
+ * project_id, while user-session tokens work fine. Switching back to the
+ * API key after the ticket is fixed is a one-line change in pgGet().
+ *
  * Env:
  *   CLOUDBASE_ENV_ID   - environment id
- *   CLOUDBASE_API_KEY  - service_role API key (secret, server only)
+ *   ADMIN_USERNAME     - admin account for the server-side session
+ *   ADMIN_PASSWORD     - its password (secret, server only)
  *   PORT               - listen port (CloudRun sets this)
  */
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import cloudbase from '@cloudbase/js-sdk';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.resolve(__dirname, '../dist');
 
 const ENV_ID = process.env.CLOUDBASE_ENV_ID;
-const API_KEY = process.env.CLOUDBASE_API_KEY;
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const PG_BASE = `https://${ENV_ID}.api.tcloudbasegateway.com/v1/rdb/rest/v1`;
 const PORT = Number(process.env.PORT || 8080);
 
-if (!ENV_ID || !API_KEY) {
-  console.error('Missing CLOUDBASE_ENV_ID or CLOUDBASE_API_KEY');
-  process.exit(1);
+// Degrade gracefully instead of crash-looping: without admin credentials the
+// data APIs return 503 while the static site keeps serving (frontend has a
+// static fallback). This keeps deploys green even when env vars lag behind.
+const dbEnabled = Boolean(ENV_ID && ADMIN_USERNAME && ADMIN_PASSWORD);
+if (!dbEnabled) {
+  console.warn('[anoix] Missing CLOUDBASE_ENV_ID / ADMIN_USERNAME / ADMIN_PASSWORD — data APIs disabled, static site only');
+}
+
+// ---- Admin session token (auto re-login on expiry) ----
+const cb = ENV_ID ? cloudbase.init({ env: ENV_ID }) : null;
+let cachedToken = null;
+let tokenExpireAt = 0;
+
+async function getAdminToken(force = false) {
+  if (!cb) throw new Error('CloudBase client unavailable: missing env id');
+  if (!force && cachedToken && Date.now() < tokenExpireAt - 60_000) return cachedToken;
+  const { data, error } = await cb.auth.signInWithPassword({
+    username: ADMIN_USERNAME,
+    password: ADMIN_PASSWORD,
+  });
+  if (error || !data?.session?.access_token) {
+    throw new Error(`admin sign-in failed: ${error?.message ?? 'no session'}`);
+  }
+  cachedToken = data.session.access_token;
+  const expiresIn = data.session.expires_in ?? 3600;
+  tokenExpireAt = Date.now() + expiresIn * 1000;
+  return cachedToken;
 }
 
 const app = express();
@@ -39,10 +71,19 @@ app.use((req, res, next) => {
   next();
 });
 
-async function pgGet(path) {
+async function pgGet(path, _retried = false) {
+  if (!dbEnabled) {
+    const err = new Error('data APIs disabled: missing admin credentials');
+    err.status = 503;
+    throw err;
+  }
+  const token = await getAdminToken();
   const r = await fetch(`${PG_BASE}${path}`, {
-    headers: { Authorization: `Bearer ${API_KEY}` },
+    headers: { Authorization: `Bearer ${token}` },
   });
+  if (r.status === 401 && !_retried) {
+    return pgGet(path, true); // token expired mid-flight — re-login once
+  }
   if (!r.ok) {
     const body = await r.text();
     const err = new Error(`PG ${r.status}: ${body.slice(0, 200)}`);
@@ -52,8 +93,11 @@ async function pgGet(path) {
   return r.json();
 }
 
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, env: ENV_ID, time: new Date().toISOString() });
+app.get('/api/health', async (_req, res) => {
+  let db = 'ok';
+  if (!dbEnabled) db = 'disabled';
+  else { try { await getAdminToken(); } catch { db = 'degraded'; } }
+  res.json({ ok: true, env: ENV_ID, db, time: new Date().toISOString() });
 });
 
 app.get('/api/films', async (_req, res, next) => {
