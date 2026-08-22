@@ -23,17 +23,24 @@ npm run lint       # tsc 类型检查
 npm run build      # 生产构建 → dist/
 ```
 
-## 部署
+## 部署(GitHub Actions 自动部署)
 
-本地构建后通过 CloudBase 部署(serviceName: `anoix`):
+推送到 `main` 分支即自动:类型检查 → 构建前端 → 部署静态托管 + 云托管 API。
 
-```
-npm run build
-# MCP manageApps deployApp(serviceName=anoix, framework=static, buildPath=dist, installCmd="", buildCmd="")
-```
+首次使用需在 GitHub 仓库配置一个 Secret:
 
-SPA 路由回退已通过 `setWebsiteDocument(index/error = index.html)` 配置;
-`/films/:id` 直刷由客户端路由接管。
+1. 打开仓库 **Settings → Secrets and variables → Actions → New repository secret**
+2. Name 填 `TCB_API_KEY`,Value 填 CloudBase API Key(service_role,见下)
+3. 之后 `git push` 即自动部署;也可在 **Actions** 页手动触发(workflow_dispatch)
+
+**API Key 获取**:云开发平台 → API Key 管理(或让 AI 助手用 `manageAppAuth createApiKey` 创建)。
+⚠️ service_role 密钥只放 GitHub Secrets 和云托管环境变量,不要提交进代码。
+
+相关地址:
+
+- 前端:https://anoix-a213-d4gzgo1mn873d99da.webapps.tcloudbase.com
+- API:https://anoix-api-299456-11-1407057491.sh.run.tcloudbase.com(`/api/health` `/api/films` `/api/news`)
+- SPA 路由回退:`setWebsiteDocument(index/error = index.html)` 已配置
 
 ## 目录结构
 
