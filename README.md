@@ -2,9 +2,10 @@
 
 基于 TRIGGER 官网视觉体系构建的放映会电影动画「记录 / 展示 / 提名」网站。
 
-## 线上地址
+## 线上地址(唯一入口)
 
-- 前台:https://anoix-a213-d4gzgo1mn873d99da.webapps.tcloudbase.com
+- **网站 + API + 管理后台**:https://anoix-api-299456-11-1407057491.sh.run.tcloudbase.com
+  - `/` 网站 · `/films/:id` 详情 · `/admin` 管理后台
 - CloudBase 环境:`a213-d4gzgo1mn873d99da`(上海 · PG 模式)
 - 控制台:https://tcb.cloud.tencent.com/dev?envId=a213-d4gzgo1mn873d99da
 
@@ -38,9 +39,8 @@ npm run build      # 生产构建 → dist/
 
 相关地址:
 
-- 前端:https://anoix-a213-d4gzgo1mn873d99da.webapps.tcloudbase.com
-- API:https://anoix-api-299456-11-1407057491.sh.run.tcloudbase.com(`/api/health` `/api/films` `/api/news`)
-- SPA 路由回退:`setWebsiteDocument(index/error = index.html)` 已配置
+- 唯一线上入口(见顶部)——前端、API、后台同域
+- 服务端 PG 访问使用管理员会话 token(平台 API Key 签发 bug 的过渡方案,修复后可切回)
 
 ## 目录结构
 
