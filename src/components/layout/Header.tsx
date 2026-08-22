@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TriggerLogo } from '../ui/TriggerLogo';
 import { Language } from '../../types';
 import { I18N } from '../../data/triggerData';
@@ -14,6 +15,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpenModal }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const t = I18N[lang];
 
   useEffect(() => {
@@ -95,6 +97,20 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               className="transition-colors duration-150 hover:text-[#ff3650] cursor-pointer"
             >
               {t.recruit}
+            </button>
+            <button
+              id="nav-screenings"
+              onClick={() => { setMobileMenuOpen(false); navigate('/screenings'); }}
+              className="transition-colors duration-150 hover:text-[#ff3650] cursor-pointer"
+            >
+              {lang === 'zh' ? '放映档案' : 'SCREENINGS'}
+            </button>
+            <button
+              id="nav-nominations"
+              onClick={() => { setMobileMenuOpen(false); navigate('/nominations'); }}
+              className="transition-colors duration-150 hover:text-[#ff3650] cursor-pointer"
+            >
+              {lang === 'zh' ? '提名投票' : 'VOTE'}
             </button>
             <button
               id="nav-contact"
@@ -258,6 +274,18 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               className="hover:text-[#ff3650] transition-colors py-2"
             >
               {t.recruit}
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); navigate('/screenings'); }}
+              className="hover:text-[#ff3650] transition-colors py-2"
+            >
+              {lang === 'zh' ? '放映档案' : 'SCREENINGS'}
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); navigate('/nominations'); }}
+              className="hover:text-[#ff3650] transition-colors py-2"
+            >
+              {lang === 'zh' ? '提名投票' : 'VOTE'}
             </button>
             <button
               onClick={() => handleNavClick('contact', 'contact')}

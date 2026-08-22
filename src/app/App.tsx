@@ -6,6 +6,8 @@ import { TRIGGER_EASE } from '../lib/motion';
 import { repository } from '../lib/repository';
 import { HomePage } from './pages/HomePage';
 import { FilmDetailPage } from './pages/FilmDetailPage';
+import { ScreeningsPage } from './pages/ScreeningsPage';
+import { NominationsPage } from './pages/NominationsPage';
 import { AdminPage } from './pages/AdminPage';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
@@ -116,6 +118,18 @@ const AppShell: React.FC = () => {
                 onOpenModal={handleOpenModal}
                 onPlayTrailer={handlePlayTrailer}
               />
+            }
+          />
+          <Route
+            path="/screenings"
+            element={
+              <ScreeningsPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
+            }
+          />
+          <Route
+            path="/nominations"
+            element={
+              <NominationsPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
             }
           />
           {/* Admin console — self-contained auth, no site chrome */}

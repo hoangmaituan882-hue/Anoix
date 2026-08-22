@@ -93,6 +93,24 @@ async function pgGet(path, _retried = false) {
   return r.json();
 }
 
+/** Write helper (same auth, returns [status, body]) without throwing on 4xx. */
+async function pgWrite(method, path, body) {
+  const token = await getAdminToken();
+  const r = await fetch(`${PG_BASE}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const text = await r.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch { /* keep null */ }
+  return [r.status, json];
+}
+
 app.get('/api/health', async (_req, res) => {
   let db = 'ok';
   if (!dbEnabled) db = 'disabled';
@@ -118,6 +136,76 @@ app.get('/api/news', async (_req, res, next) => {
   try {
     const rows = await pgGet('/news?select=*&order=sort_order.asc');
     res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// ---- Screenings (archive) ----
+app.get('/api/screenings', async (_req, res, next) => {
+  try {
+    const rows = await pgGet('/screenings?select=*&order=screen_date.desc');
+    res.json(rows);
+  } catch (e) { next(e); }
+});
+
+// ---- Nominations (rounds + options + film join + live vote counts) ----
+app.get('/api/nominations', async (_req, res, next) => {
+  try {
+    const [rounds, options, films, votes] = await Promise.all([
+      pgGet('/nomination_rounds?select=*&order=created_at.desc'),
+      pgGet('/nomination_options?select=*&order=id.asc'),
+      pgGet('/films?select=id,title,title_zh,title_en,year,category,image'),
+      pgGet('/votes?select=round_id,option_id'),
+    ]);
+    const filmById = new Map(films.map((f) => [f.id, f]));
+    const voteCount = new Map(); // option_id -> count (live tally, no stale counter)
+    for (const v of votes) voteCount.set(v.option_id, (voteCount.get(v.option_id) ?? 0) + 1);
+    res.json(rounds.map((r) => ({
+      ...r,
+      options: options
+        .filter((o) => o.round_id === r.id)
+        .map((o) => ({
+          ...o,
+          votes_count: voteCount.get(o.id) ?? 0,
+          film: o.film_id ? filmById.get(o.film_id) ?? null : null,
+        })),
+    })));
+  } catch (e) { next(e); }
+});
+
+// ---- Voting (server-side boundary; UNIQUE(round_id, voter_id) is the guard) ----
+app.post('/api/vote', async (req, res, next) => {
+  try {
+    const { roundId, optionId, voterId } = req.body ?? {};
+    if (!roundId || !optionId || !voterId || typeof voterId !== 'string' || voterId.length < 8) {
+      return res.status(400).json({ error: 'bad_request' });
+    }
+    const rounds = await pgGet(`/nomination_rounds?id=eq.${encodeURIComponent(roundId)}&select=id,status,deadline`);
+    const round = rounds?.[0];
+    if (!round) return res.status(404).json({ error: 'round_not_found' });
+    if (round.status !== 'voting') return res.status(409).json({ error: 'not_voting' });
+    if (round.deadline && new Date(round.deadline).getTime() < Date.now()) {
+      return res.status(409).json({ error: 'deadline_passed' });
+    }
+    const [status] = await pgWrite('POST', '/votes', {
+      round_id: roundId,
+      option_id: optionId,
+      voter_id: voterId,
+    });
+    if (status === 409) return res.status(409).json({ error: 'already_voted' });
+    if (status >= 400) return res.status(502).json({ error: 'vote_failed' });
+    return res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ---- My vote status (anonymous voter id) ----
+app.get('/api/vote', async (req, res, next) => {
+  try {
+    const { roundId, voterId } = req.query;
+    if (!roundId || !voterId) return res.json({ voted: false, optionId: null });
+    const mine = await pgGet(
+      `/votes?round_id=eq.${encodeURIComponent(String(roundId))}&voter_id=eq.${encodeURIComponent(String(voterId))}&select=option_id&limit=1`
+    );
+    return res.json({ voted: mine.length > 0, optionId: mine[0]?.option_id ?? null });
   } catch (e) { next(e); }
 });
 

@@ -4,3 +4,4 @@ export * from './news';
 export * from './goods';
 export * from './media';
 export * from './social';
+export * from './screening';

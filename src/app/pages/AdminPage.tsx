@@ -5,6 +5,8 @@ import { repository } from '../../lib/repository';
 import { adminFilms, adminNews, filmToRow, rowToFilm, FilmRow, NewsRow } from '../../lib/pgAdmin';
 import { WorkItem } from '../../types';
 import { LoadingScreen } from '../../components/ui/LoadingScreen';
+import { ScreeningsAdmin } from '../../features/admin/ScreeningsAdmin';
+import { RoundsAdmin } from '../../features/admin/RoundsAdmin';
 import { ArrowLeft, LogOut, Plus, Save, Trash2, X } from 'lucide-react';
 
 type AuthState = 'checking' | 'signed-out' | 'signed-in';
@@ -105,28 +107,35 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
 
 // ---------------- Admin Panel ----------------
 const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
-  const [tab, setTab] = useState<'films' | 'news'>('films');
+  const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds'>('films');
 
   const signOut = async () => {
     await auth.signOut();
     onSignOut();
   };
 
+  const TABS = [
+    { key: 'films', label: '作品库' },
+    { key: 'news', label: '公告' },
+    { key: 'screenings', label: '放映会' },
+    { key: 'rounds', label: '提名轮次' },
+  ] as const;
+
   return (
     <div className="min-h-screen bg-[#121212] text-[#f5ffe5] selection:bg-[#ff3650] selection:text-white">
       <header className="border-b border-white/10 bg-[#1a1a1a] px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-4">
           <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest">Anoix Console</span>
-          <nav className="flex gap-1 bg-black/40 rounded-full p-1">
-            {(['films', 'news'] as const).map((t) => (
+          <nav className="flex gap-1 bg-black/40 rounded-full p-1 flex-wrap">
+            {TABS.map((t) => (
               <button
-                key={t}
-                onClick={() => setTab(t)}
+                key={t.key}
+                onClick={() => setTab(t.key)}
                 className={`px-4 py-1.5 rounded-full text-sm font-bold transition-colors cursor-pointer ${
-                  tab === t ? 'bg-[#ff3650] text-white' : 'text-white/60 hover:text-white'
+                  tab === t.key ? 'bg-[#ff3650] text-white' : 'text-white/60 hover:text-white'
                 }`}
               >
-                {t === 'films' ? '作品库' : '公告'}
+                {t.label}
               </button>
             ))}
           </nav>
@@ -142,7 +151,10 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8">
-        {tab === 'films' ? <FilmsAdmin /> : <NewsAdmin />}
+        {tab === 'films' && <FilmsAdmin />}
+        {tab === 'news' && <NewsAdmin />}
+        {tab === 'screenings' && <ScreeningsAdmin />}
+        {tab === 'rounds' && <RoundsAdmin />}
       </main>
     </div>
   );

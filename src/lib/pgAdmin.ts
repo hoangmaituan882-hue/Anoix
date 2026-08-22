@@ -91,6 +91,53 @@ export const adminNews = {
   remove: (id: string) => pg<null>('DELETE', `/news?id=eq.${encodeURIComponent(id)}`),
 };
 
+// ---------- screenings ----------
+export interface ScreeningRow {
+  id: string;
+  title: string;
+  screen_date: string;
+  venue: string | null;
+  theme: string | null;
+  film_ids: string[] | null;
+  recap: string | null;
+}
+
+export const adminScreenings = {
+  list: () => pg<ScreeningRow[]>('GET', '/screenings?select=*&order=screen_date.desc'),
+  create: (row: Partial<ScreeningRow>) => pg<ScreeningRow[]>('POST', '/screenings', row),
+  update: (id: string, row: Partial<ScreeningRow>) =>
+    pg<ScreeningRow[]>('PATCH', `/screenings?id=eq.${encodeURIComponent(id)}`, row),
+  remove: (id: string) => pg<null>('DELETE', `/screenings?id=eq.${encodeURIComponent(id)}`),
+};
+
+// ---------- nomination rounds ----------
+export interface RoundRow {
+  id: string;
+  title: string;
+  status: 'collecting' | 'voting' | 'revealed';
+  deadline: string | null;
+  created_at: string;
+}
+
+export interface OptionRow {
+  id: number;
+  round_id: string;
+  film_id: string | null;
+  nominator: string | null;
+  note: string | null;
+}
+
+export const adminRounds = {
+  list: () => pg<RoundRow[]>('GET', '/nomination_rounds?select=*&order=created_at.desc'),
+  create: (row: Partial<RoundRow>) => pg<RoundRow[]>('POST', '/nomination_rounds', row),
+  update: (id: string, row: Partial<RoundRow>) =>
+    pg<RoundRow[]>('PATCH', `/nomination_rounds?id=eq.${encodeURIComponent(id)}`, row),
+  remove: (id: string) => pg<null>('DELETE', `/nomination_rounds?id=eq.${encodeURIComponent(id)}`),
+  listOptions: () => pg<OptionRow[]>('GET', '/nomination_options?select=*&order=id.asc'),
+  addOption: (row: Partial<OptionRow>) => pg<OptionRow[]>('POST', '/nomination_options', row),
+  removeOption: (id: number) => pg<null>('DELETE', `/nomination_options?id=eq.${id}`),
+};
+
 // ---------- camelCase ⇄ snake_case mappers (for the edit form) ----------
 const str = (v: string | undefined | null): string | null =>
   v === undefined || v === null || v === '' ? null : v;
