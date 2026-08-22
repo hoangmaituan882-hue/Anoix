@@ -79,8 +79,9 @@ app.get('/api/news', async (_req, res, next) => {
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
+  // Full upstream detail stays in server logs only — clients get a generic error.
   console.error('[api]', err.message);
-  res.status(err.status || 502).json({ error: 'upstream_error', detail: err.message });
+  res.status(err.status || 502).json({ error: 'upstream_error' });
 });
 
 // ---- Static frontend + SPA fallback (after API routes) ----

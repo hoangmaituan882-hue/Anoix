@@ -135,10 +135,13 @@ export const repository = {
   async refresh(): Promise<void> {
     try {
       const base = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
+      const timer = new AbortController();
+      const timeout = setTimeout(() => timer.abort(), 8000);
       const [filmsRes, newsRes] = await Promise.all([
-        fetch(`${base}/api/films`),
-        fetch(`${base}/api/news`),
+        fetch(`${base}/api/films`, { signal: timer.signal }),
+        fetch(`${base}/api/news`, { signal: timer.signal }),
       ]);
+      clearTimeout(timeout);
       if (!filmsRes.ok || !newsRes.ok) throw new Error(`api status ${filmsRes.status}/${newsRes.status}`);
 
       const films = ((await filmsRes.json()) as FilmRow[]).map(mapFilm);
