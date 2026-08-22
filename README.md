@@ -4,7 +4,7 @@
 
 ## 线上地址(唯一入口)
 
-- **网站 + API + 管理后台**:https://anoix-api-299456-11-1407057491.sh.run.tcloudbase.com
+- **网站 + API + 管理后台**:https://ces123-299456-11-1407057491.sh.run.tcloudbase.com
   - `/` 网站 · `/films/:id` 详情 · `/admin` 管理后台
 - CloudBase 环境:`a213-d4gzgo1mn873d99da`(上海 · PG 模式)
 - 控制台:https://tcb.cloud.tencent.com/dev?envId=a213-d4gzgo1mn873d99da
