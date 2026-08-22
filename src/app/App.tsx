@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Language, WorkItem, NewsItem, GoodsItem } from '../types';
 import { TRIGGER_EASE } from '../lib/motion';
 import { repository } from '../lib/repository';
 import { HomePage } from './pages/HomePage';
 import { FilmDetailPage } from './pages/FilmDetailPage';
 import { ScreeningsPage } from './pages/ScreeningsPage';
+import { HistoryPage } from './pages/HistoryPage';
 import { NominationsPage } from './pages/NominationsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AuthPage } from './pages/AuthPage';
@@ -128,6 +129,12 @@ const AppShell: React.FC = () => {
             }
           />
           <Route
+            path="/history"
+            element={
+              <HistoryPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
+            }
+          />
+          <Route
             path="/nominations"
             element={
               <NominationsPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
@@ -151,78 +158,88 @@ const AppShell: React.FC = () => {
       </motion.div>
 
       {/* --- MODALS --- */}
-      {/* 1. Film Detail Modal (quick preview) */}
-      {selectedWork && (
-        <FilmDetailModal
-          work={selectedWork}
-          lang={lang}
-          onClose={() => setSelectedWork(null)}
-          onPlayTrailer={handlePlayTrailer}
-        />
-      )}
+      <AnimatePresence>
+        {/* 1. Film Detail Modal (quick preview) */}
+        {selectedWork && (
+          <FilmDetailModal
+            key="film-detail-modal"
+            work={selectedWork}
+            lang={lang}
+            onClose={() => setSelectedWork(null)}
+            onPlayTrailer={handlePlayTrailer}
+          />
+        )}
 
-      {/* 2. Films Library Modal */}
-      {allWorksOpen && (
-        <FilmsLibraryModal
-          lang={lang}
-          onClose={() => setAllWorksOpen(false)}
-          onSelectWork={(work) => {
-            setAllWorksOpen(false);
-            setSelectedWork(work);
-          }}
-        />
-      )}
+        {/* 2. Films Library Modal */}
+        {allWorksOpen && (
+          <FilmsLibraryModal
+            key="films-library-modal"
+            lang={lang}
+            onClose={() => setAllWorksOpen(false)}
+            onSelectWork={(work) => {
+              setAllWorksOpen(false);
+              setSelectedWork(work);
+            }}
+          />
+        )}
 
-      {/* 3. News Detail Modal */}
-      {selectedNews && (
-        <NewsDetailModal
-          news={selectedNews}
-          lang={lang}
-          onClose={() => setSelectedNews(null)}
-        />
-      )}
+        {/* 3. News Detail Modal */}
+        {selectedNews && (
+          <NewsDetailModal
+            key="news-detail-modal"
+            news={selectedNews}
+            lang={lang}
+            onClose={() => setSelectedNews(null)}
+          />
+        )}
 
-      {/* 4. Goods Detail Modal */}
-      {selectedGoods && (
-        <GoodsDetailModal
-          goods={selectedGoods}
-          lang={lang}
-          onClose={() => setSelectedGoods(null)}
-        />
-      )}
+        {/* 4. Goods Detail Modal */}
+        {selectedGoods && (
+          <GoodsDetailModal
+            key="goods-detail-modal"
+            goods={selectedGoods}
+            lang={lang}
+            onClose={() => setSelectedGoods(null)}
+          />
+        )}
 
-      {/* 5. Video Player Modal */}
-      {activeVideo && (
-        <VideoModal
-          videoUrl={activeVideo.url}
-          title={activeVideo.title}
-          onClose={() => setActiveVideo(null)}
-        />
-      )}
+        {/* 5. Video Player Modal */}
+        {activeVideo && (
+          <VideoModal
+            key="video-modal"
+            videoUrl={activeVideo.url}
+            title={activeVideo.title}
+            onClose={() => setActiveVideo(null)}
+          />
+        )}
 
-      {/* 6. About Modal */}
-      {aboutModalOpen && (
-        <AboutModal
-          lang={lang}
-          onClose={() => setAboutModalOpen(false)}
-        />
-      )}
+        {/* 6. About Modal */}
+        {aboutModalOpen && (
+          <AboutModal
+            key="about-modal"
+            lang={lang}
+            onClose={() => setAboutModalOpen(false)}
+          />
+        )}
 
-      {/* 7. Recruit Modal */}
-      {recruitModalOpen && (
-        <RecruitModal
-          lang={lang}
-          onClose={() => setRecruitModalOpen(false)}
-        />
-      )}
+        {/* 7. Recruit Modal */}
+        {recruitModalOpen && (
+          <RecruitModal
+            key="recruit-modal"
+            lang={lang}
+            onClose={() => setRecruitModalOpen(false)}
+          />
+        )}
 
-      {/* 8. Contact Modal */}
-      {contactModalOpen && (
-        <ContactModal
-          lang={lang}
-          onClose={() => setContactModalOpen(false)}
-        />
-      )}
+        {/* 8. Contact Modal */}
+        {contactModalOpen && (
+          <ContactModal
+            key="contact-modal"
+            lang={lang}
+            onClose={() => setContactModalOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

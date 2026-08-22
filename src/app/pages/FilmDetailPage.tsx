@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Language } from '../../types';
+import { Language, WorkItem } from '../../types';
 import { repository, useRepo } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { FilmDetailBody } from '../../features/films/FilmDetailBody';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Check, Sparkles } from 'lucide-react';
 
 interface FilmDetailPageProps {
   lang: Language;
@@ -26,11 +26,29 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const films = useRepo(repository.films);
-  const work = films.find((w) => w.id === id);
+  const [copied, setCopied] = useState(false);
+
+  const currentIndex = films.findIndex((w) => w.id === id);
+  const work = currentIndex !== -1 ? films[currentIndex] : undefined;
+
+  const prevWork = currentIndex > 0 ? films[currentIndex - 1] : undefined;
+  const nextWork = currentIndex !== -1 && currentIndex < films.length - 1 ? films[currentIndex + 1] : undefined;
+
+  const otherWorks = films.filter((w) => w.id !== id).slice(0, 4);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  const handleShare = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const title = work ? (lang === 'zh' && work.titleZh ? work.titleZh : lang === 'en' && work.titleEn ? work.titleEn : work.title) : '';
 
   return (
     <>
@@ -48,23 +66,131 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: TRIGGER_EASE }}
       >
-        <div className="max-w-4xl mx-auto">
-          {/* Back to library */}
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-white/60 hover:text-[#ff3650] font-black text-sm uppercase tracking-wider transition-colors mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{lang === 'zh' ? '返回首页' : 'BACK TO HOME'}</span>
-          </Link>
+        <div className="max-w-5xl mx-auto">
+          {/* Top Bar: Breadcrumbs & Share */}
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2 text-xs font-bold text-white/60">
+              <Link to="/" className="hover:text-[#ff3650] transition-colors flex items-center gap-1">
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>{lang === 'zh' ? '首页' : 'HOME'}</span>
+              </Link>
+              <span>/</span>
+              <button
+                onClick={() => onOpenModal('works')}
+                className="hover:text-[#ff3650] transition-colors cursor-pointer"
+              >
+                {lang === 'zh' ? '作品一览' : 'WORKS'}
+              </button>
+              {work && (
+                <>
+                  <span>/</span>
+                  <span className="text-white line-clamp-1 max-w-[200px] sm:max-w-none">{title}</span>
+                </>
+              )}
+            </div>
+
+            {work && (
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#ff3650] text-xs font-bold text-white transition-all cursor-pointer border border-white/10"
+                title="Share link"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-[#e0fe3d]" /> : <Share2 className="w-3.5 h-3.5" />}
+                <span>{copied ? (lang === 'zh' ? '已复制链接' : 'Copied!') : (lang === 'zh' ? '分享' : 'Share')}</span>
+              </button>
+            )}
+          </div>
 
           {work ? (
-            <div className="bg-[#1a1a1a] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-[#f5ffe5]">
-              <FilmDetailBody
-                work={work}
-                lang={lang}
-                onPlayTrailer={onPlayTrailer}
-              />
+            <div className="space-y-10">
+              {/* Main Film Card */}
+              <div className="bg-[#1a1a1a] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-[#f5ffe5]">
+                <FilmDetailBody
+                  work={work}
+                  lang={lang}
+                  onPlayTrailer={onPlayTrailer}
+                />
+              </div>
+
+              {/* Prev / Next Pagination */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {prevWork ? (
+                  <Link
+                    to={`/films/${prevWork.id}`}
+                    className="p-4 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650] flex items-center gap-3 group transition-all"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-[#ff3650] group-hover:-translate-x-1 transition-transform" />
+                    <div>
+                      <span className="text-[10px] font-black text-white/50 uppercase tracking-widest block">
+                        {lang === 'zh' ? '上一部作品' : 'PREVIOUS WORK'}
+                      </span>
+                      <p className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-[#ff3650] transition-colors">
+                        {lang === 'zh' && prevWork.titleZh ? prevWork.titleZh : lang === 'en' && prevWork.titleEn ? prevWork.titleEn : prevWork.title}
+                      </p>
+                    </div>
+                  </Link>
+                ) : <div />}
+
+                {nextWork && (
+                  <Link
+                    to={`/films/${nextWork.id}`}
+                    className="p-4 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650] flex items-center justify-end text-right gap-3 group transition-all sm:col-start-2"
+                  >
+                    <div>
+                      <span className="text-[10px] font-black text-white/50 uppercase tracking-widest block">
+                        {lang === 'zh' ? '下一部作品' : 'NEXT WORK'}
+                      </span>
+                      <p className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-[#ff3650] transition-colors">
+                        {lang === 'zh' && nextWork.titleZh ? nextWork.titleZh : lang === 'en' && nextWork.titleEn ? nextWork.titleEn : nextWork.title}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-[#ff3650] group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                )}
+              </div>
+
+              {/* Related Works Recommendations */}
+              <div className="pt-8 border-t border-white/10">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#ff3650]" />
+                    <span>{lang === 'zh' ? '更多 TRIGGER 精彩作品' : 'MORE WORKS BY TRIGGER'}</span>
+                  </h3>
+                  <button
+                    onClick={() => onOpenModal('works')}
+                    className="text-xs font-bold text-[#ff3650] hover:text-white uppercase tracking-wider"
+                  >
+                    {lang === 'zh' ? '查看全部' : 'VIEW ALL'} →
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {otherWorks.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`/films/${item.id}`}
+                      className="group flex flex-col bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/10 hover:border-[#ff3650] transition-all transform hover:-translate-y-1 shadow-lg"
+                    >
+                      <div className="relative aspect-[27/40] overflow-hidden bg-black/40">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                        />
+                        <div className="absolute top-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[9px] font-bold text-white">
+                          {item.year}
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <span className="text-[9px] font-bold text-[#ff3650] uppercase block mb-0.5">{item.category}</span>
+                        <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-[#ff3650] transition-colors">
+                          {lang === 'zh' && item.titleZh ? item.titleZh : lang === 'en' && item.titleEn ? item.titleEn : item.title}
+                        </h4>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="bg-[#1a1a1a] border border-white/20 rounded-3xl p-12 text-center text-[#f5ffe5]">

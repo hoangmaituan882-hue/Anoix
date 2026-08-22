@@ -446,7 +446,7 @@ export const I18N = {
     recruit: '人才招聘',
     contact: '联系我们',
     newBadge: 'NEW',
-    allWorks: '全部工作完成', // exactly as in user's screenshot
+    allWorks: '全部作品',
     allNews: '全部动态',
     joinUs: '加入我们',
     aboutUs: '关于TRIGGER',

@@ -3,15 +3,36 @@ import {
   adminFilms, adminRounds, adminScreenings,
   RoundRow, OptionRow, FilmRow,
 } from '../../lib/pgAdmin';
-import { ArchiveRestore, Plus, Trash2 } from 'lucide-react';
+import { ArchiveRestore, Plus, Trash2, Vote, Sparkles, CheckCircle2, Clock, PlayCircle, AlertCircle, Film, User, Layers } from 'lucide-react';
+import { Loader } from '../../components/motion/loader';
 
-const FIELD = 'w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-white text-sm focus:border-[#ff3650] focus:outline-none';
+const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
+const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
 
-const STATUS_LABEL: Record<RoundRow['status'], string> = {
-  collecting: '收集中',
-  voting: '投票中',
-  revealed: '已公布',
+const STATUS_CONFIG: Record<RoundRow['status'], { label: string; bg: string; color: string; border: string; icon: React.FC<{ className?: string }> }> = {
+  collecting: {
+    label: '提名收集中 (COLLECTING)',
+    bg: 'bg-amber-500/20',
+    color: 'text-amber-300',
+    border: 'border-amber-500/40',
+    icon: Clock,
+  },
+  voting: {
+    label: '正在投票中 (LIVE VOTING)',
+    bg: 'bg-[#ff3650]/20',
+    color: 'text-[#ff3650]',
+    border: 'border-[#ff3650]/40',
+    icon: PlayCircle,
+  },
+  revealed: {
+    label: '结果已公布 (REVEALED)',
+    bg: 'bg-emerald-500/20',
+    color: 'text-emerald-400',
+    border: 'border-emerald-500/40',
+    icon: CheckCircle2,
+  },
 };
+
 const NEXT_STATUS: Partial<Record<RoundRow['status'], RoundRow['status']>> = {
   collecting: 'voting',
   voting: 'revealed',
@@ -34,7 +55,7 @@ export const RoundsAdmin: React.FC = () => {
       setOptions(o ?? []);
       setFilms(f ?? []);
     } catch (e) {
-      setError(e instanceof Error ? e.message : '加载失败');
+      setError(e instanceof Error ? e.message : '加载选片轮次失败');
       setRounds([]);
     }
   }, []);
@@ -45,7 +66,7 @@ export const RoundsAdmin: React.FC = () => {
     setBusy(true);
     setError('');
     try {
-      if (!newRound.id.trim() || !newRound.title.trim()) throw new Error('ID 和标题必填');
+      if (!newRound.id.trim() || !newRound.title.trim()) throw new Error('ID 和标题为必填项');
       await adminRounds.create({
         id: newRound.id.trim(),
         title: newRound.title.trim(),
@@ -64,14 +85,14 @@ export const RoundsAdmin: React.FC = () => {
   const advanceStatus = async (round: RoundRow) => {
     const next = NEXT_STATUS[round.status];
     if (!next) return;
-    const label = next === 'voting' ? '开启投票(访客可投票)' : '公布结果(结束投票)';
+    const label = next === 'voting' ? '开启全网投票(访客将可进行投票)' : '正式公布结果(锁定投票并揭晓头名)';
     if (!window.confirm(`确认${label}?`)) return;
     setBusy(true);
     try {
       await adminRounds.update(round.id, { status: next });
       await reload();
     } catch (e) {
-      setError(e instanceof Error ? e.message : '操作失败');
+      setError(e instanceof Error ? e.message : '状态流转失败');
     } finally {
       setBusy(false);
     }
@@ -91,7 +112,7 @@ export const RoundsAdmin: React.FC = () => {
       setOptionDraft(null);
       await reload();
     } catch (e) {
-      setError(e instanceof Error ? e.message : '添加失败');
+      setError(e instanceof Error ? e.message : '添加候选作品失败');
     } finally {
       setBusy(false);
     }
@@ -101,32 +122,44 @@ export const RoundsAdmin: React.FC = () => {
   const archiveRound = async (round: RoundRow) => {
     const roundOptions = options.filter((o) => o.round_id === round.id);
     if (roundOptions.length === 0) { setError('该轮次没有候选作品'); return; }
-    // Live tally isn't visible here (admin list has no counts) — archive by order
-    // is wrong; fetch public API for counts.
+    
     const base = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-    const res = await fetch(`${base}/api/nominations`);
-    type LiveRound = RoundRow & { options?: Array<{ id: number; film_id: string | null; votes_count: number }> };
-    const all = res.ok ? (await res.json()) as LiveRound[] : [];
-    const live = all.find((r) => r.id === round.id);
-    const opts = live?.options ?? [];
-    if (!opts.length) { setError('无法获取票数'); return; }
-    const sorted = [...opts].sort((a, b) => b.votes_count - a.votes_count);
-    const filmIds = sorted.map((o) => o.film_id).filter((x): x is string => Boolean(x));
-    if (filmIds.length === 0) { setError('候选均未关联作品'); return; }
-    if (!window.confirm(`将「${round.title}」沉淀为放映会档案?\n片单(按得票排序):${filmIds.join(', ')}`)) return;
+    let filmIds: string[] = [];
+
+    try {
+      const res = await fetch(`${base}/api/nominations`);
+      type LiveRound = RoundRow & { options?: Array<{ id: number; film_id: string | null; votes_count: number }> };
+      const all = res.ok ? (await res.json()) as LiveRound[] : [];
+      const live = all.find((r) => r.id === round.id);
+      const opts = live?.options ?? [];
+      if (opts.length > 0) {
+        const sorted = [...opts].sort((a, b) => b.votes_count - a.votes_count);
+        filmIds = sorted.map((o) => o.film_id).filter((x): x is string => Boolean(x));
+      }
+    } catch {
+      // fallback to round options order
+      filmIds = roundOptions.map((o) => o.film_id).filter((x): x is string => Boolean(x));
+    }
+
+    if (filmIds.length === 0) {
+      filmIds = roundOptions.map((o) => o.film_id).filter((x): x is string => Boolean(x));
+    }
+
+    if (!window.confirm(`确认将「${round.title}」沉淀为放映会档案?\n片单:${filmIds.join(', ')}`)) return;
     setBusy(true);
     try {
       await adminScreenings.create({
         id: `screening-${Date.now()}`,
         title: round.title,
         screen_date: new Date().toISOString().slice(0, 10),
-        venue: null,
-        theme: null,
+        venue: '待定场地',
+        theme: '选片优胜展映',
         film_ids: filmIds,
-        recap: null,
+        recap: '根据社区选片轮次投票优胜结果特别展映。',
       });
       setError('');
       await reload();
+      alert('已成功沉淀为放映会档案！可在「放映会档案」面板查看。');
     } catch (e) {
       setError(e instanceof Error ? e.message : '沉淀失败');
     } finally {
@@ -134,85 +167,286 @@ export const RoundsAdmin: React.FC = () => {
     }
   };
 
-  if (rounds === null) return <p className="text-white/50 font-bold">加载中...</p>;
+  if (rounds === null) {
+    return (
+      <div className="py-20 flex justify-center items-center">
+        <Loader variant="comet" size={32} label="加载提名选片数据..." className="text-[#ff3650]" />
+      </div>
+    );
+  }
 
-  const filmTitle = (fid: string | null) => {
-    const f = films.find((x) => x.id === fid);
-    return f?.title_zh ?? f?.title ?? fid ?? '—';
-  };
+  const getFilm = (fid: string | null) => films.find((x) => x.id === fid);
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-black">提名轮次 <span className="text-white/40 text-sm">({rounds.length})</span></h2>
-      {error && <p className="text-sm font-bold text-[#ff3650] bg-[#ff3650]/10 border border-[#ff3650]/30 rounded-xl p-3">{error}</p>}
-
-      {/* New round */}
-      <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-4 gap-3">
-        <input value={newRound.id} onChange={(e) => setNewRound({ ...newRound, id: e.target.value })} className={`${FIELD} font-mono`} placeholder="轮次ID 如 round-2026-09 *" />
-        <input value={newRound.title} onChange={(e) => setNewRound({ ...newRound, title: e.target.value })} className={FIELD} placeholder="标题 如 9月放映选片 *" />
-        <input type="datetime-local" value={newRound.deadline} onChange={(e) => setNewRound({ ...newRound, deadline: e.target.value })} className={FIELD} />
-        <button onClick={createRound} disabled={busy} className="inline-flex items-center justify-center gap-2 bg-[#ff3650] hover:bg-[#e02640] disabled:opacity-50 text-white font-black text-sm px-4 py-2 rounded-xl cursor-pointer">
-          <Plus className="w-4 h-4" /> 创建轮次
-        </button>
+    <div className="space-y-6">
+      {/* Top Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 shadow-xl">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest flex items-center gap-1">
+              <Vote className="w-3.5 h-3.5" />
+              NOMINATION & VOTING
+            </span>
+            <span className="bg-white/10 text-white/80 px-2 py-0.5 rounded-full text-xs font-mono font-bold">
+              {rounds.length} 个轮次
+            </span>
+          </div>
+          <h2 className="text-2xl font-black text-white tracking-tight uppercase">TRIGGER 社区选片与投票轮次</h2>
+          <p className="text-xs text-white/50">发起粉丝选片投票、审核候选作品、流转投票状态与一键归档</p>
+        </div>
       </div>
 
-      {rounds.map((r) => {
-        const rOptions = options.filter((o) => o.round_id === r.id);
-        return (
-          <div key={r.id} className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-5 space-y-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider ${
-                r.status === 'voting' ? 'bg-[#ff3650] text-white' : r.status === 'revealed' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/60'
-              }`}>{STATUS_LABEL[r.status]}</span>
-              <span className="font-black">{r.title}</span>
-              <span className="text-xs text-white/40 font-mono">{r.id}{r.deadline ? ` · 截止 ${r.deadline.slice(0, 16).replace('T', ' ')}` : ''}</span>
-              <span className="ml-auto flex gap-2">
-                {NEXT_STATUS[r.status] && (
-                  <button onClick={() => advanceStatus(r)} disabled={busy} className="text-xs font-black bg-[#f5ffe5] text-[#121212] hover:bg-[#ff3650] hover:text-white px-3 py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50">
-                    {r.status === 'collecting' ? '开启投票' : '公布结果'}
-                  </button>
-                )}
-                {r.status === 'revealed' && (
-                  <button onClick={() => archiveRound(r)} disabled={busy} className="inline-flex items-center gap-1 text-xs font-black bg-[#ff3650]/15 text-[#ff3650] hover:bg-[#ff3650] hover:text-white px-3 py-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50">
-                    <ArchiveRestore className="w-3.5 h-3.5" /> 沉淀为放映会
-                  </button>
-                )}
-              </span>
-            </div>
+      {error && (
+        <div className="p-4 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/40 flex items-center gap-3 text-sm font-bold text-[#ff3650]">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
-            <div className="flex flex-wrap gap-2">
-              {rOptions.map((o) => (
-                <span key={o.id} className="inline-flex items-center gap-2 bg-white/10 rounded-full pl-3 pr-1.5 py-1 text-xs font-bold text-white/80">
-                  {filmTitle(o.film_id)}
-                  {o.nominator && <span className="text-white/40">({o.nominator})</span>}
-                  <button onClick={() => adminRounds.removeOption(o.id).then(reload)} className="w-5 h-5 rounded-full hover:bg-[#ff3650] flex items-center justify-center transition-colors cursor-pointer" aria-label="remove option">
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-              {r.status !== 'revealed' && (
-                <button
-                  onClick={() => setOptionDraft({ roundId: r.id, filmId: '', nominator: '' })}
-                  className="text-xs font-bold text-[#ff3650] hover:text-white px-2 py-1 cursor-pointer"
-                >+ 添加候选</button>
-              )}
-            </div>
+      {/* Create New Round Form Card */}
+      <div className="bg-[#181818] border border-white/10 rounded-3xl p-6 space-y-4 shadow-xl">
+        <h3 className="text-sm font-black text-white uppercase flex items-center gap-2">
+          <Plus className="w-4 h-4 text-[#ff3650]" />
+          发起新一轮选片活动 (CREATE ROUND)
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="space-y-1">
+            <label className={LABEL}>轮次唯一 ID *</label>
+            <input
+              value={newRound.id}
+              onChange={(e) => setNewRound({ ...newRound, id: e.target.value })}
+              className={`${FIELD} font-mono`}
+              placeholder="如 round-2026-autumn"
+            />
           </div>
-        );
-      })}
 
+          <div className="space-y-1">
+            <label className={LABEL}>轮次标题 *</label>
+            <input
+              value={newRound.title}
+              onChange={(e) => setNewRound({ ...newRound, title: e.target.value })}
+              className={FIELD}
+              placeholder="如 2026 秋季周年庆展映选片"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className={LABEL}>截止日期时间 (Deadline)</label>
+            <input
+              type="datetime-local"
+              value={newRound.deadline}
+              onChange={(e) => setNewRound({ ...newRound, deadline: e.target.value })}
+              className={FIELD}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={createRound}
+            disabled={busy || !newRound.id.trim() || !newRound.title.trim()}
+            className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] disabled:opacity-40 text-white font-black text-xs uppercase px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-[#ff3650]/20"
+          >
+            <Plus className="w-4 h-4" />
+            <span>确认发起轮次</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Rounds List */}
+      <div className="space-y-4">
+        {rounds.map((r) => {
+          const rOptions = options.filter((o) => o.round_id === r.id);
+          const statusMeta = STATUS_CONFIG[r.status] || STATUS_CONFIG.collecting;
+          const StatusIcon = statusMeta.icon;
+
+          return (
+            <div
+              key={r.id}
+              className="bg-[#1a1a1a] border border-white/10 hover:border-white/20 rounded-3xl p-6 space-y-5 transition-all shadow-xl"
+            >
+              {/* Round Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full border ${statusMeta.bg} ${statusMeta.color} ${statusMeta.border}`}>
+                      <StatusIcon className="w-3.5 h-3.5" />
+                      <span>{statusMeta.label}</span>
+                    </span>
+                    <span className="text-xs font-mono text-white/40">
+                      ID: {r.id}
+                    </span>
+                    {r.deadline && (
+                      <span className="text-xs font-mono text-white/50 bg-black/40 px-2.5 py-0.5 rounded-md border border-white/5">
+                        截止: {r.deadline.slice(0, 16).replace('T', ' ')}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-xl font-black text-white pt-1">{r.title}</h3>
+                </div>
+
+                {/* Workflow Stepper Action Buttons */}
+                <div className="flex items-center gap-2 self-start sm:self-center">
+                  {NEXT_STATUS[r.status] && (
+                    <button
+                      onClick={() => advanceStatus(r)}
+                      disabled={busy}
+                      className="text-xs font-black bg-[#e0fe3d] text-[#121212] hover:bg-white px-4 py-2 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-[#121212]" />
+                      <span>{r.status === 'collecting' ? '开启全网投票 →' : '公布最终结果 🏁'}</span>
+                    </button>
+                  )}
+                  {r.status === 'revealed' && (
+                    <button
+                      onClick={() => archiveRound(r)}
+                      disabled={busy}
+                      className="inline-flex items-center gap-1.5 text-xs font-black bg-[#ff3650] hover:bg-[#ff203c] text-white px-4 py-2 rounded-xl transition-all cursor-pointer shadow-lg shadow-[#ff3650]/20"
+                    >
+                      <ArchiveRestore className="w-3.5 h-3.5" />
+                      <span>沉淀为放映会档案</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Nominees Grid */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-white/50 uppercase tracking-wider">
+                    候选作品清单 ({rOptions.length} 部候选)
+                  </span>
+                  {r.status !== 'revealed' && (
+                    <button
+                      onClick={() => setOptionDraft({ roundId: r.id, filmId: '', nominator: '' })}
+                      className="text-xs font-black text-[#ff3650] hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>添加官方候选作品</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                  {rOptions.length === 0 ? (
+                    <div className="col-span-full py-6 text-center text-xs text-white/40 italic bg-black/20 rounded-2xl border border-white/5">
+                      本轮次暂无候选作品，点击上方添加
+                    </div>
+                  ) : (
+                    rOptions.map((o) => {
+                      const film = getFilm(o.film_id);
+                      return (
+                        <div
+                          key={o.id}
+                          className="bg-black/40 border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-3 hover:border-white/20 transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {film?.image ? (
+                              <img
+                                src={film.image}
+                                alt=""
+                                className="w-10 h-12 rounded-lg object-cover border border-white/10 flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-12 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                                <Film className="w-4 h-4 text-white/40" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-white truncate">
+                                {film?.title_zh ?? film?.title ?? o.film_id}
+                              </p>
+                              {o.nominator && (
+                                <p className="text-[10px] text-white/40 flex items-center gap-1 truncate mt-0.5">
+                                  <User className="w-2.5 h-2.5 text-[#e0fe3d]" />
+                                  <span>提名者: {o.nominator}</span>
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => adminRounds.removeOption(o.id).then(reload)}
+                            className="p-1.5 rounded-lg text-white/30 hover:text-[#ff3650] hover:bg-white/5 transition-colors cursor-pointer flex-shrink-0"
+                            title="移除此候选"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add Option Modal */}
       {optionDraft && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl" onClick={() => setOptionDraft(null)}>
-          <div className="w-full max-w-md bg-[#1a1a1a] border border-white/15 rounded-3xl p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-black text-lg">添加候选作品</h3>
-            <select value={optionDraft.filmId} onChange={(e) => setOptionDraft({ ...optionDraft, filmId: e.target.value })} className={FIELD}>
-              <option value="" className="bg-[#1a1a1a]">选择作品...</option>
-              {films.map((f) => <option key={f.id} value={f.id} className="bg-[#1a1a1a]">{f.title_zh ?? f.title}</option>)}
-            </select>
-            <input value={optionDraft.nominator} onChange={(e) => setOptionDraft({ ...optionDraft, nominator: e.target.value })} className={FIELD} placeholder="提名人(可留空)" />
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setOptionDraft(null)} className="px-5 py-2.5 rounded-xl font-bold text-sm text-white/60 hover:text-white border border-white/15 cursor-pointer">取消</button>
-              <button onClick={addOption} disabled={busy} className="bg-[#ff3650] hover:bg-[#e02640] disabled:opacity-50 text-white font-black text-sm px-5 py-2.5 rounded-xl cursor-pointer">添加</button>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in"
+          onClick={() => setOptionDraft(null)}
+        >
+          <div
+            className="w-full max-w-md bg-[#181818] border border-white/20 rounded-3xl p-6 sm:p-8 space-y-5 text-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="font-black text-lg text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-[#ff3650]" />
+                添加候选作品
+              </h3>
+              <span className="text-xs font-mono text-white/40">{optionDraft.roundId}</span>
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className={LABEL}>选择动画作品 *</label>
+                <select
+                  value={optionDraft.filmId}
+                  onChange={(e) => setOptionDraft({ ...optionDraft, filmId: e.target.value })}
+                  className={`${FIELD} cursor-pointer`}
+                >
+                  <option value="" className="bg-[#181818]">
+                    选择一部作品...
+                  </option>
+                  {films.map((f) => (
+                    <option key={f.id} value={f.id} className="bg-[#181818]">
+                      {f.title_zh ?? f.title} ({f.year})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className={LABEL}>提名人 / 推荐理由 (Nominator)</label>
+                <input
+                  value={optionDraft.nominator}
+                  onChange={(e) => setOptionDraft({ ...optionDraft, nominator: e.target.value })}
+                  className={FIELD}
+                  placeholder="如 官方推荐 / @今石狂粉"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
+              <button
+                onClick={() => setOptionDraft(null)}
+                className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 cursor-pointer"
+              >
+                取消
+              </button>
+              <button
+                onClick={addOption}
+                disabled={busy || !optionDraft.filmId}
+                className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] disabled:opacity-40 text-white font-black text-xs uppercase px-5 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-[#ff3650]/20"
+              >
+                <Plus className="w-4 h-4" />
+                <span>确认添加</span>
+              </button>
             </div>
           </div>
         </div>

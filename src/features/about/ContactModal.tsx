@@ -94,16 +94,34 @@ export const ContactModal: React.FC<ContactModalProps> = ({ lang, onClose }) => 
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
               >
-                <option value="business">取材・制作依頼 (Business / Production Inquiries)</option>
-                <option value="goods">グッズ・物販について (Merchandise Inquiries)</option>
-                <option value="event">イベント・サイン会について (Events / Appearances)</option>
-                <option value="other">その他 (Other)</option>
+                {lang === 'zh' ? (
+                  <>
+                    <option value="business">商业合作 · 动画制作企划洽谈 (Business & Production)</option>
+                    <option value="goods">周边商品 · 官方商城相关 (Merchandise)</option>
+                    <option value="event">展会演出 · 活动出展邀请 (Events & Appearances)</option>
+                    <option value="other">其他咨询 (Other)</option>
+                  </>
+                ) : lang === 'en' ? (
+                  <>
+                    <option value="business">Business & Production Inquiries</option>
+                    <option value="goods">Merchandise & Store Inquiries</option>
+                    <option value="event">Events & Convention Appearances</option>
+                    <option value="other">Other Inquiries</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="business">取材・制作依頼 (Business / Production Inquiries)</option>
+                    <option value="goods">グッズ・物販について (Merchandise Inquiries)</option>
+                    <option value="event">イベント・サイン会について (Events / Appearances)</option>
+                    <option value="other">その他 (Other)</option>
+                  </>
+                )}
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-white/70 mb-1">
-                {lang === 'zh' ? '内容' : lang === 'en' ? 'Message' : 'お問い合わせ内容'} *
+                {lang === 'zh' ? '咨询内容详情' : lang === 'en' ? 'Message' : 'お問い合わせ内容'} *
               </label>
               <textarea
                 rows={4}
@@ -111,7 +129,7 @@ export const ContactModal: React.FC<ContactModalProps> = ({ lang, onClose }) => 
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#ff3650] text-sm resize-none"
-                placeholder="Your inquiry details..."
+                placeholder={lang === 'zh' ? '请输入您的具体咨询或合作意向...' : 'Your inquiry details...'}
               />
             </div>
 

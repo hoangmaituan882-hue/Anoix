@@ -37,11 +37,27 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
 
   const handleNavClick = (sectionId: string, modalName?: 'about' | 'works' | 'news' | 'recruit' | 'contact') => {
     setMobileMenuOpen(false);
+    if (modalName === 'works') {
+      onOpenModal('works');
+      return;
+    }
+    if (modalName === 'about') {
+      onOpenModal('about');
+      return;
+    }
+    if (modalName === 'recruit') {
+      onOpenModal('recruit');
+      return;
+    }
+    if (modalName === 'contact') {
+      onOpenModal('contact');
+      return;
+    }
     const el = document.getElementById(sectionId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
-    } else if (modalName) {
-      onOpenModal(modalName);
+    } else {
+      navigate('/', { state: { scrollTo: sectionId } });
     }
   };
 
@@ -61,7 +77,10 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
           <h1 id="header_logo" className="flex items-center">
             <TriggerLogo
               className="w-24 md:w-32 text-white hover:text-[#ff3650] transition-colors"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => {
+                navigate('/');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             />
           </h1>
 
@@ -70,13 +89,25 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             id="global_menu"
             className="hidden lg:flex items-center justify-center gap-0.5 bg-black/40 rounded-full p-1 font-extrabold tracking-wider text-[13px] xl:text-sm"
           >
-            <button id="nav-about" onClick={() => onOpenModal('about')} className={pillItem}>
+            <button
+              id="nav-about"
+              onClick={() => onOpenModal('about')}
+              className={pillItem}
+            >
               {t.about}
             </button>
-            <button id="nav-works" onClick={() => handleNavClick('index_header_works', 'works')} className={pillItem}>
+            <button
+              id="nav-works"
+              onClick={() => onOpenModal('works')}
+              className={pillItem}
+            >
               {t.works}
             </button>
-            <button id="nav-news" onClick={() => handleNavClick('cb_content_90', 'news')} className={pillItem}>
+            <button
+              id="nav-news"
+              onClick={() => handleNavClick('cb_content_90')}
+              className={pillItem}
+            >
               {t.news}
             </button>
             <button
@@ -85,6 +116,13 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               className={pillItem}
             >
               {lang === 'zh' ? '放映档案' : 'SCREENINGS'}
+            </button>
+            <button
+              id="nav-history"
+              onClick={() => { setMobileMenuOpen(false); navigate('/history'); }}
+              className={pillItem}
+            >
+              {lang === 'zh' ? '历史数据' : 'HISTORY'}
             </button>
             <button
               id="nav-nominations"
@@ -184,6 +222,9 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             </button>
             <button onClick={() => { setMobileMenuOpen(false); navigate('/screenings'); }} className="hover:text-[#ff3650] transition-colors py-2">
               {lang === 'zh' ? '放映档案' : 'SCREENINGS'}
+            </button>
+            <button onClick={() => { setMobileMenuOpen(false); navigate('/history'); }} className="hover:text-[#ff3650] transition-colors py-2">
+              {lang === 'zh' ? '历史数据' : 'HISTORY'}
             </button>
             <button onClick={() => { setMobileMenuOpen(false); navigate('/nominations'); }} className="hover:text-[#ff3650] transition-colors py-2">
               {lang === 'zh' ? '提名投票' : 'VOTE'}

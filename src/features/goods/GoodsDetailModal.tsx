@@ -53,7 +53,7 @@ export const GoodsDetailModal: React.FC<GoodsDetailModalProps> = ({
                 {title}
               </h2>
               <div className="text-2xl font-black text-[#f5ffe5] mb-4">
-                {goods.price} <span className="text-xs text-white/50 font-normal">(tax incl.)</span>
+                {goods.price} <span className="text-xs text-white/50 font-normal">({lang === 'zh' ? '含税' : lang === 'en' ? 'tax incl.' : '税込'})</span>
               </div>
 
               {goods.description && (
@@ -65,7 +65,7 @@ export const GoodsDetailModal: React.FC<GoodsDetailModalProps> = ({
               <div className="space-y-2 text-xs text-white/60 mb-6">
                 <div className="flex items-center gap-1.5 text-white/80 font-semibold">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>TRIGGER Official Guaranteed Authentic</span>
+                  <span>{lang === 'zh' ? 'TRIGGER 官方正品保障 · 日本原厂出库' : 'TRIGGER Official Guaranteed Authentic'}</span>
                 </div>
               </div>
             </div>

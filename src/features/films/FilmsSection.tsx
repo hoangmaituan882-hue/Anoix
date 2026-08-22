@@ -116,10 +116,10 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
               transition={{ duration: 0.95, delay: 0.62, ease: TRIGGER_EASE }}
               style={{
                 color: '#ff3650',
-                fontFamily: lang === 'zh' ? "'Noto Sans SC', 'Dela Gothic One', sans-serif" : "'Anton', 'Montserrat', sans-serif"
+                fontFamily: "'Anton', 'Montserrat', sans-serif"
               }}
             >
-              {lang === 'zh' ? '工作完成' : 'WORKS'}
+              WORKS
             </motion.h2>
           </div>
 
@@ -214,7 +214,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
               className="design_button group/btn inline-flex items-center gap-3 bg-[#f5ffe5] text-[#121212] hover:bg-[#ff3650] hover:text-white px-7 py-3 rounded-full font-black text-sm md:text-base tracking-wider uppercase transition-all duration-300 shadow-xl hover:shadow-[0_8px_25px_rgba(255,54,80,0.4)] cursor-pointer"
             >
               <span className="label font-extrabold tracking-widest">
-                {lang === 'zh' ? '全部工作完成' : t.allWorks}
+                {t.allWorks}
               </span>
               <span className="w-7 h-7 rounded-full bg-[#121212] text-[#f5ffe5] group-hover/btn:bg-white group-hover/btn:text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-1 duration-200">
                 <ArrowRight className="w-4 h-4" />

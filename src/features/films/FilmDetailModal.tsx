@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { WorkItem, Language } from '../../types';
 import { FilmDetailBody } from './FilmDetailBody';
+import { TRIGGER_EASE } from '../../lib/motion';
 import { ArrowRight, X } from 'lucide-react';
 
 interface FilmDetailModalProps {
@@ -21,11 +23,19 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
   if (!work) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl animate-fade-in overflow-y-auto"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto"
       onClick={onClose}
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ duration: 0.3, ease: TRIGGER_EASE }}
         className="relative w-full max-w-4xl bg-[#1a1a1a] border border-white/20 rounded-3xl overflow-hidden shadow-2xl my-8 text-[#f5ffe5]"
         onClick={(e) => e.stopPropagation()}
       >
@@ -52,7 +62,8 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
             </Link>
           }
         />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
+

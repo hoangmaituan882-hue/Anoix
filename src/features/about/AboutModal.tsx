@@ -21,7 +21,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ lang, onClose }) => {
         <div className="p-6 sm:p-8 border-b border-white/10 flex items-center justify-between bg-[#151515]">
           <div>
             <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest">
-              COMPANY PROFILE
+              {lang === 'zh' ? '企业档案 · COMPANY PROFILE' : 'COMPANY PROFILE'}
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
               {t.aboutModalTitle}
@@ -57,7 +57,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ lang, onClose }) => {
           {/* Intro */}
           <div>
             <h4 className="text-sm font-black text-[#ff3650] uppercase tracking-wider mb-2">
-              MISSION & PHILOSOPHY
+              {lang === 'zh' ? '使命与理念 · PHILOSOPHY' : 'MISSION & PHILOSOPHY'}
             </h4>
             <p className="text-white/90">
               {t.companyIntro}
@@ -67,24 +67,46 @@ export const AboutModal: React.FC<AboutModalProps> = ({ lang, onClose }) => {
           {/* Company Data Table */}
           <div className="bg-white/5 rounded-2xl p-6 border border-white/10 space-y-4 text-xs sm:text-sm">
             <div className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-white/10 gap-1 sm:gap-6">
-              <span className="w-32 font-black text-white/50 uppercase">Company Name</span>
-              <span className="font-bold text-white">株式会社トリガー (ANIMATION STUDIO TRIGGER Inc.)</span>
+              <span className="w-32 font-black text-white/50 uppercase">
+                {lang === 'zh' ? '公司名称' : 'Company Name'}
+              </span>
+              <span className="font-bold text-white">
+                {lang === 'zh' ? '株式会社TRIGGER (ANIMATION STUDIO TRIGGER Inc.)' : '株式会社トリガー (ANIMATION STUDIO TRIGGER Inc.)'}
+              </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-white/10 gap-1 sm:gap-6">
-              <span className="w-32 font-black text-white/50 uppercase">Established</span>
-              <span className="font-bold text-white">2011年8月22日 (August 22, 2011)</span>
+              <span className="w-32 font-black text-white/50 uppercase">
+                {lang === 'zh' ? '创立时间' : 'Established'}
+              </span>
+              <span className="font-bold text-white">
+                {lang === 'zh' ? '2011年8月22日' : '2011年8月22日 (August 22, 2011)'}
+              </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-white/10 gap-1 sm:gap-6">
-              <span className="w-32 font-black text-white/50 uppercase">Board Members</span>
-              <span className="font-bold text-white">代表取締役：大塚 雅彦 / 取締役：今石 洋之、舛本 和也</span>
+              <span className="w-32 font-black text-white/50 uppercase">
+                {lang === 'zh' ? '核心管理层' : 'Board Members'}
+              </span>
+              <span className="font-bold text-white">
+                {lang === 'zh' ? '代表取缔役：大冢雅彦 / 取缔役：今石洋之、舛本和也' : '代表取締役：大塚 雅彦 / 取締役：今石 洋之、舛本 和也'}
+              </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-white/10 gap-1 sm:gap-6">
-              <span className="w-32 font-black text-white/50 uppercase">Business Domain</span>
-              <span className="font-bold text-white">劇場用アニメーション、TVシリーズ、短編アニメーションの企画・制作・プロデュース、版権管理</span>
+              <span className="w-32 font-black text-white/50 uppercase">
+                {lang === 'zh' ? '主要业务' : 'Business Domain'}
+              </span>
+              <span className="font-bold text-white">
+                {lang === 'zh' 
+                  ? '院线剧场版动画、电视动画系列、短篇原创动画的企划·制作·出品与版权运营管理' 
+                  : '劇場用アニメーション、TVシリーズ、短編アニメーションの企画・制作・プロデュース、版権管理'}
+              </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center py-2 gap-1 sm:gap-6">
-              <span className="w-32 font-black text-white/50 uppercase">Headquarters</span>
-              <span className="font-bold text-white">東京都杉並区 (Suginami-ku, Tokyo, Japan)</span>
+              <span className="w-32 font-black text-white/50 uppercase">
+                {lang === 'zh' ? '总部所在地' : 'Headquarters'}
+              </span>
+              <span className="font-bold text-white">
+                {lang === 'zh' ? '日本东京都杉并区' : '東京都杉並区 (Suginami-ku, Tokyo, Japan)'}
+              </span>
             </div>
           </div>
         </div>

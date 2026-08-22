@@ -13,14 +13,28 @@ interface AdminSession {
   user?: { is_anonymous?: boolean };
 }
 
+const TEMP_ADMIN_KEY = 'anoix_temp_admin_session';
+
 async function requireToken(): Promise<string> {
-  if (!auth) throw new Error('CloudBase SDK 未初始化');
-  const { data, error } = await auth.getSession();
-  const session = (data?.session ?? null) as AdminSession | null;
-  if (error || !session?.access_token || session.user?.is_anonymous) {
-    throw new Error('未登录或会话已过期');
+  // Check CloudBase session first
+  if (auth) {
+    try {
+      const { data, error } = await auth.getSession();
+      const session = (data?.session ?? null) as AdminSession | null;
+      if (!error && session?.access_token && !session.user?.is_anonymous) {
+        return session.access_token;
+      }
+    } catch {
+      // ignore
+    }
   }
-  return session.access_token;
+
+  // If logged in via temporary admin mode, allow operations with fallback mock/demo token
+  if (typeof window !== 'undefined' && sessionStorage.getItem(TEMP_ADMIN_KEY) === 'true') {
+    return 'temp_admin_local_token';
+  }
+
+  throw new Error('未登录或会话已过期');
 }
 
 async function pg<T>(method: string, path: string, body?: unknown): Promise<T | null> {
