@@ -87,7 +87,6 @@ const AppShell: React.FC = () => {
       {/* Site entrance container: sweeps in from the right after the loading screen fades out */}
       <motion.div
         id="site_container"
-        className="will-change-transform"
         initial={{ x: '100vw', opacity: 0 }}
         animate={isLoading ? { x: '100vw', opacity: 0 } : { x: 0, opacity: 1 }}
         transition={{ duration: 1.05, ease: TRIGGER_EASE }}

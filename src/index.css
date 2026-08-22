@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+/* ============================================================
+   shadcn-style theme tokens for beUI components (Select, etc.)
+   Dark is the default; overridden under html.light below.
+   ============================================================ */
+@theme {
+  --color-background: #181818;
+  --color-foreground: #f5ffe5;
+  --color-muted: rgba(255, 255, 255, 0.08);
+  --color-muted-foreground: rgba(245, 255, 229, 0.55);
+  --color-border: rgba(255, 255, 255, 0.15);
+  --color-border-strong: rgba(255, 255, 255, 0.35);
+  --color-strong: #ffffff;
+}
+
+html.light {
+  --color-background: #ffffff;
+  --color-foreground: #18181b;
+  --color-muted: rgba(0, 0, 0, 0.05);
+  --color-muted-foreground: rgba(24, 24, 27, 0.55);
+  --color-border: rgba(0, 0, 0, 0.15);
+  --color-border-strong: rgba(0, 0, 0, 0.3);
+  --color-strong: #18181b;
+}
+
 /* Prevent horizontal scrollbars during the RTL site entrance sweep (x: 100vw) */
 html,
 body {
@@ -345,6 +369,48 @@ html.light .bg-\[\#1e1e1e\] {
 
 @media (prefers-reduced-motion: reduce) {
   .t-resize { transition: none !important; }
+}
+
+/* ============================================================
+   Custom themed scrollbar (beUI-style polish)
+   Thin rounded track, brand-red on hover, dark/light aware.
+   ============================================================ */
+* {
+  scrollbar-width: thin;                            /* Firefox */
+  scrollbar-color: #3a3a3c transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: #3a3a3c;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #ff3650;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Light mode scrollbar */
+html.light * {
+  scrollbar-color: #c6c3bb transparent;
+}
+html.light *::-webkit-scrollbar-thumb {
+  background: #c6c3bb;
+  background-clip: padding-box;
+}
+html.light *::-webkit-scrollbar-thumb:hover {
+  background: #ff3650;
+  background-clip: padding-box;
 }
 
 

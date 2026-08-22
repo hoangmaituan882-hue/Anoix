@@ -20,6 +20,7 @@ import express from 'express';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import cloudbase from '@cloudbase/js-sdk';
+import { tmdbRouter } from './tmdb.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.resolve(__dirname, '../dist');
@@ -135,7 +136,18 @@ app.get('/api/films/:id', async (req, res, next) => {
 app.get('/api/news', async (_req, res, next) => {
   try {
     const rows = await pgGet('/news?select=*&order=sort_order.asc');
-    res.json(rows);
+    // Publish control: only show items that are published (or scheduled whose
+    // time has arrived); pinned items float to the top. Lazy scheduling — no
+    // cron needed, the time comparison does the job.
+    const now = Date.now();
+    const visible = rows
+      .filter((r) => {
+        if (r.status === 'draft' || r.status === 'archived') return false;
+        if (!r.published_at) return r.status === 'published';
+        return new Date(r.published_at).getTime() <= now;
+      })
+      .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+    res.json(visible);
   } catch (e) { next(e); }
 });
 
@@ -208,6 +220,9 @@ app.get('/api/vote', async (req, res, next) => {
     return res.json({ voted: mine.length > 0, optionId: mine[0]?.option_id ?? null });
   } catch (e) { next(e); }
 });
+
+// ---- TMDB proxy (configurable base URL, key stays server-side) ----
+app.use(tmdbRouter);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {

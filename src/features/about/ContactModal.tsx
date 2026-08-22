@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { X, Mail, Send, CheckCircle2 } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/motion/select';
 
 interface ContactModalProps {
   lang: Language;
@@ -89,34 +90,35 @@ export const ContactModal: React.FC<ContactModalProps> = ({ lang, onClose }) => 
               <label className="block text-xs font-bold uppercase tracking-wider text-white/70 mb-1">
                 {lang === 'zh' ? '咨询类型' : lang === 'en' ? 'Inquiry Category' : 'お問い合わせ項目'} *
               </label>
-              <select
-                className="w-full bg-[#242424] border border-white/15 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#ff3650] text-sm"
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-              >
-                {lang === 'zh' ? (
-                  <>
-                    <option value="business">商业合作 · 动画制作企划洽谈 (Business & Production)</option>
-                    <option value="goods">周边商品 · 官方商城相关 (Merchandise)</option>
-                    <option value="event">展会演出 · 活动出展邀请 (Events & Appearances)</option>
-                    <option value="other">其他咨询 (Other)</option>
-                  </>
-                ) : lang === 'en' ? (
-                  <>
-                    <option value="business">Business & Production Inquiries</option>
-                    <option value="goods">Merchandise & Store Inquiries</option>
-                    <option value="event">Events & Convention Appearances</option>
-                    <option value="other">Other Inquiries</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="business">取材・制作依頼 (Business / Production Inquiries)</option>
-                    <option value="goods">グッズ・物販について (Merchandise Inquiries)</option>
-                    <option value="event">イベント・サイン会について (Events / Appearances)</option>
-                    <option value="other">その他 (Other)</option>
-                  </>
-                )}
-              </select>
+              <Select value={formData.subject} onValueChange={(v) => setFormData({ ...formData, subject: v })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={lang === 'zh' ? '选择咨询类型' : lang === 'en' ? 'Select category' : '項目を選択'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {lang === 'zh' ? (
+                    <>
+                      <SelectItem value="business">商业合作 · 动画制作企划洽谈</SelectItem>
+                      <SelectItem value="goods">周边商品 · 官方商城相关</SelectItem>
+                      <SelectItem value="event">展会演出 · 活动出展邀请</SelectItem>
+                      <SelectItem value="other">其他咨询</SelectItem>
+                    </>
+                  ) : lang === 'en' ? (
+                    <>
+                      <SelectItem value="business">Business & Production Inquiries</SelectItem>
+                      <SelectItem value="goods">Merchandise & Store Inquiries</SelectItem>
+                      <SelectItem value="event">Events & Convention Appearances</SelectItem>
+                      <SelectItem value="other">Other Inquiries</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="business">取材・制作依頼</SelectItem>
+                      <SelectItem value="goods">グッズ・物販について</SelectItem>
+                      <SelectItem value="event">イベント・サイン会について</SelectItem>
+                      <SelectItem value="other">その他</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

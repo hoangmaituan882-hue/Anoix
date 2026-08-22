@@ -51,26 +51,37 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
             <article
               key={item.id}
               onClick={() => onSelectNews(item)}
-              className="py-6 sm:py-8 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-8 group cursor-pointer hover:bg-white/10 px-4 md:px-6 -mx-4 md:-mx-6 rounded-2xl transition-all duration-200"
+              className="py-6 sm:py-8 flex items-center gap-4 sm:gap-6 group cursor-pointer hover:bg-white/10 px-4 md:px-6 -mx-4 md:-mx-6 rounded-2xl transition-all duration-200"
             >
-              <div className="flex items-center gap-4 text-sm md:text-base font-bold text-white/80">
-                <time className="font-mono tracking-wider text-white">
-                  {item.date}
-                </time>
-                {item.category && (
-                  <span className="bg-white text-[#4246ff] text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
-                    <Tag className="w-2.5 h-2.5" />
-                    {item.category}
-                  </span>
-                )}
-              </div>
+              {item.image ? (
+                <img
+                  src={item.image}
+                  alt={lang === 'zh' && item.titleZh ? item.titleZh : item.title}
+                  className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 border border-white/10 bg-black/40"
+                  loading="lazy"
+                />
+              ) : null}
 
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white group-hover:text-[#f5ffe5] flex-1 line-clamp-2 md:line-clamp-1 transition-colors">
-                {lang === 'zh' && item.titleZh ? item.titleZh : lang === 'en' && item.titleEn ? item.titleEn : item.title}
-              </h3>
+              <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6">
+                <div className="flex items-center gap-4 text-sm md:text-base font-bold text-white/80">
+                  <time className="font-mono tracking-wider text-white">
+                    {item.date}
+                  </time>
+                  {item.category && (
+                    <span className="bg-white text-[#4246ff] text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+                      <Tag className="w-2.5 h-2.5" />
+                      {item.category}
+                    </span>
+                  )}
+                </div>
 
-              <div className="hidden md:flex items-center text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
-                <ArrowRight className="w-6 h-6" />
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white group-hover:text-[#f5ffe5] flex-1 line-clamp-2 md:line-clamp-1 transition-colors">
+                  {lang === 'zh' && item.titleZh ? item.titleZh : lang === 'en' && item.titleEn ? item.titleEn : item.title}
+                </h3>
+
+                <div className="hidden md:flex items-center text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                  <ArrowRight className="w-6 h-6" />
+                </div>
               </div>
             </article>
           ))}

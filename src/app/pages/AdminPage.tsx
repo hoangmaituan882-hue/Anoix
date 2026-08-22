@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import { auth } from '../../lib/cloudbase';
 import { repository } from '../../lib/repository';
 import { adminFilms, adminNews, filmToRow, rowToFilm, FilmRow, NewsRow } from '../../lib/pgAdmin';
 import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/motion/select';
 import { ScreeningsAdmin } from '../../features/admin/ScreeningsAdmin';
 import { RoundsAdmin } from '../../features/admin/RoundsAdmin';
+import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import {
   ArrowLeft,
@@ -30,6 +33,7 @@ import {
   Edit3,
   CheckCircle2,
   AlertCircle,
+  Clock,
   Eye,
   Lock,
   User,
@@ -458,6 +462,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'TV Series' | 'Movie' | 'Original Animation'>('all');
+  const [tmdbOpen, setTmdbOpen] = useState(false);
 
   const reload = useCallback(async () => {
     setError('');
@@ -535,6 +540,13 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setTmdbOpen(true)}
+            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-black text-sm px-5 py-3 rounded-2xl transition-all cursor-pointer border border-white/15"
+          >
+            <Search className="w-4 h-4" />
+            <span>TMDB 刮削导入</span>
+          </button>
           <button
             onClick={() => setEditing({ ...EMPTY_FILM, id: `trigger-work-${Date.now().toString().slice(-4)}` })}
             className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] active:scale-95 text-white font-black text-sm px-5 py-3 rounded-2xl transition-all cursor-pointer shadow-[0_8px_20px_rgba(255,54,80,0.3)]"
@@ -745,9 +757,17 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
       {editing && (
         <FilmFormModal
           initial={editing}
-          isNew={!editing.id || editing.id.startsWith('trigger-work-')}
+          isNew={!editing.id || editing.id.startsWith('trigger-work-') || editing.id.startsWith('tmdb-')}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); void reload(); }}
+        />
+      )}
+
+      {/* TMDB Scrape Import Modal */}
+      {tmdbOpen && (
+        <TmdbImportModal
+          onClose={() => setTmdbOpen(false)}
+          onSelect={(work) => { setTmdbOpen(false); setEditing(work); }}
         />
       )}
     </div>
@@ -1025,9 +1045,10 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
   const [rows, setRows] = useState<NewsRow[] | null>(null);
   const [error, setError] = useState('');
   const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ title: '', titleZh: '', date: '', category: 'Info', contentZh: '' });
+  const [draft, setDraft] = useState({ title: '', titleZh: '', date: '', category: 'Info', contentZh: '', image: '', scheduleAt: '' });
   const [busy, setBusy] = useState(false);
   const [filterCat, setFilterCat] = useState<'all' | 'Info' | 'Event' | 'Goods' | 'Media'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const reload = useCallback(async () => {
     setError('');
@@ -1043,22 +1064,37 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
 
   useEffect(() => { void reload(); }, [reload]);
 
-  const add = async () => {
+  const publish = async (mode: 'draft' | 'publish' | 'schedule') => {
     setBusy(true);
     setError('');
     try {
-      if (!draft.title.trim()) throw new Error('公告标题必填');
+      let status: NewsRow['status'] = 'draft';
+      let publishedAt: string | null = null;
+      if (mode === 'publish') {
+        if (!draft.title.trim()) throw new Error('公告标题必填');
+        status = 'published';
+        publishedAt = new Date().toISOString();
+      } else if (mode === 'schedule') {
+        if (!draft.title.trim()) throw new Error('公告标题必填');
+        if (!draft.scheduleAt) throw new Error('请选择定时发布时间');
+        status = 'scheduled';
+        publishedAt = new Date(draft.scheduleAt).toISOString();
+      }
       await adminNews.create({
         id: `news-${Date.now()}`,
-        title: draft.title,
+        title: draft.title.trim() || '未命名草稿',
         title_zh: draft.titleZh || null,
         date: draft.date || new Date().toISOString().slice(0, 10).replaceAll('-', '.'),
         category: draft.category,
         content: draft.contentZh || null,
         content_zh: draft.contentZh || null,
+        image: draft.image || null,
         sort_order: 0,
+        status,
+        published_at: publishedAt,
+        pinned: false,
       });
-      setDraft({ title: '', titleZh: '', date: '', category: 'Info', contentZh: '' });
+      setDraft({ title: '', titleZh: '', date: '', category: 'Info', contentZh: '', image: '', scheduleAt: '' });
       setAdding(false);
       await reload();
       void repository.refresh();
@@ -1066,6 +1102,28 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
       setError(e instanceof Error ? e.message : '保存失败');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const setStatus = async (id: string, status: NewsRow['status']) => {
+    try {
+      const patch: Partial<NewsRow> = { status };
+      if (status === 'published') patch.published_at = new Date().toISOString();
+      await adminNews.update(id, patch);
+      await reload();
+      void repository.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '状态更新失败');
+    }
+  };
+
+  const togglePinned = async (r: NewsRow) => {
+    try {
+      await adminNews.update(r.id, { pinned: !r.pinned });
+      await reload();
+      void repository.refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '置顶更新失败');
     }
   };
 
@@ -1082,9 +1140,15 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
 
   const filteredNews = useMemo(() => {
     if (!rows) return [];
-    if (filterCat === 'all') return rows;
-    return rows.filter((r) => r.category.toLowerCase() === filterCat.toLowerCase());
-  }, [rows, filterCat]);
+    let list = filterCat === 'all' ? rows : rows.filter((r) => r.category.toLowerCase() === filterCat.toLowerCase());
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter((r) =>
+        [r.title, r.title_zh, r.content_zh, r.date].some((v) => v && String(v).toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [rows, filterCat, searchQuery]);
 
   if (rows === null) {
     return (
@@ -1099,6 +1163,13 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
     Event: 'bg-[#e0fe3d]/20 text-[#e0fe3d] border-[#e0fe3d]/40',
     Goods: 'bg-[#4246ff]/20 text-[#8b8eff] border-[#4246ff]/40',
     Media: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+  };
+
+  const STATUS_META: Record<string, { label: string; cls: string }> = {
+    draft: { label: '草稿', cls: 'bg-white/10 text-white/50 border-white/20' },
+    scheduled: { label: '定时', cls: 'bg-blue-500/20 text-blue-400 border-blue-500/40' },
+    published: { label: '已发布', cls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' },
+    archived: { label: '已归档', cls: 'bg-white/5 text-white/30 border-white/10' },
   };
 
   return (
@@ -1175,17 +1246,16 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
             </div>
             <div className="space-y-1">
               <label className={LABEL}>公告分类 (Category)</label>
-              <select
-                value={draft.category}
-                onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-                className={`${FIELD} cursor-pointer`}
-              >
-                {['Info', 'Event', 'Goods', 'Media'].map((c) => (
-                  <option key={c} value={c} className="bg-[#181818]">
-                    {c}
-                  </option>
-                ))}
-              </select>
+              <Select value={draft.category} onValueChange={(v) => setDraft({ ...draft, category: v })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="选择分类" />
+                </SelectTrigger>
+                <SelectContent>
+                  {['Info', 'Event', 'Goods', 'Media'].map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -1200,74 +1270,167 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className={LABEL}>封面图 URL (Cover)</label>
+              <input
+                value={draft.image}
+                onChange={(e) => setDraft({ ...draft, image: e.target.value })}
+                className={FIELD}
+                placeholder="https://... (留空无封面)"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className={LABEL}>定时发布时间 (Schedule)</label>
+              <input
+                type="datetime-local"
+                value={draft.scheduleAt}
+                onChange={(e) => setDraft({ ...draft, scheduleAt: e.target.value })}
+                className={FIELD}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-end gap-3 pt-2">
             <button
               onClick={() => setAdding(false)}
-              className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15"
+              className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 cursor-pointer"
             >
               取消
             </button>
             <button
-              onClick={add}
+              onClick={() => publish('draft')}
               disabled={busy}
-              className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] disabled:opacity-50 text-white font-black text-xs uppercase px-6 py-2.5 rounded-xl transition-all shadow-lg"
+              className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 cursor-pointer disabled:opacity-50"
+            >
+              存为草稿
+            </button>
+            <button
+              onClick={() => publish('schedule')}
+              disabled={busy}
+              className="inline-flex items-center gap-2 bg-[#4246ff] hover:bg-[#3336e0] disabled:opacity-50 text-white font-black text-xs uppercase px-5 py-2.5 rounded-xl transition-all cursor-pointer"
+            >
+              <Clock className="w-4 h-4" />
+              <span>{busy ? '提交中...' : '定时发布'}</span>
+            </button>
+            <button
+              onClick={() => publish('publish')}
+              disabled={busy}
+              className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] disabled:opacity-50 text-white font-black text-xs uppercase px-6 py-2.5 rounded-xl transition-all shadow-lg cursor-pointer"
             >
               <Save className="w-4 h-4" />
-              <span>{busy ? '正在发布...' : '确认发布'}</span>
+              <span>{busy ? '正在发布...' : '立即发布'}</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* Category Filter */}
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none bg-[#181818] p-3 rounded-2xl border border-white/10">
-        {(['all', 'Info', 'Event', 'Goods', 'Media'] as const).map((c) => (
-          <button
-            key={c}
-            onClick={() => setFilterCat(c)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-              filterCat === c
-                ? 'bg-[#ff3650] text-white shadow-md'
-                : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            {c === 'all' ? `全部 (${rows.length})` : c}
-          </button>
-        ))}
+      {/* Category Filter + Search */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-white/10">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+          {(['all', 'Info', 'Event', 'Goods', 'Media'] as const).map((c) => (
+            <button
+              key={c}
+              onClick={() => setFilterCat(c)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-black transition-all whitespace-nowrap cursor-pointer ${
+                filterCat === c
+                  ? 'bg-[#ff3650] text-white shadow-md'
+                  : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              {c === 'all' ? `全部 (${rows.length})` : c}
+            </button>
+          ))}
+        </div>
+        <div className="relative sm:w-64 shrink-0">
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="搜索公告..."
+            className="w-full bg-white/5 border border-white/15 rounded-full pl-9 pr-3 py-1.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff3650] transition-colors"
+          />
+        </div>
       </div>
 
-      {/* News List */}
-      <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl divide-y divide-white/5 overflow-hidden shadow-xl">
+      {/* News Grid with layout animations */}
+      <AnimatePresence mode="popLayout">
         {filteredNews.length === 0 ? (
-          <div className="p-12 text-center text-white/40 font-bold">暂无此分类下的动态</div>
+          <motion.div
+            key="news-empty"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25 }}
+            className="py-16 text-center text-white/40 font-bold"
+          >
+            暂无匹配的动态
+          </motion.div>
         ) : (
-          filteredNews.map((r) => (
-            <div key={r.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/5 transition-colors">
-              <div className="min-w-0 space-y-1">
-                <div className="flex items-center gap-2.5">
-                  <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${CATEGORY_COLORS[r.category] || 'bg-white/10 text-white'}`}>
-                    {r.category}
-                  </span>
-                  <span className="text-xs font-mono text-white/50">{r.date}</span>
-                </div>
-                <h4 className="font-black text-white text-base truncate">{r.title_zh ?? r.title}</h4>
-                {r.title_zh && <p className="text-xs text-white/40 font-mono truncate">{r.title}</p>}
-                {r.content_zh && <p className="text-xs text-white/60 line-clamp-2 pt-1">{r.content_zh}</p>}
-              </div>
-
-              <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                <button
-                  onClick={() => remove(r.id)}
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-[#ff3650] text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 border border-white/10"
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AnimatePresence mode="popLayout">
+              {filteredNews.map((r) => (
+                <motion.div
+                  layout
+                  key={r.id}
+                  initial={{ opacity: 0, scale: 0.92, y: 14 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: -12 }}
+                  transition={{
+                    duration: 0.3,
+                    ease: [0.16, 1, 0.3, 1],
+                    layout: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
+                  }}
+                  className="group bg-[#1a1a1a] border border-white/10 rounded-2xl p-5 hover:border-[#ff3650]/50 hover:bg-[#1e1e1e] transition-colors shadow-sm"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>删除</span>
-                </button>
-              </div>
-            </div>
-          ))
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${CATEGORY_COLORS[r.category] || 'bg-white/10 text-white'}`}>
+                      {r.category}
+                    </span>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${STATUS_META[r.status]?.cls || 'bg-white/10 text-white'}`}>
+                      {STATUS_META[r.status]?.label ?? r.status}
+                    </span>
+                    {r.pinned && <span className="text-xs" title="置顶">📌</span>}
+                    <span className="text-xs font-mono text-white/50 ml-auto">{r.date}</span>
+                  </div>
+                  <h4 className="font-black text-white text-base line-clamp-1 mb-1 group-hover:text-[#ff3650] transition-colors">
+                    {r.title_zh ?? r.title}
+                  </h4>
+                  {r.title_zh && <p className="text-xs text-white/40 font-mono line-clamp-1 mb-1">{r.title}</p>}
+                  {r.content_zh && <p className="text-xs text-white/60 line-clamp-2">{r.content_zh}</p>}
+                  <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+                    {r.status === 'draft' && (
+                      <button onClick={() => setStatus(r.id, 'published')} className="px-2.5 py-1 rounded-lg bg-[#ff3650] hover:bg-[#ff203c] text-xs font-bold text-white cursor-pointer">发布</button>
+                    )}
+                    {r.status === 'scheduled' && (
+                      <button onClick={() => setStatus(r.id, 'published')} className="px-2.5 py-1 rounded-lg bg-[#4246ff] hover:bg-[#3336e0] text-xs font-bold text-white cursor-pointer">立即发布</button>
+                    )}
+                    {r.status === 'published' && (
+                      <button onClick={() => setStatus(r.id, 'archived')} className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-white/70 cursor-pointer">归档</button>
+                    )}
+                    {r.status === 'archived' && (
+                      <button onClick={() => setStatus(r.id, 'published')} className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-xs font-bold text-emerald-400 cursor-pointer">重新发布</button>
+                    )}
+                    <button
+                      onClick={() => togglePinned(r)}
+                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-xs font-bold text-white/60 hover:text-white cursor-pointer inline-flex items-center gap-1 border border-white/10"
+                    >
+                      {r.pinned ? '取消置顶' : '置顶'}
+                    </button>
+                    <button
+                      onClick={() => remove(r.id)}
+                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#ff3650] text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1 border border-white/10"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>删除</span>
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 };

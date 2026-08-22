@@ -87,7 +87,11 @@ export interface NewsRow {
   title_zh: string | null;
   content: string | null;
   content_zh: string | null;
+  image: string | null;
   sort_order: number;
+  status: 'draft' | 'scheduled' | 'published' | 'archived';
+  published_at: string | null;
+  pinned: boolean;
 }
 
 // ---------- films ----------
@@ -103,6 +107,7 @@ export const adminFilms = {
 export const adminNews = {
   list: () => pg<NewsRow[]>('GET', '/news?select=*&order=sort_order.asc'),
   create: (row: Partial<NewsRow>) => pg<NewsRow[]>('POST', '/news', row),
+  update: (id: string, row: Partial<NewsRow>) => pg<NewsRow[]>('PATCH', `/news?id=eq.${encodeURIComponent(id)}`, row),
   remove: (id: string) => pg<null>('DELETE', `/news?id=eq.${encodeURIComponent(id)}`),
 };
 

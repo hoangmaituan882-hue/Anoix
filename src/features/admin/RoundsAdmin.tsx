@@ -3,8 +3,9 @@ import {
   adminFilms, adminRounds, adminScreenings,
   RoundRow, OptionRow, FilmRow,
 } from '../../lib/pgAdmin';
-import { ArchiveRestore, Plus, Trash2, Vote, Sparkles, CheckCircle2, Clock, PlayCircle, AlertCircle, Film, User, Layers } from 'lucide-react';
+import { ArchiveRestore, Plus, Trash2, Vote, Sparkles, CheckCircle2, Clock, PlayCircle, AlertCircle, Film, User, Layers, Search } from 'lucide-react';
 import { Loader } from '../../components/motion/loader';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/motion/select';
 
 const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
 const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
@@ -46,6 +47,7 @@ export const RoundsAdmin: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [newRound, setNewRound] = useState({ id: '', title: '', deadline: '' });
   const [optionDraft, setOptionDraft] = useState<{ roundId: string; filmId: string; nominator: string } | null>(null);
+  const [filmSearch, setFilmSearch] = useState('');
 
   const reload = useCallback(async () => {
     setError('');
@@ -176,6 +178,13 @@ export const RoundsAdmin: React.FC = () => {
   }
 
   const getFilm = (fid: string | null) => films.find((x) => x.id === fid);
+
+  const filmQ = filmSearch.trim().toLowerCase();
+  const filteredFilms = filmQ
+    ? films.filter((f) =>
+        [f.title, f.title_zh, f.title_en, f.year, f.id].some((v) => v && String(v).toLowerCase().includes(filmQ))
+      )
+    : films;
 
   return (
     <div className="space-y-6">
@@ -319,7 +328,7 @@ export const RoundsAdmin: React.FC = () => {
                   </span>
                   {r.status !== 'revealed' && (
                     <button
-                      onClick={() => setOptionDraft({ roundId: r.id, filmId: '', nominator: '' })}
+                      onClick={() => { setFilmSearch(''); setOptionDraft({ roundId: r.id, filmId: '', nominator: '' }); }}
                       className="text-xs font-black text-[#ff3650] hover:text-white transition-colors cursor-pointer flex items-center gap-1"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -405,20 +414,50 @@ export const RoundsAdmin: React.FC = () => {
             <div className="space-y-3">
               <div className="space-y-1">
                 <label className={LABEL}>选择动画作品 *</label>
-                <select
-                  value={optionDraft.filmId}
-                  onChange={(e) => setOptionDraft({ ...optionDraft, filmId: e.target.value })}
-                  className={`${FIELD} cursor-pointer`}
-                >
-                  <option value="" className="bg-[#181818]">
-                    选择一部作品...
-                  </option>
-                  {films.map((f) => (
-                    <option key={f.id} value={f.id} className="bg-[#181818]">
-                      {f.title_zh ?? f.title} ({f.year})
-                    </option>
-                  ))}
-                </select>
+                <Select value={optionDraft.filmId} onValueChange={(v) => setOptionDraft({ ...optionDraft, filmId: v })}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="选择一部作品..." />
+                  </SelectTrigger>
+                  <SelectContent maxHeight={288}>
+                    <div className="sticky top-0 z-10 px-1.5 pb-1.5 pt-0.5 bg-background" onClick={(e) => e.stopPropagation()}>
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          value={filmSearch}
+                          onChange={(e) => setFilmSearch(e.target.value)}
+                          placeholder="搜索作品..."
+                          className="w-full bg-muted border border-border rounded-lg pl-8 pr-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#ff3650] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    {filteredFilms.length === 0 ? (
+                      <p className="px-2.5 py-4 text-center text-xs font-bold text-muted-foreground">没有匹配的作品</p>
+                    ) : (
+                      filteredFilms.map((f) => (
+                        <SelectItem key={f.id} value={f.id} label={f.title_zh ?? f.title}>
+                          <span className="flex items-center gap-2.5 min-w-0">
+                            {f.image ? (
+                              <img
+                                src={f.image}
+                                alt={f.title_zh ?? f.title}
+                                className="w-9 h-[54px] rounded-md object-cover shrink-0 bg-black/40 border border-white/10"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <span className="w-9 h-[54px] rounded-md bg-white/10 border border-white/10 shrink-0 flex items-center justify-center">
+                                <Film className="w-4 h-4 text-white/30" />
+                              </span>
+                            )}
+                            <span className="min-w-0 flex flex-col">
+                              <span className="font-bold text-sm text-foreground truncate">{f.title_zh ?? f.title}</span>
+                              <span className="text-xs text-muted-foreground">{f.year}</span>
+                            </span>
+                          </span>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-1">
