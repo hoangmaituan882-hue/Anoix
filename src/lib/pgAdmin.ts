@@ -1,4 +1,4 @@
-import { auth } from './cloudbase';
+import { auth, CLOUDBASE_ENV_ID } from './cloudbase';
 import { WorkItem, NewsItem } from '../types';
 
 /**
@@ -6,7 +6,7 @@ import { WorkItem, NewsItem } from '../types';
  * admin session token. RLS policies (films_admin_write etc.) are the real
  * permission boundary; anonymous visitors simply have no token.
  */
-const PG_BASE = `https://${import.meta.env.VITE_CLOUDBASE_ENV_ID as string}.api.tcloudbasegateway.com/v1/rdb/rest/v1`;
+const PG_BASE = `https://${CLOUDBASE_ENV_ID}.api.tcloudbasegateway.com/v1/rdb/rest/v1`;
 
 interface AdminSession {
   access_token?: string;
@@ -14,6 +14,7 @@ interface AdminSession {
 }
 
 async function requireToken(): Promise<string> {
+  if (!auth) throw new Error('CloudBase SDK 未初始化');
   const { data, error } = await auth.getSession();
   const session = (data?.session ?? null) as AdminSession | null;
   if (error || !session?.access_token || session.user?.is_anonymous) {
