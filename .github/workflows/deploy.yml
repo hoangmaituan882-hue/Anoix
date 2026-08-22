@@ -1,17 +1,16 @@
-name: Deploy to CloudBase
+name: CI Check
 
+# Deployment is handled by the CloudBase console Git integration:
+# push to main -> CloudBase builds the Dockerfile (frontend + API) -> CloudRun.
+# This workflow only gates the push with type-check and a production build.
 on:
   push:
     branches: [main]
-  workflow_dispatch:
-
-env:
-  TCB_ENV_ID: a213-d4gzgo1mn873d99da
-  VITE_CLOUDBASE_ENV_ID: a213-d4gzgo1mn873d99da
-  VITE_API_BASE: https://anoix-api-299456-11-1407057491.sh.run.tcloudbase.com
+  pull_request:
+    branches: [main]
 
 jobs:
-  deploy:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,16 +26,5 @@ jobs:
       - name: Type check
         run: npm run lint
 
-      - name: Build frontend
+      - name: Production build
         run: npm run build
-
-      - name: Login CloudBase CLI
-        run: npx -y @cloudbase/cli@latest login --cloudbase-api-key "$TCB_API_KEY" -e "$TCB_ENV_ID"
-        env:
-          TCB_API_KEY: ${{ secrets.TCB_API_KEY }}
-
-      - name: Deploy frontend (static hosting)
-        run: npx -y @cloudbase/cli@latest hosting deploy dist / -e "$TCB_ENV_ID"
-
-      - name: Deploy API service (CloudRun)
-        run: npx -y @cloudbase/cli@latest run deploy -s anoix-api -e "$TCB_ENV_ID"

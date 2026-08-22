@@ -1,9 +1,9 @@
 /**
- * Anoix API service (CloudBase CloudRun container).
+ * Anoix web service (CloudBase CloudRun container) — serves BOTH the built
+ * frontend (dist/) and the JSON API:
  *
- * Public read APIs over CloudBase PG via the PostgREST-style REST endpoint,
- * authenticated server-side with the API Key (service_role) — browsers never
- * touch database credentials.
+ *   /api/health, /api/films, /api/films/:id, /api/news   → CloudBase PG
+ *   everything else                                       → SPA (dist/index.html)
  *
  * Env:
  *   CLOUDBASE_ENV_ID   - environment id
@@ -11,6 +11,11 @@
  *   PORT               - listen port (CloudRun sets this)
  */
 import express from 'express';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DIST_DIR = path.resolve(__dirname, '../dist');
 
 const ENV_ID = process.env.CLOUDBASE_ENV_ID;
 const API_KEY = process.env.CLOUDBASE_API_KEY;
@@ -78,6 +83,12 @@ app.use((err, _req, res, _next) => {
   res.status(err.status || 502).json({ error: 'upstream_error', detail: err.message });
 });
 
+// ---- Static frontend + SPA fallback (after API routes) ----
+app.use(express.static(DIST_DIR));
+app.get(/^(?!\/api).*/, (_req, res) => {
+  res.sendFile(path.join(DIST_DIR, 'index.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`[anoix-api] listening on :${PORT}, env=${ENV_ID}`);
+  console.log(`[anoix] web+api listening on :${PORT}, env=${ENV_ID}, dist=${DIST_DIR}`);
 });
