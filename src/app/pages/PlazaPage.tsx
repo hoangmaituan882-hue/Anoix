@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { Masonry } from 'masonic';
 import { Language } from '../../types';
 import { nominations, PlazaItem } from '../../lib/nominations';
@@ -10,7 +11,7 @@ import { Loader } from '../../components/motion/loader';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Badge } from '../../components/ui/badge';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
-import { ArrowLeft, Flame, Crown, LayoutGrid, ListOrdered } from 'lucide-react';
+import { ArrowLeft, Flame, Crown, Trophy, LayoutGrid, ListOrdered, Radio } from 'lucide-react';
 
 const PlazaCard: React.FC<{ item: PlazaItem }> = ({ item }) => (
   <div className="bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650]/50 rounded-2xl overflow-hidden transition-all duration-300 group">
@@ -35,6 +36,12 @@ const PlazaCard: React.FC<{ item: PlazaItem }> = ({ item }) => (
   </div>
 );
 
+const RANK_STYLES = [
+  { ring: 'border-[#ff3650]/60 bg-[#ff3650]/10', chip: 'bg-[#ff3650] text-white shadow-[0_0_16px_rgba(255,54,80,0.5)]', bar: 'bg-[#ff3650]' },
+  { ring: 'border-[#e0fe3d]/50 bg-[#e0fe3d]/5', chip: 'bg-[#e0fe3d] text-[#121212]', bar: 'bg-[#e0fe3d]' },
+  { ring: 'border-[#ff9900]/50 bg-[#ff9900]/5', chip: 'bg-[#ff9900] text-white', bar: 'bg-[#ff9900]' },
+];
+
 export const PlazaPage: React.FC<{
   lang: Language;
   setLang: (l: Language) => void;
@@ -45,16 +52,22 @@ export const PlazaPage: React.FC<{
   const [view, setView] = useState<'masonry' | 'ranking'>('masonry');
   const [items, setItems] = useState<PlazaItem[] | null>(null);
 
+  // Load + silent poll every 8s (real-time ranking).
   useEffect(() => {
     let alive = true;
-    setItems(null);
-    nominations.plaza(scope)
-      .then((d) => { if (alive) setItems(d.items ?? []); })
-      .catch(() => { if (alive) setItems([]); });
-    return () => { alive = false; };
+    const load = () => {
+      nominations.plaza(scope)
+        .then((d) => { if (alive) setItems(d.items ?? []); })
+        .catch(() => { if (alive && items === null) setItems([]); });
+    };
+    load();
+    const timer = setInterval(load, 8000);
+    return () => { alive = false; clearInterval(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scope]);
 
   const ranking = (items ?? []).slice().sort((a, b) => b.votes - a.votes || b.nominations - a.nominations);
+  const maxVotes = ranking.length ? ranking[0].votes : 0;
 
   return (
     <>
@@ -70,7 +83,10 @@ export const PlazaPage: React.FC<{
             <div>
               <p className="text-xs font-black text-[#ff3650] uppercase tracking-widest mb-1">Nomination Plaza</p>
               <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">提名广场</h1>
-              <p className="text-sm text-white/50 mt-1.5">影迷提名的影片瀑布流与实时投票排行</p>
+              <p className="text-sm text-white/50 mt-1.5 flex items-center gap-2">
+                影迷提名的影片瀑布流与实时投票排行
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#e0fe3d]"><Radio className="w-3 h-3 animate-pulse" /> 实时</span>
+              </p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -103,20 +119,58 @@ export const PlazaPage: React.FC<{
               render={({ data }) => <div className="mb-4"><PlazaCard item={data} /></div>}
             />
           ) : (
-            <div className="space-y-2.5 max-w-3xl">
-              {ranking.map((item, i) => (
-                <div key={item.filmId} className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${i === 0 ? 'border-[#ff3650]/50 bg-[#ff3650]/5' : 'border-white/10 bg-[#1a1a1a]'}`}>
-                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${i === 0 ? 'bg-[#ff3650] text-white' : i < 3 ? 'bg-[#e0fe3d] text-[#121212]' : 'bg-white/10 text-white/60'}`}>
-                    {i === 0 ? <Crown className="w-4 h-4" /> : i + 1}
-                  </span>
-                  {item.image && <img src={item.image} alt="" className="w-9 h-12 rounded-md object-cover shrink-0" />}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-bold text-white truncate">{item.title}</p>
-                    <p className="text-xs text-white/40">提名 {item.nominations} 次</p>
-                  </div>
-                  <Badge variant="secondary" className="shrink-0"><AnimatedNumber value={item.votes} /> 票</Badge>
-                </div>
-              ))}
+            <div className="space-y-3 max-w-3xl">
+              {ranking.map((item, i) => {
+                const style = RANK_STYLES[i] ?? { ring: 'border-white/10 bg-[#1a1a1a]', chip: 'bg-white/10 text-white/60', bar: 'bg-white/40' };
+                const share = maxVotes > 0 ? item.votes / maxVotes : 0;
+                return (
+                  <motion.div
+                    key={item.filmId}
+                    layout
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.05, ease: TRIGGER_EASE }}
+                    className={`flex items-center gap-3.5 rounded-2xl border px-4 py-3.5 ${style.ring}`}
+                  >
+                    <motion.span
+                      layout
+                      className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${style.chip}`}
+                    >
+                      {i === 0 ? <Crown className="w-4 h-4" /> : i === 1 ? <Trophy className="w-4 h-4" /> : i === 2 ? <Trophy className="w-4 h-4" /> : i + 1}
+                    </motion.span>
+
+                    {item.image ? (
+                      <img src={item.image} alt="" className="w-10 h-14 rounded-lg object-cover shrink-0 border border-white/10" />
+                    ) : (
+                      <div className="w-10 h-14 rounded-lg bg-white/5 shrink-0 flex items-center justify-center text-white/20 font-black">{item.title.slice(0, 1)}</div>
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-white truncate">{item.title}</p>
+                        {item.planned && <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/40 shrink-0">已通过</Badge>}
+                      </div>
+                      <p className="text-xs text-white/40 mb-1.5">提名 {item.nominations} 次</p>
+                      <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <motion.div
+                          className={`h-full rounded-full ${style.bar}`}
+                          initial={false}
+                          animate={{ width: `${share * 100}%` }}
+                          transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0 min-w-[64px]">
+                      <div className="flex items-baseline justify-end gap-1">
+                        <AnimatedNumber value={item.votes} className="text-xl font-black text-white tabular-nums" />
+                        <span className="text-[11px] font-bold text-white/40">{lang === 'zh' ? '票' : 'votes'}</span>
+                      </div>
+                      <p className="text-[10px] font-mono text-white/30">{Math.round(share * 100)}%</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </div>
