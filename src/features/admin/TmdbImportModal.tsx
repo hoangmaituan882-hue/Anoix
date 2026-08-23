@@ -1,9 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
+import { getAccessToken } from '../../lib/session';
 import { Search, X, Import, Clapperboard, Tv, Layers, Star, AlertCircle } from 'lucide-react';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
+
+/** Bearer header for the server-side admin gate on the TMDB proxy. */
+const authHeaders = async (): Promise<Record<string, string>> => {
+  const token = await getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 interface TmdbSearchResult {
   tmdbId: number;
@@ -62,7 +69,10 @@ export const TmdbImportModal: React.FC<{
     setSearching(true);
     setError('');
     try {
-      const r = await fetch(`${API_BASE}/api/tmdb/search?q=${encodeURIComponent(q.trim())}&media_type=${mt}`);
+      const r = await fetch(`${API_BASE}/api/tmdb/search?q=${encodeURIComponent(q.trim())}&media_type=${mt}`, {
+        headers: await authHeaders(),
+      });
+      if (r.status === 401 || r.status === 403) throw new Error('需要管理员权限才能使用 TMDB 导入');
       if (!r.ok) throw new Error(r.status === 503 ? '未配置 TMDB Key,或上游不可达' : `搜索失败 (${r.status})`);
       const data = await r.json();
       setResults(data.results ?? []);
@@ -85,7 +95,10 @@ export const TmdbImportModal: React.FC<{
     setLoadingDetail(item.tmdbId);
     setError('');
     try {
-      const r = await fetch(`${API_BASE}/api/tmdb/detail/${item.tmdbId}?media_type=${item.mediaType}`);
+      const r = await fetch(`${API_BASE}/api/tmdb/detail/${item.tmdbId}?media_type=${item.mediaType}`, {
+        headers: await authHeaders(),
+      });
+      if (r.status === 401 || r.status === 403) throw new Error('需要管理员权限才能使用 TMDB 导入');
       if (!r.ok) throw new Error(`获取详情失败 (${r.status})`);
       const d: TmdbDetail = await r.json();
       onSelect(tmdbToWork(d));

@@ -21,6 +21,12 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import cloudbase from '@cloudbase/js-sdk';
 import { tmdbRouter } from './tmdb.js';
+import {
+  allowRate,
+  clientIp,
+  issueVoterCookie,
+  resolveVoterId,
+} from './auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.resolve(__dirname, '../dist');
@@ -63,9 +69,16 @@ async function getAdminToken(force = false) {
 const app = express();
 app.use(express.json());
 
-// Public read API — open CORS (admin write endpoints will tighten this later)
+// Public read API. Echo the request origin (instead of a wildcard) so the
+// signed voter cookie can be used cross-origin in local dev; same-origin
+// production traffic is unaffected.
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
@@ -78,7 +91,7 @@ async function pgGet(path, _retried = false) {
     err.status = 503;
     throw err;
   }
-  const token = await getAdminToken();
+  const token = await getAdminToken(_retried); // force a fresh login on the retry
   const r = await fetch(`${PG_BASE}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -95,8 +108,8 @@ async function pgGet(path, _retried = false) {
 }
 
 /** Write helper (same auth, returns [status, body]) without throwing on 4xx. */
-async function pgWrite(method, path, body) {
-  const token = await getAdminToken();
+async function pgWrite(method, path, body, _retried = false) {
+  const token = await getAdminToken(_retried); // force a fresh login on the retry
   const r = await fetch(`${PG_BASE}${path}`, {
     method,
     headers: {
@@ -106,6 +119,9 @@ async function pgWrite(method, path, body) {
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+  if (r.status === 401 && !_retried) {
+    return pgWrite(method, path, body, true);
+  }
   const text = await r.text();
   let json = null;
   try { json = text ? JSON.parse(text) : null; } catch { /* keep null */ }
@@ -184,13 +200,32 @@ app.get('/api/nominations', async (_req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// ---- Issue an unforgeable anonymous voter cookie ----
+app.get('/api/vote/ticket', (_req, res) => {
+  issueVoterCookie(res);
+  res.json({ ok: true });
+});
+
 // ---- Voting (server-side boundary; UNIQUE(round_id, voter_id) is the guard) ----
+// voterId is NEVER taken from the body: it comes from the server-issued signed
+// cookie (see resolveVoterId). This plus the composite FK (option_id, round_id)
+// closes both the forgery and cross-round vote holes.
 app.post('/api/vote', async (req, res, next) => {
   try {
-    const { roundId, optionId, voterId } = req.body ?? {};
-    if (!roundId || !optionId || !voterId || typeof voterId !== 'string' || voterId.length < 8) {
+    const { roundId, optionId } = req.body ?? {};
+    if (!roundId || !Number.isInteger(optionId) || optionId <= 0) {
       return res.status(400).json({ error: 'bad_request' });
     }
+    if (!allowRate(`vote:${clientIp(req)}`, 30, 60_000)) {
+      return res.status(429).json({ error: 'rate_limited' });
+    }
+
+    // Identity must come from the server-issued signed cookie — never the body.
+    const voterId = resolveVoterId(req);
+    if (!voterId) {
+      return res.status(401).json({ error: 'identity_required' });
+    }
+
     const rounds = await pgGet(`/nomination_rounds?id=eq.${encodeURIComponent(roundId)}&select=id,status,deadline`);
     const round = rounds?.[0];
     if (!round) return res.status(404).json({ error: 'round_not_found' });
@@ -198,6 +233,14 @@ app.post('/api/vote', async (req, res, next) => {
     if (round.deadline && new Date(round.deadline).getTime() < Date.now()) {
       return res.status(409).json({ error: 'deadline_passed' });
     }
+
+    // The candidate must belong to this round — otherwise a voter could push
+    // this round's vote onto a different (already revealed) round's option.
+    const opts = await pgGet(`/nomination_options?id=eq.${optionId}&select=id,round_id`);
+    const opt = opts?.[0];
+    if (!opt) return res.status(404).json({ error: 'option_not_found' });
+    if (opt.round_id !== roundId) return res.status(400).json({ error: 'option_not_in_round' });
+
     const [status] = await pgWrite('POST', '/votes', {
       round_id: roundId,
       option_id: optionId,
@@ -209,20 +252,55 @@ app.post('/api/vote', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// ---- My vote status (anonymous voter id) ----
+// ---- My vote status (identity from the signed cookie) ----
 app.get('/api/vote', async (req, res, next) => {
   try {
-    const { roundId, voterId } = req.query;
-    if (!roundId || !voterId) return res.json({ voted: false, optionId: null });
+    const { roundId } = req.query;
+    if (!roundId) return res.json({ voted: false, optionId: null });
+    const voterId = resolveVoterId(req);
+    if (!voterId) return res.json({ voted: false, optionId: null });
     const mine = await pgGet(
-      `/votes?round_id=eq.${encodeURIComponent(String(roundId))}&voter_id=eq.${encodeURIComponent(String(voterId))}&select=option_id&limit=1`
+      `/votes?round_id=eq.${encodeURIComponent(String(roundId))}&voter_id=eq.${encodeURIComponent(voterId)}&select=option_id&limit=1`
     );
     return res.json({ voted: mine.length > 0, optionId: mine[0]?.option_id ?? null });
   } catch (e) { next(e); }
 });
 
+// ---- Resolve a caller's role by forwarding THEIR access token to the PG
+// gateway. The gateway verifies the token; the user_roles self-read RLS
+// policy returns only the caller's own row, so this is tamper-proof. ----
+async function callerRole(accessToken) {
+  if (!accessToken) return null;
+  try {
+    const r = await fetch(`${PG_BASE}/user_roles?select=uid,role&limit=1`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!r.ok) return null;
+    const rows = await r.json();
+    return rows?.[0]?.role ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ---- Admin-only gate for the TMDB proxy (role + rate limit) ----
+async function adminGate(req, res, next) {
+  if (!allowRate(`tmdb:${clientIp(req)}`, 60, 60_000)) {
+    return res.status(429).json({ error: 'rate_limited' });
+  }
+  const authz = req.headers.authorization || '';
+  if (!authz.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
+  const role = await callerRole(authz.slice(7).trim());
+  if (role !== 'admin') {
+    return res.status(403).json({ error: 'not_admin' });
+  }
+  next();
+}
+
 // ---- TMDB proxy (configurable base URL, key stays server-side) ----
-app.use(tmdbRouter);
+app.use('/api/tmdb', adminGate, tmdbRouter);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {

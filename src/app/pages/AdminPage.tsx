@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { auth } from '../../lib/cloudbase';
 import { repository } from '../../lib/repository';
-import { adminFilms, adminNews, filmToRow, rowToFilm, FilmRow, NewsRow } from '../../lib/pgAdmin';
+import { adminFilms, adminNews, filmToRow, rowToFilm, FilmRow, NewsRow, adminAuth } from '../../lib/pgAdmin';
+import { getSession } from '../../lib/session';
 import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/motion/select';
@@ -23,9 +24,7 @@ import {
   Save,
   Trash2,
   X,
-  KeyRound,
   ShieldCheck,
-  UserCheck,
   Film,
   Newspaper,
   Calendar,
@@ -49,45 +48,28 @@ import {
   Tv,
 } from 'lucide-react';
 
-type AuthState = 'checking' | 'signed-out' | 'signed-in';
-
-const TEMP_ADMIN_KEY = 'anoix_temp_admin_session';
+type AuthState = 'checking' | 'signed-out' | 'signed-in' | 'unauthorized';
 
 export const AdminPage: React.FC = () => {
   const [authState, setAuthState] = useState<AuthState>('checking');
-  const [isTempAdmin, setIsTempAdmin] = useState<boolean>(false);
+
+  /** Verify the session AND the admin role (RLS stays the real write boundary). */
+  const verify = useCallback(async (): Promise<AuthState> => {
+    try {
+      const user = await getSession();
+      if (!user) return 'signed-out';
+      const isAdmin = await adminAuth.checkAdmin().catch(() => false);
+      return isAdmin ? 'signed-in' : 'unauthorized';
+    } catch {
+      return 'signed-out';
+    }
+  }, []);
 
   useEffect(() => {
     let alive = true;
-    (async () => {
-      // 1. Check local temporary admin session first
-      const hasTempAdmin = sessionStorage.getItem(TEMP_ADMIN_KEY) === 'true';
-      if (hasTempAdmin) {
-        if (alive) {
-          setIsTempAdmin(true);
-          setAuthState('signed-in');
-        }
-        return;
-      }
-
-      // 2. Check CloudBase session if available
-      if (auth) {
-        try {
-          const { data } = await auth.getSession();
-          const session = data?.session;
-          if (alive) {
-            setAuthState(session && !session.user?.is_anonymous ? 'signed-in' : 'signed-out');
-          }
-          return;
-        } catch {
-          // fallback to signed-out
-        }
-      }
-
-      if (alive) setAuthState('signed-out');
-    })();
+    void verify().then((s) => { if (alive) setAuthState(s); });
     return () => { alive = false; };
-  }, []);
+  }, [verify]);
 
   if (authState === 'checking') {
     return (
@@ -98,30 +80,45 @@ export const AdminPage: React.FC = () => {
     );
   }
 
-  return authState === 'signed-in' ? (
-    <AdminPanel
-      isTempAdmin={isTempAdmin}
-      onSignOut={() => {
-        sessionStorage.removeItem(TEMP_ADMIN_KEY);
-        setIsTempAdmin(false);
-        setAuthState('signed-out');
-      }}
-    />
-  ) : (
-    <AdminLogin
-      onSignedIn={(temp = false) => {
-        if (temp) {
-          sessionStorage.setItem(TEMP_ADMIN_KEY, 'true');
-          setIsTempAdmin(true);
-        }
-        setAuthState('signed-in');
-      }}
-    />
-  );
+  if (authState === 'signed-in') {
+    return <AdminPanel onSignOut={() => setAuthState('signed-out')} />;
+  }
+
+  if (authState === 'unauthorized') {
+    return <Unauthorized onSignOut={() => setAuthState('signed-out')} />;
+  }
+
+  return <AdminLogin onSignedIn={() => void verify().then(setAuthState)} />;
 };
 
+// ---------------- Unauthorized screen (logged in, but not an admin) ----------------
+const Unauthorized: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => (
+  <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4 selection:bg-[#ff3650] selection:text-white">
+    <div className="w-full max-w-md bg-[#181818] border border-white/10 rounded-3xl p-8 text-center space-y-5">
+      <div className="w-14 h-14 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/30 flex items-center justify-center text-[#ff3650] mx-auto">
+        <ShieldCheck className="w-7 h-7" />
+      </div>
+      <div>
+        <h1 className="text-xl font-black text-white">无管理员权限</h1>
+        <p className="text-xs text-white/50 mt-1">当前账号已登录，但不在管理员名单 (user_roles) 中。</p>
+      </div>
+      <div className="flex justify-center gap-3 pt-2">
+        <Link to="/" className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors">
+          返回首页
+        </Link>
+        <button
+          onClick={onSignOut}
+          className="px-4 py-2 rounded-xl bg-[#ff3650] hover:bg-[#ff203c] text-white text-xs font-black transition-colors cursor-pointer"
+        >
+          退出登录
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 // ---------------- Redesigned Studio TRIGGER Admin Login ----------------
-const AdminLogin: React.FC<{ onSignedIn: (isTemp?: boolean) => void }> = ({ onSignedIn }) => {
+const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -133,35 +130,18 @@ const AdminLogin: React.FC<{ onSignedIn: (isTemp?: boolean) => void }> = ({ onSi
     setBusy(true);
     setError('');
 
-    // Quick match for built-in temporary administrator credentials:
-    // admin / trigger2026 or root / trigger
-    if (
-      (username.trim().toLowerCase() === 'admin' && password === 'trigger2026') ||
-      (username.trim().toLowerCase() === 'trigger' && password === 'trigger') ||
-      (username.trim().toLowerCase() === 'root' && password === 'admin123')
-    ) {
-      setTimeout(() => {
-        onSignedIn(true);
-      }, 300);
-      return;
-    }
-
     try {
       if (!auth) {
-        throw new Error('CloudBase 数据库未初始化，建议使用下方【临时管理员】快捷进入');
+        throw new Error('CloudBase 认证不可用，无法登录');
       }
       const { data, error } = await auth.signInWithPassword({ username, password });
       if (error || !data?.session) throw new Error(error?.message ?? '账号或密码不正确');
-      onSignedIn(false);
+      onSignedIn();
     } catch (err) {
       setError(err instanceof Error ? err.message : '登录验证失败');
     } finally {
       setBusy(false);
     }
-  };
-
-  const handleQuickTempAdmin = () => {
-    onSignedIn(true);
   };
 
   return (
@@ -267,28 +247,6 @@ const AdminLogin: React.FC<{ onSignedIn: (isTemp?: boolean) => void }> = ({ onSi
             </button>
           </form>
 
-          {/* Quick 1-Click Temp Admin Entry */}
-          <div className="pt-4 border-t border-white/10 space-y-3">
-            <button
-              type="button"
-              onClick={handleQuickTempAdmin}
-              className="w-full bg-white/5 hover:bg-[#e0fe3d] hover:text-[#121212] text-white border border-white/15 hover:border-[#e0fe3d] text-xs font-black py-3 px-4 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer group shadow-sm active:scale-[0.98]"
-            >
-              <KeyRound className="w-4 h-4 text-[#e0fe3d] group-hover:text-[#121212] transition-colors" />
-              <span>一键以临时管理员进入后台 (Direct Access)</span>
-            </button>
-
-            <div className="p-3 bg-black/40 rounded-xl border border-white/10 text-[11px] text-white/50 space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-white/70">内置测试凭证：</span>
-                <span className="text-[#e0fe3d] font-mono font-black">免配直通</span>
-              </div>
-              <p className="font-mono text-white/40">
-                账号: <span className="text-white">admin</span> | 密码: <span className="text-white">trigger2026</span>
-              </p>
-            </div>
-          </div>
-
           <div className="text-center pt-2">
             <Link
               to="/"
@@ -305,7 +263,7 @@ const AdminLogin: React.FC<{ onSignedIn: (isTemp?: boolean) => void }> = ({ onSi
 };
 
 // ---------------- Redesigned Studio TRIGGER Admin Panel ----------------
-const AdminPanel: React.FC<{ onSignOut: () => void; isTempAdmin?: boolean }> = ({ onSignOut, isTempAdmin = false }) => {
+const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
   const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds'>('films');
   const [filmsCount, setFilmsCount] = useState<number>(0);
   const [newsCount, setNewsCount] = useState<number>(0);
@@ -391,17 +349,10 @@ const AdminPanel: React.FC<{ onSignOut: () => void; isTempAdmin?: boolean }> = (
               </div>
             </Link>
 
-            {isTempAdmin ? (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full bg-[#e0fe3d]/15 text-[#e0fe3d] border border-[#e0fe3d]/30 shadow-sm">
-                <UserCheck className="w-3.5 h-3.5" />
-                <span>临时管理员 (LOCAL MOCK)</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                <span>CLOUDBASE CONNECTED</span>
-              </span>
-            )}
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>CLOUDBASE ADMIN</span>
+            </span>
           </div>
 
           {/* Tab Navigation */}

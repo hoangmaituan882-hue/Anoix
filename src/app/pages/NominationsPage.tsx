@@ -7,7 +7,7 @@ import { NominationRound } from '../../types/screening';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { Loader } from '../../components/motion/loader';
-import { getSession, SessionUser } from '../../lib/session';
+import { getSession, getAccessToken, SessionUser } from '../../lib/session';
 import { ArrowLeft, Crown, Hourglass, PencilLine, Vote } from 'lucide-react';
 
 interface NominationsPageProps {
@@ -16,18 +16,13 @@ interface NominationsPageProps {
   onOpenModal: (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
 }
 
-/** Anonymous voter identity — one stable id per browser, one vote per round. */
-function getVoterId(): string {
-  const KEY = 'anoix_voter_id';
-  let id = localStorage.getItem(KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(KEY, id);
-  }
-  return id;
-}
-
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
+
+/** Bearer header for a logged-in user, empty for anonymous cookie voting. */
+const authHeaders = async (): Promise<Record<string, string>> => {
+  const token = await getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang, onOpenModal }) => {
   const navigate = useNavigate();
@@ -37,19 +32,23 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
   const [toast, setToast] = useState('');
   const [user, setUser] = useState<SessionUser | null>(null);
 
-  // Signed-in identity first (real-name vote), anonymous fingerprint fallback.
+  // Display-only: show whose name appears on the vote. The actual ballot
+  // identity is resolved server-side (verified token or signed cookie) and
+  // is never sent from the client.
   useEffect(() => {
     let alive = true;
     getSession().then((u) => { if (alive) setUser(u); });
     return () => { alive = false; };
   }, []);
-  const voterId = user?.uid ?? getVoterId();
+
+  // Ensure the anonymous voter cookie exists before any vote/status call.
+  useEffect(() => {
+    fetch(`${API_BASE}/api/vote/ticket`, { credentials: 'include' }).catch(() => {});
+  }, []);
 
   const reload = useCallback(async () => {
     try {
-      const [roundsRes, ...voteRes] = await Promise.all([
-        fetch(`${API_BASE}/api/nominations`).then((r) => r.json()) as Promise<NominationRound[]>,
-      ]);
+      const roundsRes = (await fetch(`${API_BASE}/api/nominations`).then((r) => r.json())) as NominationRound[];
       setRounds(roundsRes);
       const votes: Record<string, number | null> = {};
       await Promise.all(
@@ -57,18 +56,20 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
           .filter((r) => r.status === 'voting')
           .map(async (r) => {
             try {
-              const res = await fetch(`${API_BASE}/api/vote?roundId=${encodeURIComponent(r.id)}&voterId=${encodeURIComponent(voterId)}`);
+              const res = await fetch(`${API_BASE}/api/vote?roundId=${encodeURIComponent(r.id)}`, {
+                credentials: 'include',
+                headers: await authHeaders(),
+              });
               const data = await res.json();
               votes[r.id] = data.voted ? data.optionId : null;
             } catch { votes[r.id] = null; }
           })
       );
       setMyVotes(votes);
-      void voteRes;
     } catch {
       setRounds([]);
     }
-  }, [voterId]);
+  }, []);
 
   useEffect(() => { void reload(); }, [reload]);
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -79,8 +80,9 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
     try {
       const res = await fetch(`${API_BASE}/api/vote`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roundId, optionId, voterId }),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+        body: JSON.stringify({ roundId, optionId }),
       });
       if (res.status === 409) {
         setToast(lang === 'zh' ? '你已经投过这一轮了' : 'You already voted in this round');

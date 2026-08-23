@@ -13,10 +13,9 @@ interface AdminSession {
   user?: { is_anonymous?: boolean };
 }
 
-const TEMP_ADMIN_KEY = 'anoix_temp_admin_session';
-
 async function requireToken(): Promise<string> {
-  // Check CloudBase session first
+  // CloudBase session is the only accepted identity source. There is no
+  // local "temporary admin" fallback: a fake token would never pass RLS.
   if (auth) {
     try {
       const { data, error } = await auth.getSession();
@@ -27,11 +26,6 @@ async function requireToken(): Promise<string> {
     } catch {
       // ignore
     }
-  }
-
-  // If logged in via temporary admin mode, allow operations with fallback mock/demo token
-  if (typeof window !== 'undefined' && sessionStorage.getItem(TEMP_ADMIN_KEY) === 'true') {
-    return 'temp_admin_local_token';
   }
 
   throw new Error('未登录或会话已过期');
@@ -156,6 +150,25 @@ export const adminRounds = {
   listOptions: () => pg<OptionRow[]>('GET', '/nomination_options?select=*&order=id.asc'),
   addOption: (row: Partial<OptionRow>) => pg<OptionRow[]>('POST', '/nomination_options', row),
   removeOption: (id: number) => pg<null>('DELETE', `/nomination_options?id=eq.${id}`),
+};
+
+// ---------- admin role ----------
+export interface UserRoleRow {
+  uid: string;
+  username: string | null;
+  role: string;
+}
+
+export const adminAuth = {
+  /**
+   * True when the CURRENT session's uid has role 'admin' in user_roles.
+   * The user_roles self-read RLS policy returns only the caller's own row,
+   * so the uid is resolved server-side and never trusted from the client.
+   */
+  checkAdmin: async (): Promise<boolean> => {
+    const rows = await pg<UserRoleRow[]>('GET', '/user_roles?select=uid,role&limit=1');
+    return rows?.[0]?.role === 'admin';
+  },
 };
 
 // ---------- camelCase ⇄ snake_case mappers (for the edit form) ----------

@@ -49,6 +49,17 @@ export async function getSession(): Promise<SessionUser | null> {
   }
 }
 
+/** Raw CloudBase access token for server-side verification (Bearer). */
+export async function getAccessToken(): Promise<string | null> {
+  if (!auth) return null;
+  try {
+    const info = await auth.getAccessToken();
+    return info?.accessToken || null;
+  } catch {
+    return null;
+  }
+}
+
 /** Sign in with a username OR email plus password. */
 export async function signIn(account: string, password: string): Promise<SessionUser> {
   if (!auth) throw new Error('auth_unavailable');

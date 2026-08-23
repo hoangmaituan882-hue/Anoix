@@ -47,8 +47,8 @@ function mapSearchItem(m, mediaType) {
 
 export const tmdbRouter = express.Router();
 
-// GET /api/tmdb/search?q=&media_type=movie|tv|multi
-tmdbRouter.get('/api/tmdb/search', async (req, res, next) => {
+// GET /api/tmdb/search?q=&media_type=movie|tv|multi (mounted behind adminGate)
+tmdbRouter.get('/search', async (req, res, next) => {
   try {
     const q = String(req.query.q || '').trim();
     const mediaType = String(req.query.media_type || 'movie');
@@ -77,8 +77,8 @@ tmdbRouter.get('/api/tmdb/search', async (req, res, next) => {
   }
 });
 
-// GET /api/tmdb/detail/:id?media_type=movie|tv
-tmdbRouter.get('/api/tmdb/detail/:id', async (req, res, next) => {
+// GET /api/tmdb/detail/:id?media_type=movie|tv (mounted behind adminGate)
+tmdbRouter.get('/detail/:id', async (req, res, next) => {
   try {
     const id = req.params.id;
     const mediaType = String(req.query.media_type || 'movie');
