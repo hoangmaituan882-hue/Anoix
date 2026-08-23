@@ -12,6 +12,8 @@ import { NominationsPage } from './pages/NominationsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AuthPage } from './pages/AuthPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { PlazaPage } from './pages/PlazaPage';
+import { ActivityDrawer } from '../features/profile/ActivityDrawer';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
 import { NewsDetailModal } from '../features/news/NewsDetailModal';
@@ -155,6 +157,13 @@ const AppShell: React.FC = () => {
               <ProfilePage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
             }
           />
+          {/* Nomination plaza */}
+          <Route
+            path="/plaza"
+            element={
+              <PlazaPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
+            }
+          />
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -169,6 +178,9 @@ const AppShell: React.FC = () => {
           <ArrowUp className="w-5 h-5 stroke-[2.5]" />
         </button>
       </motion.div>
+
+      {/* Global activity drawer (my votes & nominations) */}
+      <ActivityDrawer />
 
       {/* --- MODALS --- */}
       <AnimatePresence>

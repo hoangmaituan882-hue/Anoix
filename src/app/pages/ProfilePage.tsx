@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language } from '../../types';
 import { AdminUser } from '../../types/user';
-import { me, MyVote } from '../../lib/me';
+import { me } from '../../lib/me';
+import { nominations, VoteActivity, NominationActivity } from '../../lib/nominations';
 import { getSession, signOut } from '../../lib/session';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
@@ -31,7 +32,7 @@ export const ProfilePage: React.FC<{
 
   const [profile, setProfile] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [votes, setVotes] = useState<MyVote[] | null>(null);
+  const [activity, setActivity] = useState<{ votes: VoteActivity[]; nominations: NominationActivity[] } | null>(null);
 
   const [form, setForm] = useState({ nickname: '', avatarUrl: '' });
   const [saving, setSaving] = useState(false);
@@ -39,16 +40,16 @@ export const ProfilePage: React.FC<{
   const [pwd, setPwd] = useState({ current: '', next: '', confirm: '' });
   const [changing, setChanging] = useState(false);
 
-  const loadVotes = useCallback(async () => {
+  const loadActivity = useCallback(async () => {
     try {
-      const data = await me.getVotes();
-      setVotes(data.votes ?? []);
+      const data = await nominations.activity();
+      setActivity({ votes: data.votes ?? [], nominations: data.nominations ?? [] });
     } catch {
-      setVotes([]);
+      setActivity({ votes: [], nominations: [] });
     }
   }, []);
 
-  useEffect(() => { void loadVotes(); }, [loadVotes]);
+  useEffect(() => { void loadActivity(); }, [loadActivity]);
 
   const load = useCallback(async () => {
     try {
@@ -219,40 +220,65 @@ export const ProfilePage: React.FC<{
                       </div>
                     </TabsContent>
 
-                    {/* Votes tab */}
-                    <TabsContent value="votes" className="space-y-3">
-                      {votes === null ? (
+                    {/* Votes & nominations tab */}
+                    <TabsContent value="votes" className="space-y-5">
+                      {activity === null ? (
                         <div className="py-8 flex justify-center">
                           <Loader variant="dots" size={24} label="加载投票记录" className="text-[#ff3650]" />
                         </div>
-                      ) : votes.length === 0 ? (
-                        <div className="py-12 text-center text-white/40">
-                          <Vote className="w-8 h-8 mx-auto mb-2 text-white/20" />
-                          <p className="text-sm font-bold">还没有投票记录</p>
-                          <p className="text-xs text-white/30 mt-1">登录后投票会自动绑定到你的账号</p>
-                        </div>
                       ) : (
-                        <div className="space-y-2.5">
-                          {votes.map((v) => (
-                            <div key={`${v.roundId}-${v.optionId}`} className="flex items-center gap-3 bg-black/30 border border-white/10 rounded-xl px-4 py-3">
-                              <Vote className="w-4 h-4 text-[#ff3650] shrink-0" />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm font-bold text-white truncate">{v.filmTitle}</p>
-                                <p className="text-xs text-white/40 truncate">{v.roundTitle}</p>
+                        <>
+                          <div>
+                            <h4 className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                              <Vote className="w-3.5 h-3.5 text-[#ff3650]" /> 我的投票
+                            </h4>
+                            {activity.votes.length === 0 ? (
+                              <p className="text-xs text-white/30 py-3">还没有投票记录</p>
+                            ) : (
+                              <div className="space-y-2">
+                                {activity.votes.map((v) => (
+                                  <div key={`${v.roundId}-${v.filmId}`} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${v.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30'}`}>
+                                    {v.image ? <img src={v.image} alt="" className="w-9 h-12 rounded-md object-cover shrink-0" /> : <Vote className="w-4 h-4 text-[#ff3650] shrink-0" />}
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm font-bold text-white truncate flex items-center gap-2">
+                                        {v.filmTitle}
+                                        {v.planned && <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/40">已通过</Badge>}
+                                      </p>
+                                      <p className="text-xs text-white/40 truncate">{v.roundTitle}</p>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                      {v.roundStatus === 'revealed' ? <Badge variant="secondary">已揭晓</Badge> : v.roundStatus === 'voting' ? <Badge>投票中</Badge> : <Badge variant="outline">收集中</Badge>}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                              <div className="text-right shrink-0">
-                                {v.roundStatus === 'revealed' ? (
-                                  <Badge variant="secondary">已揭晓</Badge>
-                                ) : v.roundStatus === 'voting' ? (
-                                  <Badge>投票中</Badge>
-                                ) : (
-                                  <Badge variant="outline">收集中</Badge>
-                                )}
-                                <p className="text-[10px] text-white/30 font-mono mt-1">{v.votedAt ? v.votedAt.slice(0, 10) : ''}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <h4 className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                              <KeyRound className="w-3.5 h-3.5 text-[#e0fe3d]" /> 我的提名
+                            </h4>
+                            {activity.nominations.length === 0 ? (
+                              <p className="text-xs text-white/30 py-3">还没有提名记录</p>
+                            ) : (
+                              <div className="space-y-2">
+                                {activity.nominations.map((n) => (
+                                  <div key={n.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${n.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30'}`}>
+                                    {n.image ? <img src={n.image} alt="" className="w-9 h-12 rounded-md object-cover shrink-0" /> : <Vote className="w-4 h-4 text-[#e0fe3d] shrink-0" />}
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm font-bold text-white truncate flex items-center gap-2">
+                                        {n.filmTitle}
+                                        {n.planned && <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/40">已通过</Badge>}
+                                      </p>
+                                      <p className="text-xs text-white/40 truncate">{n.note || n.roundTitle}</p>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                            )}
+                          </div>
+                        </>
                       )}
                     </TabsContent>
 

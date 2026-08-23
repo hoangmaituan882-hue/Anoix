@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
 } from '../ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '../ui/avatar';
+import { openActivityDrawer } from '../../features/profile/ActivityDrawer';
 
 interface HeaderProps {
   lang: Language;
@@ -141,6 +142,13 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               {lang === 'zh' ? '提名投票' : 'VOTE'}
             </button>
             <button
+              id="nav-plaza"
+              onClick={() => { setMobileMenuOpen(false); navigate('/plaza'); }}
+              className={pillItem}
+            >
+              {lang === 'zh' ? '提名广场' : 'PLAZA'}
+            </button>
+            <button
               id="nav-admin"
               onClick={() => { setMobileMenuOpen(false); navigate('/admin'); }}
               className="ml-1 inline-flex items-center gap-1.5 text-[#ff3650] hover:text-white bg-[#ff3650]/10 hover:bg-[#ff3650] rounded-full px-3.5 py-1.5 transition-colors duration-150 cursor-pointer whitespace-nowrap"
@@ -180,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
                     <UserRound className="text-[#ff3650]" /> 个人资料
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/profile?tab=votes')}>
+                  <DropdownMenuItem onClick={() => openActivityDrawer()}>
                     <Vote className="text-[#e0fe3d]" /> 我的投票
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/admin')}>

@@ -8,7 +8,9 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { Loader } from '../../components/motion/loader';
 import { getSession, getAccessToken, SessionUser } from '../../lib/session';
-import { ArrowLeft, Crown, Hourglass, PencilLine, Vote } from 'lucide-react';
+import { nominations, Quota } from '../../lib/nominations';
+import { NominateDialog } from '../../features/nominations/NominateDialog';
+import { ArrowLeft, Crown, Hourglass, PencilLine, Vote, Plus } from 'lucide-react';
 
 interface NominationsPageProps {
   lang: Language;
@@ -27,10 +29,12 @@ const authHeaders = async (): Promise<Record<string, string>> => {
 export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang, onOpenModal }) => {
   const navigate = useNavigate();
   const [rounds, setRounds] = useState<NominationRound[] | null>(null);
-  const [myVotes, setMyVotes] = useState<Record<string, number | null>>({});
+  const [myVotes, setMyVotes] = useState<Record<string, number[]>>({});
   const [votingOption, setVotingOption] = useState<number | null>(null);
   const [toast, setToast] = useState('');
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [quota, setQuota] = useState<Quota | null>(null);
+  const [nominateRound, setNominateRound] = useState<NominationRound | null>(null);
 
   // Display-only: show whose name appears on the vote. The actual ballot
   // identity is resolved server-side (verified token or signed cookie) and
@@ -50,7 +54,7 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
     try {
       const roundsRes = (await fetch(`${API_BASE}/api/nominations`).then((r) => r.json())) as NominationRound[];
       setRounds(roundsRes);
-      const votes: Record<string, number | null> = {};
+      const votes: Record<string, number[]> = {};
       await Promise.all(
         roundsRes
           .filter((r) => r.status === 'voting')
@@ -61,8 +65,8 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
                 headers: await authHeaders(),
               });
               const data = await res.json();
-              votes[r.id] = data.voted ? data.optionId : null;
-            } catch { votes[r.id] = null; }
+              votes[r.id] = data.optionIds ?? [];
+            } catch { votes[r.id] = []; }
           })
       );
       setMyVotes(votes);
@@ -72,7 +76,15 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
   }, []);
 
   useEffect(() => { void reload(); }, [reload]);
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => { void window.scrollTo(0, 0); }, []);
+
+  useEffect(() => {
+    let alive = true;
+    nominations.quota().then((q) => { if (alive) setQuota(q); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  const refreshQuota = () => { nominations.quota().then(setQuota).catch(() => {}); };
 
   const castVote = async (roundId: string, optionId: number) => {
     setVotingOption(optionId);
@@ -85,13 +97,16 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
         body: JSON.stringify({ roundId, optionId }),
       });
       if (res.status === 409) {
-        setToast(lang === 'zh' ? '你已经投过这一轮了' : 'You already voted in this round');
+        setToast(lang === 'zh' ? '你已经投过这部了' : 'You already voted for this film');
+      } else if (res.status === 429) {
+        setToast(lang === 'zh' ? '本周投票配额已用完' : 'Weekly vote quota reached');
       } else if (!res.ok) {
         setToast(lang === 'zh' ? '投票失败,请稍后再试' : 'Vote failed, try again later');
       } else {
         setToast(lang === 'zh' ? '投票成功,感谢参与!' : 'Vote cast — thank you!');
       }
       await reload();
+      refreshQuota();
     } catch {
       setToast(lang === 'zh' ? '网络错误,请稍后再试' : 'Network error, try again later');
     } finally {
@@ -150,6 +165,24 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
             )}
           </p>
 
+          {quota && (
+            <div className="mb-8 flex flex-wrap items-center gap-2 text-xs font-bold">
+              <span className="inline-flex items-center gap-1.5 bg-black/40 border border-white/15 rounded-full px-3 py-1.5 text-white/70">
+                <Plus className="w-3.5 h-3.5 text-[#ff3650]" />
+                {lang === 'zh' ? '提名' : 'Nominate'} {quota.nominationsUsed}/{quota.nominationsLimit}
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-black/40 border border-white/15 rounded-full px-3 py-1.5 text-white/70">
+                <Vote className="w-3.5 h-3.5 text-[#e0fe3d]" />
+                {lang === 'zh' ? '投票' : 'Votes'} {quota.votesUsed}/{quota.votesLimit}
+              </span>
+              {quota.kind === 'anon' && (
+                <button onClick={() => navigate('/auth?redirect=/nominations')} className="text-[#ff3650] hover:text-white underline underline-offset-2 cursor-pointer">
+                  {lang === 'zh' ? '登录可提名 3 部 / 投票 6 部' : 'Sign in for 3 nominations / 6 votes'}
+                </button>
+              )}
+            </div>
+          )}
+
           {toast && (
             <p className="mb-6 text-sm font-black text-[#f5ffe5] bg-[#ff3650]/15 border border-[#ff3650]/40 rounded-xl px-4 py-3">
               {toast}
@@ -173,8 +206,7 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
               )}
 
               {active.map((round) => {
-                const myOption = myVotes[round.id];
-                const voted = Boolean(myOption);
+                const myOptionIds = myVotes[round.id] ?? [];
                 return (
                   <section key={round.id} className="mb-12">
                     <div className="flex flex-wrap items-center gap-3 mb-1">
@@ -194,11 +226,21 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
                         </span>
                       )}
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-[#f5ffe5] mb-6">{round.title}</h2>
+                    <h2 className="text-2xl sm:text-3xl font-black text-[#f5ffe5] mb-4">{round.title}</h2>
+
+                    {round.status === 'collecting' && (
+                      <button
+                        onClick={() => setNominateRound(round)}
+                        disabled={quota !== null && quota.remainingNominations <= 0}
+                        className="mb-5 inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] disabled:opacity-40 text-white font-black text-sm px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-[#ff3650]/20"
+                      >
+                        <Plus className="w-4 h-4" /> {lang === 'zh' ? '我要提名' : 'Nominate a film'}
+                      </button>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {round.options.map((opt, i) => {
-                        const isMine = myOption === opt.id;
+                        const isMine = myOptionIds.includes(opt.id);
                         return (
                           <motion.div
                             key={opt.id}
@@ -233,14 +275,14 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
                             )}
                             <div className="p-3">
                               {round.status === 'voting' ? (
-                                voted ? (
-                                  <p className={`text-center text-sm font-black py-2 rounded-xl ${isMine ? 'bg-[#ff3650] text-white' : 'text-white/40'}`}>
-                                    {isMine ? `✓ ${lang === 'zh' ? '我的选择' : 'MY VOTE'}` : (lang === 'zh' ? '已投其他' : 'voted other')}
+                                isMine ? (
+                                  <p className="text-center text-sm font-black py-2 rounded-xl bg-[#ff3650] text-white">
+                                    ✓ {lang === 'zh' ? '已投' : 'VOTED'}
                                   </p>
                                 ) : (
                                   <button
                                     onClick={() => castVote(round.id, opt.id)}
-                                    disabled={votingOption !== null}
+                                    disabled={votingOption !== null || (quota !== null && quota.remainingVotes <= 0)}
                                     className="w-full inline-flex items-center justify-center gap-2 bg-[#f5ffe5] hover:bg-[#ff3650] text-[#121212] hover:text-white font-black text-sm py-2.5 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
                                   >
                                     <Vote className="w-4 h-4" />
@@ -298,6 +340,16 @@ export const NominationsPage: React.FC<NominationsPageProps> = ({ lang, setLang,
       </motion.main>
 
       <Footer lang={lang} />
+
+      {nominateRound && (
+        <NominateDialog
+          roundId={nominateRound.id}
+          roundTitle={nominateRound.title}
+          open
+          onClose={() => setNominateRound(null)}
+          onSubmitted={() => { refreshQuota(); void reload(); }}
+        />
+      )}
     </>
   );
 };

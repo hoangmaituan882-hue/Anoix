@@ -8,6 +8,7 @@ import { Loader } from '../../components/motion/loader';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/motion/select';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useToast } from '../../components/ui/Toast';
+import { getAccessToken } from '../../lib/session';
 
 const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
 const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
@@ -136,6 +137,7 @@ export const RoundsAdmin: React.FC = () => {
     
     const base = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
     let filmIds: string[] = [];
+    let winnerOptionIds: number[] = [];
 
     try {
       const res = await fetch(`${base}/api/nominations`);
@@ -146,6 +148,7 @@ export const RoundsAdmin: React.FC = () => {
       if (opts.length > 0) {
         const sorted = [...opts].sort((a, b) => b.votes_count - a.votes_count);
         filmIds = sorted.map((o) => o.film_id).filter((x): x is string => Boolean(x));
+        winnerOptionIds = sorted.map((o) => o.id);
       }
     } catch {
       // fallback to round options order
@@ -171,6 +174,16 @@ export const RoundsAdmin: React.FC = () => {
             film_ids: filmIds,
             recap: '根据社区选片轮次投票优胜结果特别展映。',
           });
+          // Mark winner options as "已通过" (planned into the screening plan)
+          const token = getAccessToken();
+          await Promise.all(
+            winnerOptionIds.map((id) =>
+              fetch(`${base}/api/admin/options/${id}/plan`, {
+                method: 'POST',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              }).catch(() => {}),
+            ),
+          );
           setError('');
           await reload();
           toastSuccess('已成功沉淀为放映会档案！可在「放映会档案」面板查看。');
