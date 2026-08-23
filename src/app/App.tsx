@@ -12,6 +12,7 @@ import { NominationsPage } from './pages/NominationsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AuthPage } from './pages/AuthPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { CalendarPage } from './pages/CalendarPage';
 import { ActivityDrawer } from '../features/profile/ActivityDrawer';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
@@ -158,6 +159,13 @@ const AppShell: React.FC = () => {
           />
           {/* Legacy plaza URL → merged nominations page */}
           <Route path="/plaza" element={<Navigate to="/nominations" replace />} />
+          {/* Calendar (future live schedule) */}
+          <Route
+            path="/calendar"
+            element={
+              <CalendarPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
+            }
+          />
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>

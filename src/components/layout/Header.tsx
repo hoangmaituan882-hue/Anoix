@@ -16,6 +16,7 @@ import {
 } from '../ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { openActivityDrawer } from '../../features/profile/ActivityDrawer';
+import { NotificationBell } from '../../features/community/NotificationBell';
 
 interface HeaderProps {
   lang: Language;
@@ -142,6 +143,13 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               {lang === 'zh' ? '提名' : 'VOTE'}
             </button>
             <button
+              id="nav-calendar"
+              onClick={() => { setMobileMenuOpen(false); navigate('/calendar', { viewTransition: true }); }}
+              className={pillItem}
+            >
+              {lang === 'zh' ? '日历' : 'LIVE'}
+            </button>
+            <button
               id="nav-admin"
               onClick={() => { setMobileMenuOpen(false); navigate('/admin', { viewTransition: true }); }}
               className="ml-1 inline-flex items-center gap-1.5 text-[#ff3650] hover:text-white bg-[#ff3650]/10 hover:bg-[#ff3650] rounded-full px-3.5 py-1.5 transition-colors duration-150 cursor-pointer whitespace-nowrap"
@@ -153,6 +161,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
 
           {/* Right Area: Theme + Account + Language + Hamburger */}
           <div className="flex items-center gap-2.5 justify-self-end">
+            <NotificationBell />
             <ThemeToggle />
             {user ? (
               <DropdownMenu>
@@ -276,6 +285,9 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             </button>
             <button onClick={() => { setMobileMenuOpen(false); navigate('/nominations', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">
               {lang === 'zh' ? '提名投票' : 'VOTE'}
+            </button>
+            <button onClick={() => { setMobileMenuOpen(false); navigate('/calendar', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">
+              {lang === 'zh' ? '放映日历' : 'LIVE'}
             </button>
             <button
               onClick={() => { setMobileMenuOpen(false); navigate('/admin', { viewTransition: true }); }}

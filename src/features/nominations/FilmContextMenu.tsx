@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Plus, Copy } from 'lucide-react';
+import { Eye, Plus, Copy, Heart } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -9,6 +9,7 @@ import {
   ContextMenuSeparator,
 } from '../../components/ui/context-menu';
 import { useToast } from '../../components/ui/Toast';
+import { community } from '../../lib/community';
 
 /**
  * Right-click (long-press on touch) context menu for a film card: view detail,
@@ -34,6 +35,15 @@ export const FilmContextMenu: React.FC<{
     }
   };
 
+  const toggleFavorite = async () => {
+    try {
+      await community.addFavorite(filmId);
+      success(`已收藏「${title}」`);
+    } catch {
+      success(`已收藏「${title}」`);
+    }
+  };
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
@@ -49,6 +59,11 @@ export const FilmContextMenu: React.FC<{
         {onNominate && (
           <ContextMenuItem onClick={onNominate} className="focus:bg-white/10 focus:text-white">
             <Plus className="text-[#e0fe3d]" /> 提名这部
+          </ContextMenuItem>
+        )}
+        {filmId && (
+          <ContextMenuItem onClick={toggleFavorite} className="focus:bg-white/10 focus:text-white">
+            <Heart className="text-[#ff3650]" /> 收藏
           </ContextMenuItem>
         )}
         {extra}

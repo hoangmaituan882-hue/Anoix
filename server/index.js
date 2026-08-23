@@ -784,6 +784,15 @@ app.post('/api/admin/pool/:id/promote', adminGate, async (req, res, next) => {
     }
     if (!fid) return res.status(400).json({ error: 'no_film' });
     await pgWrite('PATCH', `/nomination_pool?id=eq.${id}`, { status: 'promoted', film_id: fid, planned: true });
+    // Notify the nominator that their pick was approved into the library.
+    if (p.nominee_identity_id) {
+      await pgWrite('POST', '/notifications', {
+        uid: p.nominee_identity_id,
+        type: 'promoted',
+        title: '你的提名已通过',
+        body: `《${p.title}》已被管理员勾选入库`,
+      }).catch(() => {});
+    }
     res.json({ ok: true, filmId: fid });
   } catch (e) { next(e); }
 });
@@ -871,6 +880,109 @@ app.get('/api/admin/stats', adminGate, async (_req, res, next) => {
     });
 
     res.json({ nominations, votes: votesList });
+  } catch (e) { next(e); }
+});
+
+// ---- Notifications (list / mark read) ----
+app.get('/api/notifications', async (req, res, next) => {
+  try {
+    const ident = await resolveIdentity(req);
+    if (!ident) return res.json([]);
+    const rows = await pgGet(`/notifications?uid=eq.${encodeURIComponent(ident.identityId)}&select=*&order=created_at.desc&limit=50`);
+    res.json(rows ?? []);
+  } catch (e) { next(e); }
+});
+
+app.post('/api/notifications/read', async (req, res, next) => {
+  try {
+    const ident = await resolveIdentity(req);
+    if (!ident) return res.status(401).json({ error: 'identity_required' });
+    const { id } = req.body ?? {};
+    if (id != null) {
+      await pgWrite('PATCH', `/notifications?uid=eq.${encodeURIComponent(ident.identityId)}&id=eq.${Number(id)}`, { read: true });
+    } else {
+      await pgWrite('PATCH', `/notifications?uid=eq.${encodeURIComponent(ident.identityId)}`, { read: true });
+    }
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ---- Favorites (list / add / remove) ----
+app.get('/api/favorites', async (req, res, next) => {
+  try {
+    const ident = await resolveIdentity(req);
+    if (!ident) return res.json([]);
+    const rows = await pgGet(`/favorites?uid=eq.${encodeURIComponent(ident.identityId)}&select=*&order=created_at.desc`);
+    const ids = (rows ?? []).map((r) => r.film_id).filter(Boolean);
+    const films = ids.length
+      ? await pgGet(`/films?id=in.(${ids.map(encodeURIComponent).join(',')})&select=id,title,title_zh,title_en,year,category,image`)
+      : [];
+    res.json(films ?? []);
+  } catch (e) { next(e); }
+});
+
+app.post('/api/favorites', async (req, res, next) => {
+  try {
+    const ident = await resolveIdentity(req);
+    if (!ident) return res.status(401).json({ error: 'identity_required' });
+    const { filmId } = req.body ?? {};
+    if (!filmId) return res.status(400).json({ error: 'film_required' });
+    const [status] = await pgWrite('POST', '/favorites', { uid: ident.identityId, film_id: filmId });
+    if (status === 409) return res.json({ ok: true }); // already favorited
+    if (status >= 400) return res.status(502).json({ error: 'favorite_failed' });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+app.delete('/api/favorites/:filmId', async (req, res, next) => {
+  try {
+    const ident = await resolveIdentity(req);
+    if (!ident) return res.status(401).json({ error: 'identity_required' });
+    await pgWrite('DELETE', `/favorites?uid=eq.${encodeURIComponent(ident.identityId)}&film_id=eq.${encodeURIComponent(req.params.filmId)}`);
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ---- Calendar: future live-stream / screening schedule ----
+app.get('/api/calendar', async (_req, res, next) => {
+  try {
+    const [screenings, scheduled, films] = await Promise.all([
+      pgGet('/screenings?select=id,title,screen_date,venue,theme,film_ids&order=screen_date.asc'),
+      pgGet('/films?select=id,title,title_zh,title_en,image,year,screening_date&screening_status=eq.scheduled&order=screening_date.asc'),
+      pgGet('/films?select=id,title,title_zh,title_en,image,year'),
+    ]);
+    const filmMap = new Map((films || []).map((f) => [f.id, f]));
+    const events = [];
+    for (const s of screenings || []) {
+      if (!s.screen_date) continue;
+      events.push({
+        date: s.screen_date,
+        type: 'screening',
+        id: s.id,
+        title: s.title,
+        venue: s.venue || '',
+        theme: s.theme || '',
+        films: (s.film_ids || []).map((id) => {
+          const f = filmMap.get(id);
+          return { id, title: f ? (f.title_zh || f.title_en || f.title) : id, image: f?.image || '', year: f?.year || '' };
+        }),
+      });
+    }
+    for (const f of scheduled || []) {
+      if (!f.screening_date) continue;
+      events.push({
+        date: f.screening_date,
+        type: 'film',
+        id: f.id,
+        title: f.title_zh || f.title_en || f.title,
+        image: f.image || '',
+        year: f.year || '',
+        venue: '',
+        theme: '',
+        films: [],
+      });
+    }
+    res.json({ events });
   } catch (e) { next(e); }
 });
 

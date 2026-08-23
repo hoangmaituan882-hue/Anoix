@@ -5,6 +5,7 @@ import { Language } from '../../types';
 import { AdminUser } from '../../types/user';
 import { me } from '../../lib/me';
 import { nominations, VoteActivity, NominationActivity } from '../../lib/nominations';
+import { community, FavoriteFilm } from '../../lib/community';
 import { getSession, signOut } from '../../lib/session';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
@@ -19,7 +20,7 @@ import { Separator } from '../../components/ui/separator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
-import { ArrowLeft, Mail, Calendar, Shield, KeyRound, UserRound, Save, Vote } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, Shield, KeyRound, UserRound, Save, Vote, Heart, X } from 'lucide-react';
 
 export const ProfilePage: React.FC<{
   lang: Language;
@@ -33,6 +34,7 @@ export const ProfilePage: React.FC<{
   const [profile, setProfile] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [activity, setActivity] = useState<{ votes: VoteActivity[]; nominations: NominationActivity[] } | null>(null);
+  const [favorites, setFavorites] = useState<FavoriteFilm[] | null>(null);
 
   const [form, setForm] = useState({ nickname: '', avatarUrl: '' });
   const [saving, setSaving] = useState(false);
@@ -50,6 +52,18 @@ export const ProfilePage: React.FC<{
   }, []);
 
   useEffect(() => { void loadActivity(); }, [loadActivity]);
+
+  const loadFavorites = useCallback(async () => {
+    try { setFavorites(await community.favorites()); }
+    catch { setFavorites([]); }
+  }, []);
+
+  useEffect(() => { void loadFavorites(); }, [loadFavorites]);
+
+  const removeFavorite = async (filmId: string) => {
+    try { await community.removeFavorite(filmId); void loadFavorites(); }
+    catch (e) { toastError(e instanceof Error ? e.message : '移除失败'); }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -197,6 +211,7 @@ export const ProfilePage: React.FC<{
                     <TabsList className="w-full sm:w-auto">
                       <TabsTrigger value="profile" className="flex-1 sm:flex-none">资料</TabsTrigger>
                       <TabsTrigger value="votes" className="flex-1 sm:flex-none">我的投票</TabsTrigger>
+                      <TabsTrigger value="favorites" className="flex-1 sm:flex-none">收藏</TabsTrigger>
                       <TabsTrigger value="security" className="flex-1 sm:flex-none">安全</TabsTrigger>
                     </TabsList>
 
@@ -279,6 +294,36 @@ export const ProfilePage: React.FC<{
                             )}
                           </div>
                         </>
+                      )}
+                    </TabsContent>
+
+                    {/* Favorites tab */}
+                    <TabsContent value="favorites" className="space-y-3">
+                      {favorites === null ? (
+                        <div className="py-8 flex justify-center">
+                          <Loader variant="dots" size={24} label="加载收藏" className="text-[#ff3650]" />
+                        </div>
+                      ) : favorites.length === 0 ? (
+                        <div className="py-12 text-center text-white/40">
+                          <Heart className="w-8 h-8 mx-auto mb-2 text-white/20" />
+                          <p className="text-sm font-bold">还没有收藏</p>
+                          <p className="text-xs text-white/30 mt-1">在作品上右键「收藏」即可添加</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {favorites.map((f) => (
+                            <div key={f.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5">
+                              {f.image ? <img src={f.image} alt="" className="w-10 h-14 rounded-md object-cover shrink-0" /> : <div className="w-10 h-14 rounded-md bg-white/5 shrink-0" />}
+                              <button onClick={() => navigate(`/films/${f.id}`)} className="min-w-0 flex-1 text-left group">
+                                <p className="text-sm font-bold text-white truncate group-hover:text-[#ff3650] transition-colors">{f.title_zh || f.title_en || f.title}</p>
+                                <p className="text-xs text-white/40">{f.year}{f.category ? ` · ${f.category}` : ''}</p>
+                              </button>
+                              <button onClick={() => removeFavorite(f.id)} className="shrink-0 w-8 h-8 rounded-lg bg-white/5 hover:bg-[#ff3650] text-white/50 hover:text-white inline-flex items-center justify-center transition-colors cursor-pointer" title="取消收藏">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </TabsContent>
 
