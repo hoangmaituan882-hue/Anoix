@@ -11,6 +11,7 @@ import { HistoryPage } from './pages/HistoryPage';
 import { NominationsPage } from './pages/NominationsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AuthPage } from './pages/AuthPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
 import { NewsDetailModal } from '../features/news/NewsDetailModal';
@@ -147,6 +148,13 @@ const AppShell: React.FC = () => {
           <Route path="/admin" element={<AdminPage />} />
           {/* Account — login + email self-registration */}
           <Route path="/auth" element={<AuthPage />} />
+          {/* Personal profile */}
+          <Route
+            path="/profile"
+            element={
+              <ProfilePage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
+            }
+          />
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>

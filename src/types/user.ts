@@ -3,6 +3,11 @@ export interface AdminUser {
   username: string;
   email: string;
   nickname: string;
+  gender: string;
+  avatarUrl: string;
+  country: string;
+  province: string;
+  city: string;
   isAnonymous: boolean;
   disabled: boolean;
   hasPassword: boolean;

@@ -284,6 +284,40 @@ async function callerRole(accessToken) {
   }
 }
 
+/** Extract the `sub` (uid) from a JWT payload without signature checks. */
+function decodeJwtSub(token) {
+  try {
+    const parts = String(token).split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    return payload.sub || payload.uid || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolve the caller's uid + role. The token is first VERIFIED by the PG
+ * gateway (a forged token is rejected with 401); only then is the JWT `sub`
+ * decoded — so the returned uid is trustworthy. Any authenticated user is
+ * supported (not just admins).
+ */
+async function callerIdentity(accessToken) {
+  if (!accessToken) return null;
+  try {
+    const r = await fetch(`${PG_BASE}/user_roles?select=uid,role&limit=1`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!r.ok) return null; // invalid/expired token
+    const rows = await r.json();
+    const uid = decodeJwtSub(accessToken);
+    if (!uid) return null;
+    return { uid, role: rows?.[0]?.role ?? 'user' };
+  } catch {
+    return null;
+  }
+}
+
 // ---- Admin-only gate (verified role + rate limit). Used by TMDB proxy and
 // user management endpoints. ----
 async function adminGate(req, res, next) {
@@ -307,6 +341,11 @@ const mapUser = (u, roleMap) => ({
   username: u.UserName || '',
   email: u.Email || '',
   nickname: u.NickName || '',
+  gender: u.Gender || '',
+  avatarUrl: u.AvatarUrl || '',
+  country: u.Country || '',
+  province: u.Province || '',
+  city: u.City || '',
   isAnonymous: Boolean(u.IsAnonymous),
   disabled: Boolean(u.IsDisabled),
   hasPassword: Boolean(u.HasPassword),
@@ -379,6 +418,80 @@ app.delete('/api/admin/users/:uid', adminGate, async (req, res, next) => {
     const uid = req.params.uid;
     await pgWrite('DELETE', `/user_roles?uid=eq.${encodeURIComponent(uid)}`);
     await tcRequest('DeleteEndUser', { EnvId: ENV_ID, UserList: [uid] });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ---- Self profile (verified token → own uid; never trusts a client uid) ----
+const pickField = (v, max) => (typeof v === 'string' ? v.slice(0, max) : undefined);
+
+app.get('/api/me', async (req, res, next) => {
+  try {
+    const authz = req.headers.authorization || '';
+    if (!authz.startsWith('Bearer ')) return res.status(401).json({ error: 'unauthorized' });
+    const ident = await callerIdentity(authz.slice(7).trim());
+    if (!ident) return res.status(401).json({ error: 'unauthorized' });
+    const resp = await tcRequest('DescribeEndUsers', { EnvId: ENV_ID, Limit: 100, Offset: 0 });
+    const u = (resp.Users || []).find((x) => x.UUId === ident.uid);
+    if (!u) return res.status(404).json({ error: 'user_not_found' });
+    res.json(mapUser(u, new Map([[ident.uid, ident.role]])));
+  } catch (e) { next(e); }
+});
+
+app.patch('/api/me', async (req, res, next) => {
+  try {
+    const authz = req.headers.authorization || '';
+    if (!authz.startsWith('Bearer ')) return res.status(401).json({ error: 'unauthorized' });
+    const ident = await callerIdentity(authz.slice(7).trim());
+    if (!ident) return res.status(401).json({ error: 'unauthorized' });
+    const { nickname, gender, avatarUrl, country, province, city } = req.body ?? {};
+    const Data = [];
+    if (pickField(nickname, 64) !== undefined) Data.push({ Key: 'Name', Value: pickField(nickname, 64) });
+    if (pickField(gender, 16) !== undefined) Data.push({ Key: 'Gender', Value: pickField(gender, 16) });
+    if (pickField(avatarUrl, 1024) !== undefined) Data.push({ Key: 'AvatarUrl', Value: pickField(avatarUrl, 1024) });
+    if (pickField(country, 64) !== undefined) Data.push({ Key: 'Country', Value: pickField(country, 64) });
+    if (pickField(province, 64) !== undefined) Data.push({ Key: 'Province', Value: pickField(province, 64) });
+    if (pickField(city, 64) !== undefined) Data.push({ Key: 'City', Value: pickField(city, 64) });
+    if (Data.length) {
+      await tcRequest('ModifyEndUserInfo', { EnvId: ENV_ID, UUId: ident.uid, Data });
+    }
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+async function verifyUserPassword(username, password) {
+  try {
+    const r = await fetch(`https://${ENV_ID}.api.tcloudbasegateway.com/auth/v1/signin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!r.ok) return false;
+    const j = await r.json();
+    return Boolean(j.access_token || j.accessToken);
+  } catch {
+    return false;
+  }
+}
+
+app.post('/api/me/password', async (req, res, next) => {
+  try {
+    const authz = req.headers.authorization || '';
+    if (!authz.startsWith('Bearer ')) return res.status(401).json({ error: 'unauthorized' });
+    const ident = await callerIdentity(authz.slice(7).trim());
+    if (!ident) return res.status(401).json({ error: 'unauthorized' });
+    const { currentPassword, newPassword } = req.body ?? {};
+    if (typeof currentPassword !== 'string' || typeof newPassword !== 'string' || newPassword.length < 6) {
+      return res.status(400).json({ error: 'bad_request' });
+    }
+    const resp = await tcRequest('DescribeEndUsers', { EnvId: ENV_ID, Limit: 100, Offset: 0 });
+    const u = (resp.Users || []).find((x) => x.UUId === ident.uid);
+    const username = u?.UserName;
+    if (!username) return res.status(400).json({ error: 'no_username_account' });
+    if (!(await verifyUserPassword(username, currentPassword))) {
+      return res.status(401).json({ error: 'wrong_current_password' });
+    }
+    await tcRequest('ModifyEndUserAccount', { EnvId: ENV_ID, Uuid: ident.uid, Password: newPassword });
     res.json({ ok: true });
   } catch (e) { next(e); }
 });

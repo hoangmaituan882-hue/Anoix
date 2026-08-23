@@ -3,9 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { TriggerLogo } from '../ui/TriggerLogo';
 import { Language } from '../../types';
 import { I18N } from '../../data/triggerData';
-import { Menu, X, Lock, User } from 'lucide-react';
+import { Menu, X, Lock, User, LogOut, UserRound } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
-import { getSession, SessionUser } from '../../lib/session';
+import { getSession, signOut, SessionUser } from '../../lib/session';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '../ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 
 interface HeaderProps {
   lang: Language;
@@ -144,21 +153,56 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
           {/* Right Area: Theme + Account + Language + Hamburger */}
           <div className="flex items-center gap-2.5 justify-self-end">
             <ThemeToggle />
-            <button
-              id="account_button"
-              onClick={() => navigate(user ? '/auth' : '/auth')}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition-colors cursor-pointer whitespace-nowrap ${
-                user
-                  ? 'text-[#f5ffe5] bg-white/10 hover:bg-white/20'
-                  : 'text-[#ff3650] bg-[#ff3650]/10 hover:bg-[#ff3650] hover:text-white'
-              }`}
-              title={user ? user.name : lang === 'zh' ? '登录 / 注册' : 'Sign in'}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline max-w-[90px] truncate">
-                {user ? user.name : lang === 'zh' ? '登录' : 'SIGN IN'}
-              </span>
-            </button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    id="account_button"
+                    className="inline-flex items-center gap-2 rounded-full pl-1 pr-3 py-1 text-xs font-black transition-colors cursor-pointer whitespace-nowrap text-[#f5ffe5] bg-white/10 hover:bg-white/20 outline-none focus-visible:ring-2 focus-visible:ring-[#ff3650]"
+                    title={user.name}
+                  >
+                    <Avatar className="h-7 w-7">
+                      <AvatarFallback className="bg-[#ff3650]/25 text-[#ff3650] text-xs font-black">
+                        {user.name.slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden sm:inline max-w-[90px] truncate">{user.name}</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuLabel>
+                    <span className="block text-sm font-bold">{user.name}</span>
+                    <span className="block text-xs text-muted-foreground font-normal truncate">
+                      {user.email || user.username || user.uid}
+                    </span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <UserRound className="text-[#ff3650]" /> 个人资料
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin')}>
+                    <Lock className="text-[#e0fe3d]" /> 管理后台
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={async () => { await signOut(); navigate('/', { replace: true }); }}
+                    className="text-[#ff3650] focus:text-[#ff3650]"
+                  >
+                    <LogOut /> 退出登录
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <button
+                id="account_button"
+                onClick={() => navigate('/auth')}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition-colors cursor-pointer whitespace-nowrap text-[#ff3650] bg-[#ff3650]/10 hover:bg-[#ff3650] hover:text-white"
+                title={lang === 'zh' ? '登录 / 注册' : 'Sign in'}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{lang === 'zh' ? '登录' : 'SIGN IN'}</span>
+              </button>
+            )}
             <div className="flex items-center bg-white/10 rounded-full p-0.5 text-xs font-bold text-white/80">
               <button
                 id="lang-ja"

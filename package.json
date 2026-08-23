@@ -12,7 +12,12 @@
   },
   "dependencies": {
     "@cloudbase/js-sdk": "^3.8.1",
+    "@radix-ui/react-avatar": "^1.1.7",
+    "@radix-ui/react-dropdown-menu": "^2.1.12",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tabs": "^1.1.9",
     "@google/genai": "^2.4.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
