@@ -21,14 +21,17 @@ import { RecruitModal } from '../features/about/RecruitModal';
 import { ContactModal } from '../features/about/ContactModal';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
 import { ArrowUp } from 'lucide-react';
+import { ToastProvider } from '../components/ui/Toast';
 
 export default function App() {
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#121212] text-[#f5ffe5] font-sans selection:bg-[#ff3650] selection:text-white">
-      <BrowserRouter>
-        <AppShell />
-      </BrowserRouter>
-    </div>
+    <ToastProvider>
+      <div className="relative min-h-screen overflow-x-clip bg-[#121212] text-[#f5ffe5] font-sans selection:bg-[#ff3650] selection:text-white">
+        <BrowserRouter>
+          <AppShell />
+        </BrowserRouter>
+      </div>
+    </ToastProvider>
   );
 }
 

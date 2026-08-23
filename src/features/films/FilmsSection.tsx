@@ -4,6 +4,7 @@ import { WorkItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { repository, useRepo } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
+import { ExpandArrow } from '../../components/motion/ExpandArrow';
 import { ArrowRight, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 interface FilmsSectionProps {
@@ -216,8 +217,8 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
               <span className="label font-extrabold tracking-widest">
                 {t.allWorks}
               </span>
-              <span className="w-7 h-7 rounded-full bg-[#121212] text-[#f5ffe5] group-hover/btn:bg-white group-hover/btn:text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-1 duration-200">
-                <ArrowRight className="w-4 h-4" />
+              <span className="w-7 h-7 rounded-full bg-[#121212] text-[#f5ffe5] group-hover/btn:bg-white group-hover/btn:text-[#ff3650] flex items-center justify-center">
+                <ExpandArrow className="w-4 h-4" />
               </span>
             </button>
           </div>

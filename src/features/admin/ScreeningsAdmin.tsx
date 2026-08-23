@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { adminFilms, adminScreenings, ScreeningRow, FilmRow } from '../../lib/pgAdmin';
 import { Plus, Save, Trash2, X, Calendar, MapPin, Film, Sparkles, Search, Edit3, AlertCircle, Video } from 'lucide-react';
 import { Loader } from '../../components/motion/loader';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
 const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
@@ -15,6 +16,7 @@ export const ScreeningsAdmin: React.FC = () => {
   const [editing, setEditing] = useState<ScreeningRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState('');
+  const [confirm, setConfirm] = useState<{ title: string; desc?: string; action: () => void } | null>(null);
 
   const reload = useCallback(async () => {
     setError('');
@@ -30,14 +32,19 @@ export const ScreeningsAdmin: React.FC = () => {
 
   useEffect(() => { void reload(); }, [reload]);
 
-  const remove = async (id: string, title: string) => {
-    if (!window.confirm(`确认删除放映会「${title}」?`)) return;
-    try {
-      await adminScreenings.remove(id);
-      await reload();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '删除失败');
-    }
+  const remove = (id: string, title: string) => {
+    setConfirm({
+      title: `确认删除放映会「${title}」?`,
+      desc: '此操作不可恢复。',
+      action: async () => {
+        try {
+          await adminScreenings.remove(id);
+          await reload();
+        } catch (e) {
+          setError(e instanceof Error ? e.message : '删除失败');
+        }
+      },
+    });
   };
 
   const filteredRows = useMemo(() => {
@@ -213,6 +220,14 @@ export const ScreeningsAdmin: React.FC = () => {
           onSaved={() => { setEditing(null); void reload(); }}
         />
       )}
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title ?? ''}
+        description={confirm?.desc}
+        onConfirm={() => confirm?.action()}
+        onClose={() => setConfirm(null)}
+      />
     </div>
   );
 };

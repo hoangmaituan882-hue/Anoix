@@ -4,6 +4,7 @@ import { WorkItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { repository, useRepo } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
+import { TiltCard } from '../../components/motion/TiltCard';
 import { X, Play, Filter, Search, Sparkles, Film, ArrowUpDown } from 'lucide-react';
 
 interface FilmsLibraryModalProps {
@@ -217,9 +218,11 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                         ease: TRIGGER_EASE,
                         layout: { duration: 0.35, ease: TRIGGER_EASE },
                       }}
-                      onClick={() => onSelectWork(work)}
-                      className="group/item cursor-pointer flex flex-col bg-[#222222] rounded-2xl overflow-hidden border border-white/10 hover:border-[#ff3650] transition-colors duration-300 transform hover:-translate-y-1.5 hover:shadow-[0_12px_30px_rgba(255,54,80,0.25)]"
                     >
+                      <TiltCard
+                        onClick={() => onSelectWork(work)}
+                        className="group/item cursor-pointer flex flex-col bg-[#222222] rounded-2xl overflow-hidden border border-white/10 hover:border-[#ff3650] hover:shadow-[0_12px_30px_rgba(255,54,80,0.25)] transition-colors duration-300"
+                      >
                       <div className="relative aspect-[27/40] overflow-hidden bg-black/40">
                         <img
                           src={work.image}
@@ -262,6 +265,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                           )}
                         </div>
                       </div>
+                      </TiltCard>
                     </motion.div>
                   ))}
                 </AnimatePresence>

@@ -11,6 +11,8 @@ import { ScreeningsAdmin } from '../../features/admin/ScreeningsAdmin';
 import { RoundsAdmin } from '../../features/admin/RoundsAdmin';
 import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
 import {
   ArrowLeft,
   LogOut,
@@ -463,6 +465,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'TV Series' | 'Movie' | 'Original Animation'>('all');
   const [tmdbOpen, setTmdbOpen] = useState(false);
+  const [confirm, setConfirm] = useState<{ title: string; desc?: string; action: () => void } | null>(null);
 
   const reload = useCallback(async () => {
     setError('');
@@ -478,18 +481,23 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
 
   useEffect(() => { void reload(); }, [reload]);
 
-  const remove = async (id: string, title: string) => {
-    if (!window.confirm(`确认删除《${title}》?此操作不可恢复。`)) return;
-    setBusy(true);
-    try {
-      await adminFilms.remove(id);
-      await reload();
-      void repository.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '删除失败');
-    } finally {
-      setBusy(false);
-    }
+  const remove = (id: string, title: string) => {
+    setConfirm({
+      title: `确认删除《${title}》?`,
+      desc: '此操作不可恢复。',
+      action: async () => {
+        setBusy(true);
+        try {
+          await adminFilms.remove(id);
+          await reload();
+          void repository.refresh();
+        } catch (e) {
+          setError(e instanceof Error ? e.message : '删除失败');
+        } finally {
+          setBusy(false);
+        }
+      },
+    });
   };
 
   const filteredRows = useMemo(() => {
@@ -532,7 +540,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
               WORKS REPOSITORY
             </span>
             <span className="bg-white/10 text-white/80 px-2 py-0.5 rounded-full text-xs font-mono font-bold">
-              {rows.length} 部作品
+              <AnimatedNumber value={rows.length} /> 部作品
             </span>
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight uppercase">TRIGGER 动画作品管理</h2>
@@ -770,6 +778,14 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
           onSelect={(work) => { setTmdbOpen(false); setEditing(work); }}
         />
       )}
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title ?? ''}
+        description={confirm?.desc}
+        onConfirm={() => confirm?.action()}
+        onClose={() => setConfirm(null)}
+      />
     </div>
   );
 };
@@ -1049,6 +1065,7 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
   const [busy, setBusy] = useState(false);
   const [filterCat, setFilterCat] = useState<'all' | 'Info' | 'Event' | 'Goods' | 'Media'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [confirm, setConfirm] = useState<{ title: string; desc?: string; action: () => void } | null>(null);
 
   const reload = useCallback(async () => {
     setError('');
@@ -1127,15 +1144,20 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
     }
   };
 
-  const remove = async (id: string) => {
-    if (!window.confirm('确认删除这条官方公告?')) return;
-    try {
-      await adminNews.remove(id);
-      await reload();
-      void repository.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '删除失败');
-    }
+  const remove = (id: string) => {
+    setConfirm({
+      title: '确认删除这条官方公告?',
+      desc: '此操作不可恢复。',
+      action: async () => {
+        try {
+          await adminNews.remove(id);
+          await reload();
+          void repository.refresh();
+        } catch (e) {
+          setError(e instanceof Error ? e.message : '删除失败');
+        }
+      },
+    });
   };
 
   const filteredNews = useMemo(() => {
@@ -1431,6 +1453,14 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title ?? ''}
+        description={confirm?.desc}
+        onConfirm={() => confirm?.action()}
+        onClose={() => setConfirm(null)}
+      />
     </div>
   );
 };

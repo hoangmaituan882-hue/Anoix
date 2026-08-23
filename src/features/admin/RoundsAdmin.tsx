@@ -6,6 +6,8 @@ import {
 import { ArchiveRestore, Plus, Trash2, Vote, Sparkles, CheckCircle2, Clock, PlayCircle, AlertCircle, Film, User, Layers, Search } from 'lucide-react';
 import { Loader } from '../../components/motion/loader';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/motion/select';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { useToast } from '../../components/ui/Toast';
 
 const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
 const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
@@ -48,6 +50,8 @@ export const RoundsAdmin: React.FC = () => {
   const [newRound, setNewRound] = useState({ id: '', title: '', deadline: '' });
   const [optionDraft, setOptionDraft] = useState<{ roundId: string; filmId: string; nominator: string } | null>(null);
   const [filmSearch, setFilmSearch] = useState('');
+  const [confirm, setConfirm] = useState<{ title: string; desc?: string; action: () => void } | null>(null);
+  const { success: toastSuccess } = useToast();
 
   const reload = useCallback(async () => {
     setError('');
@@ -84,20 +88,25 @@ export const RoundsAdmin: React.FC = () => {
     }
   };
 
-  const advanceStatus = async (round: RoundRow) => {
+  const advanceStatus = (round: RoundRow) => {
     const next = NEXT_STATUS[round.status];
     if (!next) return;
     const label = next === 'voting' ? '开启全网投票(访客将可进行投票)' : '正式公布结果(锁定投票并揭晓头名)';
-    if (!window.confirm(`确认${label}?`)) return;
-    setBusy(true);
-    try {
-      await adminRounds.update(round.id, { status: next });
-      await reload();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '状态流转失败');
-    } finally {
-      setBusy(false);
-    }
+    setConfirm({
+      title: `确认${label}?`,
+      action: async () => {
+        setBusy(true);
+        try {
+          await adminRounds.update(round.id, { status: next });
+          await reload();
+          toastSuccess(next === 'voting' ? '投票已开启' : '结果已公布');
+        } catch (e) {
+          setError(e instanceof Error ? e.message : '状态流转失败');
+        } finally {
+          setBusy(false);
+        }
+      },
+    });
   };
 
   const addOption = async () => {
@@ -147,26 +156,31 @@ export const RoundsAdmin: React.FC = () => {
       filmIds = roundOptions.map((o) => o.film_id).filter((x): x is string => Boolean(x));
     }
 
-    if (!window.confirm(`确认将「${round.title}」沉淀为放映会档案?\n片单:${filmIds.join(', ')}`)) return;
-    setBusy(true);
-    try {
-      await adminScreenings.create({
-        id: `screening-${Date.now()}`,
-        title: round.title,
-        screen_date: new Date().toISOString().slice(0, 10),
-        venue: '待定场地',
-        theme: '选片优胜展映',
-        film_ids: filmIds,
-        recap: '根据社区选片轮次投票优胜结果特别展映。',
-      });
-      setError('');
-      await reload();
-      alert('已成功沉淀为放映会档案！可在「放映会档案」面板查看。');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '沉淀失败');
-    } finally {
-      setBusy(false);
-    }
+    setConfirm({
+      title: `确认将「${round.title}」沉淀为放映会档案?`,
+      desc: `片单:${filmIds.join(', ')}`,
+      action: async () => {
+        setBusy(true);
+        try {
+          await adminScreenings.create({
+            id: `screening-${Date.now()}`,
+            title: round.title,
+            screen_date: new Date().toISOString().slice(0, 10),
+            venue: '待定场地',
+            theme: '选片优胜展映',
+            film_ids: filmIds,
+            recap: '根据社区选片轮次投票优胜结果特别展映。',
+          });
+          setError('');
+          await reload();
+          toastSuccess('已成功沉淀为放映会档案！可在「放映会档案」面板查看。');
+        } catch (e) {
+          setError(e instanceof Error ? e.message : '沉淀失败');
+        } finally {
+          setBusy(false);
+        }
+      },
+    });
   };
 
   if (rounds === null) {
@@ -490,6 +504,14 @@ export const RoundsAdmin: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title ?? ''}
+        description={confirm?.desc}
+        onConfirm={() => confirm?.action()}
+        onClose={() => setConfirm(null)}
+      />
     </div>
   );
 };
