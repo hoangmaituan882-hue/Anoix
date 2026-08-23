@@ -5,6 +5,8 @@ import { I18N } from '../../data/triggerData';
 import { repository, useRepo } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { ExpandArrow } from '../../components/motion/ExpandArrow';
+import { TextAnimation } from '../../components/motion/TextAnimation';
+import { Tooltip } from '../../components/motion/Tooltip';
 import { ArrowRight, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 interface FilmsSectionProps {
@@ -120,7 +122,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
                 fontFamily: "'Anton', 'Montserrat', sans-serif"
               }}
             >
-              WORKS
+              {introStarted ? <TextAnimation text="WORKS" stagger={0.05} /> : ''}
             </motion.h2>
           </div>
 
@@ -180,20 +182,24 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
             </div>
 
             {/* Slider Navigation Arrow Floating Buttons */}
-            <button
-              onClick={() => scrollBy(-260)}
-              className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/80 border border-white/20 text-white items-center justify-center opacity-0 group-hover/list:opacity-100 transition-opacity hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl z-10 cursor-pointer"
-              aria-label="Previous Work"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => scrollBy(260)}
-              className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/80 border border-white/20 text-white items-center justify-center opacity-0 group-hover/list:opacity-100 transition-opacity hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl z-10 cursor-pointer"
-              aria-label="Next Work"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+            <Tooltip label={lang === 'zh' ? '上一个' : 'Previous'} wrapperClassName="absolute -left-4 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/list:opacity-100 transition-opacity">
+              <button
+                onClick={() => scrollBy(-260)}
+                className="hidden md:flex w-10 h-10 rounded-full bg-black/80 border border-white/20 text-white items-center justify-center hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl cursor-pointer"
+                aria-label="Previous Work"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            </Tooltip>
+            <Tooltip label={lang === 'zh' ? '下一个' : 'Next'} wrapperClassName="absolute -right-4 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/list:opacity-100 transition-opacity">
+              <button
+                onClick={() => scrollBy(260)}
+                className="hidden md:flex w-10 h-10 rounded-full bg-black/80 border border-white/20 text-white items-center justify-center hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl cursor-pointer"
+                aria-label="Next Work"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </Tooltip>
           </div>
 
           {/* Custom Horizontal Scrollbar Track */}

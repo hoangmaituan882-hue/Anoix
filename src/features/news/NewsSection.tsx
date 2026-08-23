@@ -2,6 +2,7 @@ import React from 'react';
 import { NewsItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { repository, useRepo } from '../../lib/repository';
+import { Marquee } from '../../components/motion/Marquee';
 import { ArrowRight, Tag } from 'lucide-react';
 
 interface NewsSectionProps {
@@ -44,6 +45,21 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
           </h2>
           <div className="w-16 h-1.5 bg-white mt-3 rounded-full" />
         </div>
+
+        {/* Latest news ticker */}
+        {news.length > 0 && (
+          <div className="mb-10 border-y border-white/15 py-3 overflow-hidden">
+            <Marquee duration={26} pauseOnHover>
+              {news.map((item) => (
+                <span key={item.id} className="inline-flex items-center gap-2 px-5 text-sm font-bold text-white/90 whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />
+                  <span className="font-mono text-xs text-white/60">{item.date}</span>
+                  <span>{lang === 'zh' && item.titleZh ? item.titleZh : item.title}</span>
+                </span>
+              ))}
+            </Marquee>
+          </div>
+        )}
 
         {/* News List */}
         <div className="news_list divide-y divide-white/20 border-t border-b border-white/20">

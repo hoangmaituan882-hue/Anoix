@@ -22,6 +22,7 @@ import { ContactModal } from '../features/about/ContactModal';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
 import { ArrowUp } from 'lucide-react';
 import { ToastProvider } from '../components/ui/Toast';
+import { NotFound } from '../components/ui/NotFound';
 
 export default function App() {
   return (
@@ -146,6 +147,8 @@ const AppShell: React.FC = () => {
           <Route path="/admin" element={<AdminPage />} />
           {/* Account — login + email self-registration */}
           <Route path="/auth" element={<AuthPage />} />
+          {/* 404 fallback */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
 
         {/* Floating Scroll-to-Top Button */}

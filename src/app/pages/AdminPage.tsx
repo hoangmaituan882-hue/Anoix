@@ -13,6 +13,9 @@ import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
+import { Switch } from '../../components/motion/Switch';
+import { CommandPalette, CommandItem } from '../../components/ui/CommandPalette';
+import { Command as CmdIcon } from 'lucide-react';
 import {
   ArrowLeft,
   LogOut,
@@ -306,11 +309,24 @@ const AdminPanel: React.FC<{ onSignOut: () => void; isTempAdmin?: boolean }> = (
   const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds'>('films');
   const [filmsCount, setFilmsCount] = useState<number>(0);
   const [newsCount, setNewsCount] = useState<number>(0);
+  const [cmdOpen, setCmdOpen] = useState(false);
 
   useEffect(() => {
     // Initial fetch counts for badges
     void adminFilms.list().then((res) => res && setFilmsCount(res.length)).catch(() => {});
     void adminNews.list().then((res) => res && setNewsCount(res.length)).catch(() => {});
+  }, []);
+
+  // Ctrl/Cmd+K opens the command palette
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCmdOpen((o) => !o);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   const signOut = async () => {
@@ -337,6 +353,22 @@ const AdminPanel: React.FC<{ onSignOut: () => void; isTempAdmin?: boolean }> = (
     { key: 'news', label: '动态与公告', en: 'NEWS', icon: Newspaper, count: newsCount },
     { key: 'screenings', label: '放映会档案', en: 'SCREENINGS', icon: Calendar },
     { key: 'rounds', label: '选片与投票', en: 'VOTING', icon: Vote },
+  ];
+
+  const commands: CommandItem[] = [
+    ...TABS.map((t) => ({
+      id: `tab-${t.key}`,
+      label: t.label,
+      hint: t.en,
+      icon: <t.icon className="w-4 h-4" />,
+      action: () => setTab(t.key),
+    })),
+    {
+      id: 'sign-out',
+      label: '退出登录',
+      hint: 'Sign out',
+      action: () => signOut(),
+    },
   ];
 
   return (
@@ -444,6 +476,9 @@ const AdminPanel: React.FC<{ onSignOut: () => void; isTempAdmin?: boolean }> = (
           </div>
         </div>
       </footer>
+
+      {/* Command Palette (Ctrl/Cmd+K) */}
+      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} commands={commands} />
     </div>
   );
 };
@@ -1433,12 +1468,12 @@ const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCo
                     {r.status === 'archived' && (
                       <button onClick={() => setStatus(r.id, 'published')} className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-xs font-bold text-emerald-400 cursor-pointer">重新发布</button>
                     )}
-                    <button
-                      onClick={() => togglePinned(r)}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-xs font-bold text-white/60 hover:text-white cursor-pointer inline-flex items-center gap-1 border border-white/10"
-                    >
-                      {r.pinned ? '取消置顶' : '置顶'}
-                    </button>
+                    <span className="inline-flex items-center gap-1.5 px-1.5">
+                      <Switch checked={!!r.pinned} onChange={() => togglePinned(r)} />
+                      <span className="text-xs font-bold text-white/50 whitespace-nowrap">
+                        {r.pinned ? '已置顶' : '置顶'}
+                      </span>
+                    </span>
                     <button
                       onClick={() => remove(r.id)}
                       className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#ff3650] text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1 border border-white/10"

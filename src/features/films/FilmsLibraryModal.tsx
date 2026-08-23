@@ -5,6 +5,7 @@ import { I18N } from '../../data/triggerData';
 import { repository, useRepo } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { TiltCard } from '../../components/motion/TiltCard';
+import { AnimatedBadge } from '../../components/motion/AnimatedBadge';
 import { X, Play, Filter, Search, Sparkles, Film, ArrowUpDown } from 'lucide-react';
 
 interface FilmsLibraryModalProps {
@@ -244,9 +245,9 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                         </div>
 
                         {work.isNew && (
-                          <span className="absolute top-2.5 right-2.5 bg-[#ff3650] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md">
+                          <AnimatedBadge className="absolute top-2.5 right-2.5 bg-[#ff3650] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md">
                             NEW
-                          </span>
+                          </AnimatedBadge>
                         )}
                       </div>
 
