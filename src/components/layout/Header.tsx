@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { TriggerLogo } from '../ui/TriggerLogo';
 import { Language } from '../../types';
 import { I18N } from '../../data/triggerData';
-import { Menu, X, Lock, User, LogOut, UserRound } from 'lucide-react';
+import { Menu, X, Lock, User, LogOut, UserRound, Vote } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { getSession, signOut, SessionUser } from '../../lib/session';
 import {
@@ -179,6 +179,9 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
                     <UserRound className="text-[#ff3650]" /> 个人资料
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/profile?tab=votes')}>
+                    <Vote className="text-[#e0fe3d]" /> 我的投票
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/admin')}>
                     <Lock className="text-[#e0fe3d]" /> 管理后台

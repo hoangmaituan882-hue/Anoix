@@ -208,9 +208,8 @@ app.get('/api/vote/ticket', (_req, res) => {
 });
 
 // ---- Voting (server-side boundary; UNIQUE(round_id, voter_id) is the guard) ----
-// voterId is NEVER taken from the body: it comes from the server-issued signed
-// cookie (see resolveVoterId). This plus the composite FK (option_id, round_id)
-// closes both the forgery and cross-round vote holes.
+// voterId is NEVER taken from the body: a logged-in user's vote binds to their
+// account uid (real-name), otherwise it uses the signed anonymous cookie.
 app.post('/api/vote', async (req, res, next) => {
   try {
     const { roundId, optionId } = req.body ?? {};
@@ -221,8 +220,7 @@ app.post('/api/vote', async (req, res, next) => {
       return res.status(429).json({ error: 'rate_limited' });
     }
 
-    // Identity must come from the server-issued signed cookie — never the body.
-    const voterId = resolveVoterId(req);
+    const voterId = await resolveVoter(req);
     if (!voterId) {
       return res.status(401).json({ error: 'identity_required' });
     }
@@ -253,12 +251,12 @@ app.post('/api/vote', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// ---- My vote status (identity from the signed cookie) ----
+// ---- My vote status (token uid first, else signed cookie) ----
 app.get('/api/vote', async (req, res, next) => {
   try {
     const { roundId } = req.query;
     if (!roundId) return res.json({ voted: false, optionId: null });
-    const voterId = resolveVoterId(req);
+    const voterId = await resolveVoter(req);
     if (!voterId) return res.json({ voted: false, optionId: null });
     const mine = await pgGet(
       `/votes?round_id=eq.${encodeURIComponent(String(roundId))}&voter_id=eq.${encodeURIComponent(voterId)}&select=option_id&limit=1`
@@ -316,6 +314,19 @@ async function callerIdentity(accessToken) {
   } catch {
     return null;
   }
+}
+
+/**
+ * Resolve the ballot identity: a valid Bearer token binds the vote to the
+ * account uid (real-name), otherwise fall back to the signed anonymous cookie.
+ */
+async function resolveVoter(req) {
+  const authz = req.headers.authorization || '';
+  if (authz.startsWith('Bearer ')) {
+    const ident = await callerIdentity(authz.slice(7).trim());
+    if (ident) return ident.uid;
+  }
+  return resolveVoterId(req);
 }
 
 // ---- Admin-only gate (verified role + rate limit). Used by TMDB proxy and
@@ -489,6 +500,40 @@ app.post('/api/me/password', async (req, res, next) => {
     }
     await tcRequest('ModifyEndUserAccount', { EnvId: ENV_ID, Uuid: ident.uid, Password: newPassword });
     res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ---- My voting history (votes bound to the account uid) ----
+app.get('/api/me/votes', async (req, res, next) => {
+  try {
+    const authz = req.headers.authorization || '';
+    if (!authz.startsWith('Bearer ')) return res.status(401).json({ error: 'unauthorized' });
+    const ident = await callerIdentity(authz.slice(7).trim());
+    if (!ident) return res.status(401).json({ error: 'unauthorized' });
+
+    const [votes, rounds, options, films] = await Promise.all([
+      pgGet(`/votes?voter_id=eq.${encodeURIComponent(ident.uid)}&select=round_id,option_id,created_at&order=created_at.desc`),
+      pgGet('/nomination_rounds?select=id,title,status'),
+      pgGet('/nomination_options?select=id,round_id,film_id'),
+      pgGet('/films?select=id,title,title_zh,title_en'),
+    ]);
+    const roundMap = new Map((rounds || []).map((r) => [r.id, r]));
+    const optionMap = new Map((options || []).map((o) => [o.id, o]));
+    const filmMap = new Map((films || []).map((f) => [f.id, f]));
+    const list = (votes || []).map((v) => {
+      const round = roundMap.get(v.round_id);
+      const option = optionMap.get(v.option_id);
+      const film = option ? filmMap.get(option.film_id) : null;
+      return {
+        roundId: v.round_id,
+        roundTitle: round?.title || v.round_id,
+        roundStatus: round?.status || 'revealed',
+        optionId: v.option_id,
+        filmTitle: film ? (film.title_zh || film.title_en || film.title) : (option?.note || '—'),
+        votedAt: v.created_at,
+      };
+    });
+    res.json({ votes: list });
   } catch (e) { next(e); }
 });
 

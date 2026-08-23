@@ -29,6 +29,15 @@ export interface ProfilePatch {
   avatarUrl?: string;
 }
 
+export interface MyVote {
+  roundId: string;
+  roundTitle: string;
+  roundStatus: 'collecting' | 'voting' | 'revealed';
+  optionId: number;
+  filmTitle: string;
+  votedAt: string;
+}
+
 export const me = {
   get: () => request<AdminUser>('/api/me'),
 
@@ -45,4 +54,6 @@ export const me = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentPassword, newPassword }),
     }),
+
+  getVotes: () => request<{ votes: MyVote[] }>('/api/me/votes'),
 };

@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language } from '../../types';
 import { AdminUser } from '../../types/user';
-import { me } from '../../lib/me';
+import { me, MyVote } from '../../lib/me';
 import { getSession, signOut } from '../../lib/session';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
@@ -18,7 +18,7 @@ import { Separator } from '../../components/ui/separator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
-import { ArrowLeft, Mail, Calendar, Shield, KeyRound, UserRound, Save } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, Shield, KeyRound, UserRound, Save, Vote } from 'lucide-react';
 
 export const ProfilePage: React.FC<{
   lang: Language;
@@ -26,16 +26,29 @@ export const ProfilePage: React.FC<{
   onOpenModal: (m: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
 }> = ({ lang, setLang, onOpenModal }) => {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { success, error: toastError } = useToast();
 
   const [profile, setProfile] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [votes, setVotes] = useState<MyVote[] | null>(null);
 
   const [form, setForm] = useState({ nickname: '', avatarUrl: '' });
   const [saving, setSaving] = useState(false);
 
   const [pwd, setPwd] = useState({ current: '', next: '', confirm: '' });
   const [changing, setChanging] = useState(false);
+
+  const loadVotes = useCallback(async () => {
+    try {
+      const data = await me.getVotes();
+      setVotes(data.votes ?? []);
+    } catch {
+      setVotes([]);
+    }
+  }, []);
+
+  useEffect(() => { void loadVotes(); }, [loadVotes]);
 
   const load = useCallback(async () => {
     try {
@@ -179,9 +192,10 @@ export const ProfilePage: React.FC<{
               {/* Right: tabs */}
               <Card className="border-white/10 bg-[#1a1a1a]">
                 <CardContent className="p-6">
-                  <Tabs defaultValue="profile">
+                  <Tabs defaultValue={params.get('tab') === 'votes' ? 'votes' : 'profile'}>
                     <TabsList className="w-full sm:w-auto">
                       <TabsTrigger value="profile" className="flex-1 sm:flex-none">资料</TabsTrigger>
+                      <TabsTrigger value="votes" className="flex-1 sm:flex-none">我的投票</TabsTrigger>
                       <TabsTrigger value="security" className="flex-1 sm:flex-none">安全</TabsTrigger>
                     </TabsList>
 
@@ -203,6 +217,43 @@ export const ProfilePage: React.FC<{
                           <Save className="w-4 h-4" /> {saving ? '保存中...' : '保存资料'}
                         </Button>
                       </div>
+                    </TabsContent>
+
+                    {/* Votes tab */}
+                    <TabsContent value="votes" className="space-y-3">
+                      {votes === null ? (
+                        <div className="py-8 flex justify-center">
+                          <Loader variant="dots" size={24} label="加载投票记录" className="text-[#ff3650]" />
+                        </div>
+                      ) : votes.length === 0 ? (
+                        <div className="py-12 text-center text-white/40">
+                          <Vote className="w-8 h-8 mx-auto mb-2 text-white/20" />
+                          <p className="text-sm font-bold">还没有投票记录</p>
+                          <p className="text-xs text-white/30 mt-1">登录后投票会自动绑定到你的账号</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          {votes.map((v) => (
+                            <div key={`${v.roundId}-${v.optionId}`} className="flex items-center gap-3 bg-black/30 border border-white/10 rounded-xl px-4 py-3">
+                              <Vote className="w-4 h-4 text-[#ff3650] shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-bold text-white truncate">{v.filmTitle}</p>
+                                <p className="text-xs text-white/40 truncate">{v.roundTitle}</p>
+                              </div>
+                              <div className="text-right shrink-0">
+                                {v.roundStatus === 'revealed' ? (
+                                  <Badge variant="secondary">已揭晓</Badge>
+                                ) : v.roundStatus === 'voting' ? (
+                                  <Badge>投票中</Badge>
+                                ) : (
+                                  <Badge variant="outline">收集中</Badge>
+                                )}
+                                <p className="text-[10px] text-white/30 font-mono mt-1">{v.votedAt ? v.votedAt.slice(0, 10) : ''}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </TabsContent>
 
                     {/* Security tab */}
