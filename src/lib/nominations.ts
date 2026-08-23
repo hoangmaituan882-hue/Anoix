@@ -82,11 +82,8 @@ export interface TmdbNominationPayload {
 export const nominations = {
   quota: () => request<Quota>('/api/quota'),
 
-  nominate: (
-    roundId: string,
-    payload: { filmId?: string; tmdb?: TmdbNominationPayload; note: string },
-  ) =>
-    request<{ ok: boolean }>(`/api/nominations/${encodeURIComponent(roundId)}/nominate`, {
+  nominate: (payload: { filmId?: string; tmdb?: TmdbNominationPayload; note: string }) =>
+    request<{ ok: boolean }>(`/api/nominations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

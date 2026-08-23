@@ -52,9 +52,11 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
           work={work}
           lang={lang}
           onPlayTrailer={onPlayTrailer}
+          posterViewTransitionName={`film-poster-${work.id}`}
           footerExtra={
             <Link
               to={`/films/${work.id}`}
+              viewTransition
               className="inline-flex items-center gap-2 text-[#ff3650] hover:text-white px-6 py-3 rounded-full font-black text-sm uppercase tracking-wider transition-colors border-2 border-[#ff3650]/60 hover:border-[#ff3650] bg-[#ff3650]/10"
             >
               <span>{lang === 'zh' ? '查看完整详情' : 'FULL DETAILS'}</span>

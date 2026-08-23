@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useLocation, useViewTransitionState } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language, WorkItem } from '../../types';
 import { repository, useRepo } from '../../lib/repository';
@@ -25,6 +25,8 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
 }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isTransitioning = useViewTransitionState(location);
   const films = useRepo(repository.films);
   const [copied, setCopied] = useState(false);
 
@@ -109,6 +111,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
                   work={work}
                   lang={lang}
                   onPlayTrailer={onPlayTrailer}
+                  posterViewTransitionName={isTransitioning && work ? `film-poster-${work.id}` : undefined}
                 />
               </div>
 
@@ -169,6 +172,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
                     <Link
                       key={item.id}
                       to={`/films/${item.id}`}
+                      viewTransition
                       className="group flex flex-col bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/10 hover:border-[#ff3650] transition-all transform hover:-translate-y-1 shadow-lg"
                     >
                       <div className="relative aspect-[27/40] overflow-hidden bg-black/40">
@@ -176,6 +180,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
                           src={item.image}
                           alt={item.title}
                           className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                          style={{ viewTransitionName: `film-poster-${item.id}` }}
                         />
                         <div className="absolute top-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[9px] font-bold text-white">
                           {item.year}

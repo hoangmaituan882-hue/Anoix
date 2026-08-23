@@ -61,7 +61,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
   }, [selectedEraId, searchQuery]);
 
   const handleSelectFilm = (filmId: string) => {
-    navigate(`/films/${filmId}`);
+    navigate(`/films/${filmId}`, { viewTransition: true });
   };
 
   return (

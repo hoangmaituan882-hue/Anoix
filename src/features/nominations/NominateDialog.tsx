@@ -24,12 +24,12 @@ interface TmdbResult {
 }
 
 export const NominateDialog: React.FC<{
-  roundId: string;
-  roundTitle: string;
+  roundTitle?: string;
   open: boolean;
   onClose: () => void;
   onSubmitted: () => void;
-}> = ({ roundId, roundTitle, open, onClose, onSubmitted }) => {
+  initialFilmId?: string | null;
+}> = ({ roundTitle, open, onClose, onSubmitted, initialFilmId }) => {
   const films = useRepo(repository.films);
   const { success, error: toastError } = useToast();
 
@@ -45,13 +45,20 @@ export const NominateDialog: React.FC<{
   const [searching, setSearching] = useState(false);
   const [selectedTmdb, setSelectedTmdb] = useState<TmdbResult | null>(null);
 
-  // reset on open
+  // reset on open (pre-select a film when opened from the plaza)
   useEffect(() => {
     if (open) {
-      setNote(''); setSelectedFilm(null); setSelectedTmdb(null);
+      setNote(''); setSelectedTmdb(null);
       setLibQuery(''); setTmdbQuery(''); setTmdbResults([]);
+      if (initialFilmId) {
+        const f = films.find((x) => x.id === initialFilmId);
+        setSelectedFilm(f ?? null);
+        setTab(f ? 'library' : 'tmdb');
+      } else {
+        setSelectedFilm(null);
+      }
     }
-  }, [open]);
+  }, [open, initialFilmId, films]);
 
   // TMDB search (debounced)
   useEffect(() => {
@@ -93,7 +100,7 @@ export const NominateDialog: React.FC<{
           posterUrl: selectedTmdb.posterUrl,
         };
       }
-      await nominations.nominate(roundId, payload);
+      await nominations.nominate(payload);
       success('提名已提交');
       onSubmitted();
       onClose();

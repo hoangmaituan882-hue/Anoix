@@ -441,5 +441,46 @@ html.light *::-webkit-scrollbar-thumb:hover {
   background-clip: padding-box;
 }
 
+/* ============================================================
+   View Transitions API
+   - page navigation: TRIGGER right slide-in
+   - theme toggle: circular reveal from the click point (scoped)
+   ============================================================ */
+::view-transition-old(root) {
+  animation: vt-old 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+::view-transition-new(root) {
+  animation: vt-new 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes vt-old {
+  to { opacity: 0; transform: translateX(-4%); }
+}
+@keyframes vt-new {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Theme toggle — circular reveal from the click position */
+html.vt-theme::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+html.vt-theme::view-transition-new(root) {
+  animation: vt-theme-in 0.5s ease-out both;
+  z-index: 2;
+}
+@keyframes vt-theme-in {
+  from { clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%)); }
+  to { clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 50%)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
 
 

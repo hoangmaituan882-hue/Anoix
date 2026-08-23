@@ -88,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             <TriggerLogo
               className="w-24 md:w-32 text-white hover:text-[#ff3650] transition-colors"
               onClick={() => {
-                navigate('/');
+                navigate('/', { viewTransition: true });
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             />
@@ -122,35 +122,28 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             </button>
             <button
               id="nav-screenings"
-              onClick={() => { setMobileMenuOpen(false); navigate('/screenings'); }}
+              onClick={() => { setMobileMenuOpen(false); navigate('/screenings', { viewTransition: true }); }}
               className={pillItem}
             >
               {lang === 'zh' ? '放映档案' : 'SCREENINGS'}
             </button>
             <button
               id="nav-history"
-              onClick={() => { setMobileMenuOpen(false); navigate('/history'); }}
+              onClick={() => { setMobileMenuOpen(false); navigate('/history', { viewTransition: true }); }}
               className={pillItem}
             >
               {lang === 'zh' ? '历史数据' : 'HISTORY'}
             </button>
             <button
               id="nav-nominations"
-              onClick={() => { setMobileMenuOpen(false); navigate('/nominations'); }}
+              onClick={() => { setMobileMenuOpen(false); navigate('/nominations', { viewTransition: true }); }}
               className={pillItem}
             >
-              {lang === 'zh' ? '提名投票' : 'VOTE'}
-            </button>
-            <button
-              id="nav-plaza"
-              onClick={() => { setMobileMenuOpen(false); navigate('/plaza'); }}
-              className={pillItem}
-            >
-              {lang === 'zh' ? '提名广场' : 'PLAZA'}
+              {lang === 'zh' ? '提名' : 'VOTE'}
             </button>
             <button
               id="nav-admin"
-              onClick={() => { setMobileMenuOpen(false); navigate('/admin'); }}
+              onClick={() => { setMobileMenuOpen(false); navigate('/admin', { viewTransition: true }); }}
               className="ml-1 inline-flex items-center gap-1.5 text-[#ff3650] hover:text-white bg-[#ff3650]/10 hover:bg-[#ff3650] rounded-full px-3.5 py-1.5 transition-colors duration-150 cursor-pointer whitespace-nowrap"
             >
               <Lock className="w-3 h-3" />
@@ -166,15 +159,15 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
                 <DropdownMenuTrigger asChild>
                   <button
                     id="account_button"
-                    className="inline-flex items-center gap-2 rounded-full pl-1 pr-3 py-1 text-xs font-black transition-colors cursor-pointer whitespace-nowrap text-[#f5ffe5] bg-white/10 hover:bg-white/20 outline-none focus-visible:ring-2 focus-visible:ring-[#ff3650]"
+                    className="inline-flex items-center gap-2 rounded-full pl-1 pr-3 py-1 text-xs font-black transition-colors cursor-pointer whitespace-nowrap text-[#f5ffe5] bg-white/10 hover:bg-white/20 outline-none focus-visible:ring-2 focus-visible:ring-[#ff3650] sm:w-[140px] sm:max-w-[140px]"
                     title={user.name}
                   >
-                    <Avatar className="h-7 w-7">
+                    <Avatar className="h-7 w-7 shrink-0">
                       <AvatarFallback className="bg-[#ff3650]/25 text-[#ff3650] text-xs font-black">
                         {user.name.slice(0, 1).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="hidden sm:inline max-w-[90px] truncate">{user.name}</span>
+                    <span className="hidden sm:inline min-w-0 flex-1 truncate text-left">{user.name}</span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
@@ -185,13 +178,13 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
                     </span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <DropdownMenuItem onClick={() => navigate('/profile', { viewTransition: true })}>
                     <UserRound className="text-[#ff3650]" /> 个人资料
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => openActivityDrawer()}>
                     <Vote className="text-[#e0fe3d]" /> 我的投票
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/admin')}>
+                  <DropdownMenuItem onClick={() => navigate('/admin', { viewTransition: true })}>
                     <Lock className="text-[#e0fe3d]" /> 管理后台
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -207,7 +200,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               <button
                 id="account_button"
                 onClick={() => navigate('/auth')}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition-colors cursor-pointer whitespace-nowrap text-[#ff3650] bg-[#ff3650]/10 hover:bg-[#ff3650] hover:text-white"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black transition-colors cursor-pointer whitespace-nowrap text-[#ff3650] bg-[#ff3650]/10 hover:bg-[#ff3650] hover:text-white sm:w-[140px] sm:max-w-[140px]"
                 title={lang === 'zh' ? '登录 / 注册' : 'Sign in'}
               >
                 <User className="w-3.5 h-3.5" />
@@ -275,17 +268,17 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             <button onClick={() => handleNavClick('cb_content_90', 'news')} className="hover:text-[#ff3650] transition-colors py-2">
               {t.news}
             </button>
-            <button onClick={() => { setMobileMenuOpen(false); navigate('/screenings'); }} className="hover:text-[#ff3650] transition-colors py-2">
+            <button onClick={() => { setMobileMenuOpen(false); navigate('/screenings', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">
               {lang === 'zh' ? '放映档案' : 'SCREENINGS'}
             </button>
-            <button onClick={() => { setMobileMenuOpen(false); navigate('/history'); }} className="hover:text-[#ff3650] transition-colors py-2">
+            <button onClick={() => { setMobileMenuOpen(false); navigate('/history', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">
               {lang === 'zh' ? '历史数据' : 'HISTORY'}
             </button>
-            <button onClick={() => { setMobileMenuOpen(false); navigate('/nominations'); }} className="hover:text-[#ff3650] transition-colors py-2">
+            <button onClick={() => { setMobileMenuOpen(false); navigate('/nominations', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">
               {lang === 'zh' ? '提名投票' : 'VOTE'}
             </button>
             <button
-              onClick={() => { setMobileMenuOpen(false); navigate('/admin'); }}
+              onClick={() => { setMobileMenuOpen(false); navigate('/admin', { viewTransition: true }); }}
               className="text-[#ff3650] hover:text-white transition-colors py-2 inline-flex items-center justify-center gap-1.5"
             >
               <Lock className="w-4 h-4" />

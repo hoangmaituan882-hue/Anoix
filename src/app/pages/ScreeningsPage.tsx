@@ -114,7 +114,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
   }, [rows, selectedYear, searchQuery]);
 
   const handleSelectFilm = (filmId: string) => {
-    navigate(`/films/${filmId}`);
+    navigate(`/films/${filmId}`, { viewTransition: true });
   };
 
   return (

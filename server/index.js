@@ -270,6 +270,32 @@ app.get('/api/vote', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// ---- Revoke (withdraw) a vote ----
+app.delete('/api/vote', async (req, res, next) => {
+  try {
+    const { roundId, optionId } = req.body ?? {};
+    if (!roundId || !Number.isInteger(optionId) || optionId <= 0) {
+      return res.status(400).json({ error: 'bad_request' });
+    }
+    const ident = await resolveIdentity(req);
+    if (!ident) return res.status(401).json({ error: 'identity_required' });
+
+    const rounds = await pgGet(`/nomination_rounds?id=eq.${encodeURIComponent(roundId)}&select=id,status`);
+    const round = rounds?.[0];
+    if (!round) return res.status(404).json({ error: 'round_not_found' });
+    if (round.status !== 'voting') return res.status(409).json({ error: 'not_voting' });
+
+    const [status] = await pgWrite(
+      'DELETE',
+      `/votes?round_id=eq.${encodeURIComponent(roundId)}&voter_id=eq.${encodeURIComponent(ident.identityId)}&option_id=eq.${optionId}`,
+    );
+    if (status === 404) return res.status(404).json({ error: 'vote_not_found' });
+    if (status >= 400) return res.status(502).json({ error: 'revoke_failed' });
+    await unbumpQuota(ident.identityId, 'vote');
+    return res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
 // ---- Weekly quota (anonymous cookie vs logged-in uid) ----
 app.get('/api/quota', async (req, res, next) => {
   try {
@@ -289,7 +315,57 @@ app.get('/api/quota', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// ---- Nominate a film (from library or TMDB scrape; no admin approval) ----
+// ---- Continuous nomination → pool (no round required; admin reviews later) ----
+app.post('/api/nominations', async (req, res, next) => {
+  try {
+    const ident = await resolveIdentity(req);
+    if (!ident) return res.status(401).json({ error: 'identity_required' });
+
+    const { filmId, tmdb, note } = req.body ?? {};
+    if (typeof note !== 'string' || note.trim().length === 0) {
+      return res.status(400).json({ error: 'note_required' });
+    }
+    if (note.trim().length > 200) return res.status(400).json({ error: 'note_too_long' });
+
+    const quota = await quotaInfo(ident.identityId, ident.kind);
+    if (quota.remainingNominations <= 0) return res.status(429).json({ error: 'quota_exceeded' });
+
+    const row = {
+      note: note.trim(),
+      nominee_identity_id: ident.identityId,
+      source: 'user',
+      status: 'pending',
+      planned: false,
+    };
+
+    if (tmdb && tmdb.tmdbId) {
+      row.tmdb_id = `tmdb-${tmdb.tmdbId}`;
+      row.title = tmdb.title || tmdb.originalTitle || `tmdb-${tmdb.tmdbId}`;
+      row.original_title = tmdb.originalTitle || null;
+      row.year = tmdb.year || '';
+      row.image = tmdb.posterUrl || '';
+      row.overview = tmdb.overview || '';
+      row.director = tmdb.director || null;
+    } else if (typeof filmId === 'string' && filmId.trim()) {
+      const fid = filmId.trim();
+      const films = await pgGet(`/films?id=eq.${encodeURIComponent(fid)}&select=id,title,title_zh,title_en,year,image`);
+      const f = films?.[0];
+      if (!f) return res.status(404).json({ error: 'film_not_found' });
+      row.film_id = fid;
+      row.title = f.title_zh || f.title_en || f.title;
+      row.year = f.year || '';
+      row.image = f.image || '';
+    } else {
+      return res.status(400).json({ error: 'film_required' });
+    }
+
+    await pgWrite('POST', '/nomination_pool', row);
+    await bumpQuota(ident.identityId, 'nomination');
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ---- Nominate a film directly into a specific round (admin/legacy) ----
 app.post('/api/nominations/:roundId/nominate', async (req, res, next) => {
   try {
     const ident = await resolveIdentity(req);
@@ -355,43 +431,47 @@ app.post('/api/nominations/:roundId/nominate', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-// ---- Nomination plaza (weekly / all, merged by film, with vote counts) ----
+// ---- Nomination plaza (reads the pool; votes joined from round candidates) ----
 app.get('/api/nominations/plaza', async (req, res, next) => {
   try {
     const scope = req.query.scope === 'all' ? 'all' : 'week';
-    const [options, films, votes] = await Promise.all([
-      pgGet('/nomination_options?select=id,film_id,planned,created_at&order=created_at.desc'),
-      pgGet('/films?select=id,title,title_zh,title_en,year,category,image'),
+    const [pool, options, votes] = await Promise.all([
+      pgGet('/nomination_pool?select=id,film_id,tmdb_id,title,image,year,planned,created_at&order=created_at.desc'),
+      pgGet('/nomination_options?select=id,film_id'),
       pgGet('/votes?select=option_id'),
     ]);
-    const filmMap = new Map((films || []).map((f) => [f.id, f]));
-    const voteCount = new Map();
-    for (const v of votes || []) voteCount.set(v.option_id, (voteCount.get(v.option_id) ?? 0) + 1);
-
-    const weekStart = Date.now() - 7 * 24 * 3600 * 1000; // rolling filter fallback (approx)
-    const grouped = new Map();
-    for (const o of options || []) {
-      const created = o.created_at ? new Date(o.created_at).getTime() : 0;
-      if (scope === 'week' && created < weekStart) continue;
-      const g = grouped.get(o.film_id) ?? { nominations: 0, votes: 0, planned: false };
-      g.nominations += 1;
-      g.votes += voteCount.get(o.id) ?? 0;
-      g.planned = g.planned || Boolean(o.planned);
-      grouped.set(o.film_id, g);
+    const optionFilm = new Map();
+    for (const o of options || []) optionFilm.set(o.id, o.film_id);
+    const votesByFilm = new Map();
+    for (const v of votes || []) {
+      const fid = optionFilm.get(v.option_id);
+      if (fid) votesByFilm.set(fid, (votesByFilm.get(fid) ?? 0) + 1);
     }
-    const items = Array.from(grouped.entries()).map(([filmId, g]) => {
-      const f = filmMap.get(filmId);
-      return {
-        filmId,
-        title: f ? (f.title_zh || f.title_en || f.title) : filmId,
-        image: f?.image || '',
-        year: f?.year || '',
-        category: f?.category || '',
-        nominations: g.nominations,
-        votes: g.votes,
-        planned: g.planned,
-      };
-    });
+
+    const weekStart = Date.now() - 7 * 24 * 3600 * 1000;
+    const grouped = new Map();
+    for (const p of pool || []) {
+      const created = p.created_at ? new Date(p.created_at).getTime() : 0;
+      if (scope === 'week' && created < weekStart) continue;
+      const key = p.film_id || p.tmdb_id || p.title;
+      let g = grouped.get(key);
+      if (!g) {
+        g = { filmId: key, title: p.title, image: p.image || '', year: p.year || '', nominations: 0, planned: false };
+        grouped.set(key, g);
+      }
+      g.nominations += 1;
+      g.planned = g.planned || Boolean(p.planned);
+    }
+    const items = Array.from(grouped.values()).map((g) => ({
+      filmId: g.filmId,
+      title: g.title,
+      image: g.image,
+      year: g.year,
+      category: '',
+      nominations: g.nominations,
+      votes: votesByFilm.get(g.filmId) ?? 0,
+      planned: g.planned,
+    }));
     res.json({ items });
   } catch (e) { next(e); }
 });
@@ -531,6 +611,24 @@ async function bumpQuota(identityId, type) {
   }
 }
 
+async function unbumpQuota(identityId, type) {
+  const ws = weekStartDateString();
+  const rows = await pgGet(
+    `/user_quota?identity_id=eq.${encodeURIComponent(identityId)}&week_start=eq.${ws}&select=nominations_used,votes_used&limit=1`,
+  );
+  if (!rows?.length) return; // no row → nothing to decrement
+  const r = rows[0];
+  if (type === 'vote') {
+    await pgWrite('PATCH', `/user_quota?identity_id=eq.${encodeURIComponent(identityId)}&week_start=eq.${ws}`, {
+      votes_used: Math.max(0, (r.votes_used ?? 0) - 1),
+    });
+  } else {
+    await pgWrite('PATCH', `/user_quota?identity_id=eq.${encodeURIComponent(identityId)}&week_start=eq.${ws}`, {
+      nominations_used: Math.max(0, (r.nominations_used ?? 0) - 1),
+    });
+  }
+}
+
 // ---- Admin-only gate (verified role + rate limit). Used by TMDB proxy and
 // user management endpoints. ----
 async function adminGate(req, res, next) {
@@ -642,6 +740,137 @@ app.post('/api/admin/options/:id/plan', adminGate, async (req, res, next) => {
     if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'bad_request' });
     await pgWrite('PATCH', `/nomination_options?id=eq.${id}`, { planned: true });
     res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ---- P1-P3: nomination pool admin (list / promote / demote) ----
+app.get('/api/admin/pool', adminGate, async (_req, res, next) => {
+  try {
+    const rows = await pgGet('/nomination_pool?select=*&order=created_at.desc');
+    res.json(rows ?? []);
+  } catch (e) { next(e); }
+});
+
+// 勾选入库: promote a pool item into the film library (creates a film for TMDB)
+app.post('/api/admin/pool/:id/promote', adminGate, async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'bad_request' });
+    const rows = await pgGet(`/nomination_pool?id=eq.${id}&select=*`);
+    const p = rows?.[0];
+    if (!p) return res.status(404).json({ error: 'not_found' });
+
+    let fid = p.film_id;
+    if (!fid && p.tmdb_id) {
+      fid = p.tmdb_id;
+      const existing = await pgGet(`/films?id=eq.${encodeURIComponent(fid)}&select=id`);
+      if (!existing?.length) {
+        await pgWrite('POST', '/films', {
+          id: fid,
+          title: p.original_title || p.title || fid,
+          title_zh: p.title || null,
+          title_en: p.original_title || null,
+          year: p.year || '',
+          category: 'Movie',
+          image: p.image || '',
+          description: p.overview || '',
+          description_zh: p.overview || null,
+          description_en: p.overview || null,
+          director: p.director || null,
+          is_new: false,
+          sort_order: 0,
+        });
+      }
+    }
+    if (!fid) return res.status(400).json({ error: 'no_film' });
+    await pgWrite('PATCH', `/nomination_pool?id=eq.${id}`, { status: 'promoted', film_id: fid, planned: true });
+    res.json({ ok: true, filmId: fid });
+  } catch (e) { next(e); }
+});
+
+// 退回提名库 (reversible): reset a promoted item back to pending
+app.post('/api/admin/pool/:id/demote', adminGate, async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'bad_request' });
+    await pgWrite('PATCH', `/nomination_pool?id=eq.${id}`, { status: 'pending', planned: false });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// 排期: set a film's screening status/date (待定 / 选日期 / 下周六 / 已放映)
+app.post('/api/admin/films/:id/schedule', adminGate, async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { screening_status, screening_date } = req.body ?? {};
+    const valid = ['unscheduled', 'scheduled', 'screened'];
+    if (!valid.includes(screening_status)) return res.status(400).json({ error: 'bad_status' });
+    const body = { screening_status };
+    body.screening_date = screening_date && typeof screening_date === 'string' ? screening_date : null;
+    await pgWrite('PATCH', `/films?id=eq.${encodeURIComponent(id)}`, body);
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// 轮次状态流转: draft → collecting → reviewing → voting → revealed → archived
+app.post('/api/admin/rounds/:id/status', adminGate, async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { status, deadline } = req.body ?? {};
+    const valid = ['draft', 'collecting', 'reviewing', 'voting', 'revealed', 'archived'];
+    if (!valid.includes(status)) return res.status(400).json({ error: 'bad_status' });
+    const body = { status };
+    if (deadline !== undefined) body.deadline = deadline || null;
+    await pgWrite('PATCH', `/nomination_rounds?id=eq.${encodeURIComponent(id)}`, body);
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+// ---- P5: admin statistics (who nominated / who voted) ----
+app.get('/api/admin/stats', adminGate, async (_req, res, next) => {
+  try {
+    const [pool, votes, options, rounds, films] = await Promise.all([
+      pgGet('/nomination_pool?select=id,title,note,source,status,nominee_identity_id,created_at&order=created_at.desc&limit=500'),
+      pgGet('/votes?select=round_id,option_id,voter_id,created_at&order=created_at.desc&limit=500'),
+      pgGet('/nomination_options?select=id,round_id,film_id'),
+      pgGet('/nomination_rounds?select=id,title'),
+      pgGet('/films?select=id,title,title_zh,title_en'),
+    ]);
+
+    // uid → display name (anonymous cookie ids are long and never match a uid)
+    let userMap = new Map();
+    try {
+      const resp = await tcRequest('DescribeEndUsers', { EnvId: ENV_ID, Limit: 100, Offset: 0 });
+      for (const u of resp.Users || []) userMap.set(u.UUId, u.UserName || u.Email || u.PhoneNumber || u.UUId);
+    } catch { /* stats still useful without name resolution */ }
+    const name = (id) => (id ? (userMap.get(id) || (String(id).length > 30 ? '匿名' : id)) : '匿名');
+
+    const roundTitle = new Map((rounds || []).map((r) => [r.id, r.title]));
+    const filmTitle = new Map((films || []).map((f) => [f.id, f.title_zh || f.title_en || f.title]));
+    const optInfo = new Map((options || []).map((o) => [o.id, { round_id: o.round_id, film_id: o.film_id }]));
+
+    const nominations = (pool || []).map((p) => ({
+      id: p.id,
+      title: p.title,
+      note: p.note,
+      source: p.source,
+      status: p.status,
+      nominee: name(p.nominee_identity_id),
+      created_at: p.created_at,
+    }));
+    const votesList = (votes || []).map((v) => {
+      const o = optInfo.get(v.option_id);
+      return {
+        round_id: v.round_id,
+        round_title: o ? (roundTitle.get(o.round_id) || v.round_id) : v.round_id,
+        film_id: o?.film_id ?? null,
+        film_title: o?.film_id ? (filmTitle.get(o.film_id) || o.film_id) : '—',
+        voter: name(v.voter_id),
+        voted_at: v.created_at,
+      };
+    });
+
+    res.json({ nominations, votes: votesList });
   } catch (e) { next(e); }
 });
 

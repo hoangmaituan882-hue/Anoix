@@ -11,6 +11,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 import { ScreeningsAdmin } from '../../features/admin/ScreeningsAdmin';
 import { RoundsAdmin } from '../../features/admin/RoundsAdmin';
 import { UsersAdmin } from '../../features/admin/UsersAdmin';
+import { PoolAdmin } from '../../features/admin/PoolAdmin';
+import { StatsAdmin } from '../../features/admin/StatsAdmin';
 import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -266,7 +268,7 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
 
 // ---------------- Redesigned Studio TRIGGER Admin Panel ----------------
 const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
-  const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds' | 'users'>('films');
+  const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds' | 'pool' | 'stats' | 'users'>('films');
   const [filmsCount, setFilmsCount] = useState<number>(0);
   const [newsCount, setNewsCount] = useState<number>(0);
   const [cmdOpen, setCmdOpen] = useState(false);
@@ -301,7 +303,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
   };
 
   interface TabItem {
-    key: 'films' | 'news' | 'screenings' | 'rounds' | 'users';
+    key: 'films' | 'news' | 'screenings' | 'rounds' | 'pool' | 'stats' | 'users';
     label: string;
     en: string;
     icon: React.ComponentType<{ className?: string }>;
@@ -313,6 +315,8 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
     { key: 'news', label: '动态与公告', en: 'NEWS', icon: Newspaper, count: newsCount },
     { key: 'screenings', label: '放映会档案', en: 'SCREENINGS', icon: Calendar },
     { key: 'rounds', label: '选片与投票', en: 'VOTING', icon: Vote },
+    { key: 'pool', label: '提名库', en: 'POOL', icon: Flame },
+    { key: 'stats', label: '统计', en: 'STATS', icon: Activity },
     { key: 'users', label: '用户管理', en: 'USERS', icon: UserCheck },
   ];
 
@@ -415,6 +419,8 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
         {tab === 'news' && <NewsAdmin onCountChange={setNewsCount} />}
         {tab === 'screenings' && <ScreeningsAdmin />}
         {tab === 'rounds' && <RoundsAdmin />}
+        {tab === 'pool' && <PoolAdmin />}
+        {tab === 'stats' && <StatsAdmin />}
         {tab === 'users' && <UsersAdmin />}
       </main>
 

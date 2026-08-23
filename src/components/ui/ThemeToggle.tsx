@@ -25,10 +25,29 @@ export const ThemeToggle: React.FC = () => {
   }, [theme]);
 
   const isLight = theme === 'light';
+
+  const toggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const next: 'light' | 'dark' = isLight ? 'dark' : 'light';
+    const apply = () => {
+      applyTheme(next);
+      setTheme(next);
+    };
+    // Circular reveal from the click point via the View Transitions API.
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      document.documentElement.style.setProperty('--vt-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--vt-y', `${e.clientY}px`);
+      document.documentElement.classList.add('vt-theme');
+      const vt = (document as Document & { startViewTransition: (cb: () => void) => { finished: Promise<void> } }).startViewTransition(apply);
+      vt.finished.finally(() => document.documentElement.classList.remove('vt-theme'));
+    } else {
+      apply();
+    }
+  };
+
   return (
     <button
       id="theme_toggle"
-      onClick={() => setTheme(isLight ? 'dark' : 'light')}
+      onClick={toggle}
       className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#ff3650] text-current flex items-center justify-center transition-colors cursor-pointer"
       title={isLight ? '切换深色模式' : '切换浅色模式'}
       aria-label="Toggle theme"

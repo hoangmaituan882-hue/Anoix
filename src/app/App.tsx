@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Language, WorkItem, NewsItem, GoodsItem } from '../types';
 import { TRIGGER_EASE } from '../lib/motion';
@@ -12,7 +12,6 @@ import { NominationsPage } from './pages/NominationsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AuthPage } from './pages/AuthPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { PlazaPage } from './pages/PlazaPage';
 import { ActivityDrawer } from '../features/profile/ActivityDrawer';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
@@ -157,13 +156,8 @@ const AppShell: React.FC = () => {
               <ProfilePage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
             }
           />
-          {/* Nomination plaza */}
-          <Route
-            path="/plaza"
-            element={
-              <PlazaPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
-            }
-          />
+          {/* Legacy plaza URL → merged nominations page */}
+          <Route path="/plaza" element={<Navigate to="/nominations" replace />} />
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>

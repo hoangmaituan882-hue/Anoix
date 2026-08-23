@@ -9,6 +9,8 @@ interface FilmDetailBodyProps {
   onPlayTrailer?: (url: string) => void;
   /** Extra action rendered inside the footer action row (e.g. "full detail" link). */
   footerExtra?: React.ReactNode;
+  /** Shared-element view-transition name for the poster (morphs from the source card). */
+  posterViewTransitionName?: string;
 }
 
 /**
@@ -20,6 +22,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
   lang,
   onPlayTrailer,
   footerExtra,
+  posterViewTransitionName,
 }) => {
   const t = I18N[lang];
 
@@ -43,6 +46,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
               src={work.image}
               alt={title}
               className="hidden sm:block w-28 md:w-36 lg:w-40 aspect-[27/40] rounded-2xl object-cover shadow-2xl border-2 border-[#ff3650] flex-shrink-0"
+              style={posterViewTransitionName ? { viewTransitionName: posterViewTransitionName } : undefined}
             />
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2.5 mb-2.5">
