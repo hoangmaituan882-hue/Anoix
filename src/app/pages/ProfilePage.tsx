@@ -20,8 +20,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/ta
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
 import { ArrowLeft, Mail, Calendar, Shield, KeyRound, UserRound, Save } from 'lucide-react';
 
-const GENDERS = ['未设置', '男', '女', '其他'];
-
 export const ProfilePage: React.FC<{
   lang: Language;
   setLang: (l: Language) => void;
@@ -33,7 +31,7 @@ export const ProfilePage: React.FC<{
   const [profile, setProfile] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [form, setForm] = useState({ nickname: '', gender: '', avatarUrl: '', country: '', province: '', city: '' });
+  const [form, setForm] = useState({ nickname: '', avatarUrl: '' });
   const [saving, setSaving] = useState(false);
 
   const [pwd, setPwd] = useState({ current: '', next: '', confirm: '' });
@@ -48,14 +46,7 @@ export const ProfilePage: React.FC<{
       }
       const p = await me.get();
       setProfile(p);
-      setForm({
-        nickname: p.nickname || '',
-        gender: p.gender || '',
-        avatarUrl: p.avatarUrl || '',
-        country: p.country || '',
-        province: p.province || '',
-        city: p.city || '',
-      });
+      setForm({ nickname: p.nickname || '', avatarUrl: p.avatarUrl || '' });
     } catch (e) {
       toastError(e instanceof Error ? e.message : '加载资料失败');
       setProfile(null);
@@ -69,14 +60,7 @@ export const ProfilePage: React.FC<{
   const save = async () => {
     setSaving(true);
     try {
-      await me.update({
-        nickname: form.nickname.trim(),
-        gender: form.gender === '未设置' ? '' : form.gender,
-        avatarUrl: form.avatarUrl.trim(),
-        country: form.country.trim(),
-        province: form.province.trim(),
-        city: form.city.trim(),
-      });
+      await me.update({ nickname: form.nickname.trim(), avatarUrl: form.avatarUrl.trim() });
       success('资料已保存');
       await load();
     } catch (e) {
@@ -209,46 +193,9 @@ export const ProfilePage: React.FC<{
                       </div>
 
                       <div className={field}>
-                        <Label className="text-white/60 uppercase text-xs font-black">性别</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {GENDERS.map((g) => {
-                            const active = (form.gender || '未设置') === g;
-                            return (
-                              <button
-                                key={g}
-                                type="button"
-                                onClick={() => setForm({ ...form, gender: g })}
-                                className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-colors cursor-pointer border ${
-                                  active
-                                    ? 'bg-[#ff3650] text-white border-[#ff3650]'
-                                    : 'bg-black/40 text-white/60 border-white/15 hover:text-white'
-                                }`}
-                              >
-                                {g}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className={field}>
                         <Label className="text-white/60 uppercase text-xs font-black">头像 URL</Label>
                         <Input value={form.avatarUrl} onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })} placeholder="https://…" />
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className={field}>
-                          <Label className="text-white/60 uppercase text-xs font-black">国家</Label>
-                          <Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} placeholder="国家" />
-                        </div>
-                        <div className={field}>
-                          <Label className="text-white/60 uppercase text-xs font-black">省份</Label>
-                          <Input value={form.province} onChange={(e) => setForm({ ...form, province: e.target.value })} placeholder="省份" />
-                        </div>
-                        <div className={field}>
-                          <Label className="text-white/60 uppercase text-xs font-black">城市</Label>
-                          <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="城市" />
-                        </div>
+                        <p className="text-[11px] text-white/30">填写图片直链，留空则使用首字母头像</p>
                       </div>
 
                       <div className="flex justify-end pt-2">

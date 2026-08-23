@@ -444,16 +444,12 @@ app.patch('/api/me', async (req, res, next) => {
     if (!authz.startsWith('Bearer ')) return res.status(401).json({ error: 'unauthorized' });
     const ident = await callerIdentity(authz.slice(7).trim());
     if (!ident) return res.status(401).json({ error: 'unauthorized' });
-    const { nickname, gender, avatarUrl, country, province, city } = req.body ?? {};
-    const Data = [];
-    if (pickField(nickname, 64) !== undefined) Data.push({ Key: 'Name', Value: pickField(nickname, 64) });
-    if (pickField(gender, 16) !== undefined) Data.push({ Key: 'Gender', Value: pickField(gender, 16) });
-    if (pickField(avatarUrl, 1024) !== undefined) Data.push({ Key: 'AvatarUrl', Value: pickField(avatarUrl, 1024) });
-    if (pickField(country, 64) !== undefined) Data.push({ Key: 'Country', Value: pickField(country, 64) });
-    if (pickField(province, 64) !== undefined) Data.push({ Key: 'Province', Value: pickField(province, 64) });
-    if (pickField(city, 64) !== undefined) Data.push({ Key: 'City', Value: pickField(city, 64) });
-    if (Data.length) {
-      await tcRequest('ModifyEndUserInfo', { EnvId: ENV_ID, UUId: ident.uid, Data });
+    const { nickname, avatarUrl } = req.body ?? {};
+    const patch = { EnvId: ENV_ID, Uid: ident.uid };
+    if (pickField(nickname, 64) !== undefined) patch.NickName = pickField(nickname, 64);
+    if (pickField(avatarUrl, 1024) !== undefined) patch.AvatarUrl = pickField(avatarUrl, 1024);
+    if (patch.NickName !== undefined || patch.AvatarUrl !== undefined) {
+      await tcRequest('ModifyUser', patch);
     }
     res.json({ ok: true });
   } catch (e) { next(e); }

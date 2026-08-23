@@ -26,11 +26,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export interface ProfilePatch {
   nickname?: string;
-  gender?: string;
   avatarUrl?: string;
-  country?: string;
-  province?: string;
-  city?: string;
 }
 
 export const me = {
