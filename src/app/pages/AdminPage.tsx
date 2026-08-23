@@ -10,6 +10,7 @@ import { Loader } from '../../components/motion/loader';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/motion/select';
 import { ScreeningsAdmin } from '../../features/admin/ScreeningsAdmin';
 import { RoundsAdmin } from '../../features/admin/RoundsAdmin';
+import { UsersAdmin } from '../../features/admin/UsersAdmin';
 import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -25,6 +26,7 @@ import {
   Trash2,
   X,
   ShieldCheck,
+  UserCheck,
   Film,
   Newspaper,
   Calendar,
@@ -264,7 +266,7 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
 
 // ---------------- Redesigned Studio TRIGGER Admin Panel ----------------
 const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
-  const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds'>('films');
+  const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds' | 'users'>('films');
   const [filmsCount, setFilmsCount] = useState<number>(0);
   const [newsCount, setNewsCount] = useState<number>(0);
   const [cmdOpen, setCmdOpen] = useState(false);
@@ -299,7 +301,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
   };
 
   interface TabItem {
-    key: 'films' | 'news' | 'screenings' | 'rounds';
+    key: 'films' | 'news' | 'screenings' | 'rounds' | 'users';
     label: string;
     en: string;
     icon: React.ComponentType<{ className?: string }>;
@@ -311,6 +313,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
     { key: 'news', label: '动态与公告', en: 'NEWS', icon: Newspaper, count: newsCount },
     { key: 'screenings', label: '放映会档案', en: 'SCREENINGS', icon: Calendar },
     { key: 'rounds', label: '选片与投票', en: 'VOTING', icon: Vote },
+    { key: 'users', label: '用户管理', en: 'USERS', icon: UserCheck },
   ];
 
   const commands: CommandItem[] = [
@@ -412,6 +415,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
         {tab === 'news' && <NewsAdmin onCountChange={setNewsCount} />}
         {tab === 'screenings' && <ScreeningsAdmin />}
         {tab === 'rounds' && <RoundsAdmin />}
+        {tab === 'users' && <UsersAdmin />}
       </main>
 
       {/* Footer System Status */}

@@ -27,6 +27,7 @@ import {
   issueVoterCookie,
   resolveVoterId,
 } from './auth.js';
+import { tcRequest, tcEnabled } from './tcapi.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.resolve(__dirname, '../dist');
@@ -283,9 +284,10 @@ async function callerRole(accessToken) {
   }
 }
 
-// ---- Admin-only gate for the TMDB proxy (role + rate limit) ----
+// ---- Admin-only gate (verified role + rate limit). Used by TMDB proxy and
+// user management endpoints. ----
 async function adminGate(req, res, next) {
-  if (!allowRate(`tmdb:${clientIp(req)}`, 60, 60_000)) {
+  if (!allowRate(`admin:${clientIp(req)}`, 120, 60_000)) {
     return res.status(429).json({ error: 'rate_limited' });
   }
   const authz = req.headers.authorization || '';
@@ -298,6 +300,77 @@ async function adminGate(req, res, next) {
   }
   next();
 }
+
+// ---- User management (CloudBase Auth via TC API + local role table) ----
+const mapUser = (u, roleMap) => ({
+  uid: u.UUId,
+  username: u.UserName || '',
+  email: u.Email || '',
+  nickname: u.NickName || '',
+  isAnonymous: Boolean(u.IsAnonymous),
+  disabled: Boolean(u.IsDisabled),
+  hasPassword: Boolean(u.HasPassword),
+  createTime: u.CreateTime || '',
+  updateTime: u.UpdateTime || '',
+  role: roleMap.get(u.UUId) === 'admin' ? 'admin' : 'user',
+});
+
+app.get('/api/admin/users', adminGate, async (req, res, next) => {
+  try {
+    if (!tcEnabled()) return res.status(503).json({ error: 'user_management_unavailable' });
+    const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 100);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
+    const resp = await tcRequest('DescribeEndUsers', { EnvId: ENV_ID, Limit: limit, Offset: offset });
+    const roles = await pgGet('/user_roles?select=uid,role');
+    const roleMap = new Map((roles || []).map((r) => [r.uid, r.role]));
+    res.json({ total: Number(resp.Total) || (resp.Users?.length ?? 0), users: (resp.Users || []).map((u) => mapUser(u, roleMap)) });
+  } catch (e) { next(e); }
+});
+
+app.post('/api/admin/users', adminGate, async (req, res, next) => {
+  try {
+    const { username, password, role } = req.body ?? {};
+    const name = typeof username === 'string' ? username.trim() : '';
+    if (!name || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'bad_request' });
+    }
+    const resp = await tcRequest('CreateEndUserAccount', { EnvId: ENV_ID, Username: name, Password: password });
+    const uid = resp?.User?.UUId || resp?.UUId || null;
+    if (uid && role === 'admin') {
+      await pgWrite('POST', '/user_roles', { uid, username: name, role: 'admin' });
+    }
+    res.json({ ok: true, uid });
+  } catch (e) { next(e); }
+});
+
+app.patch('/api/admin/users/:uid', adminGate, async (req, res, next) => {
+  try {
+    const uid = req.params.uid;
+    const { role, disabled, password } = req.body ?? {};
+
+    if (role === 'admin') {
+      await pgWrite('POST', '/user_roles', { uid, role: 'admin' });
+    } else if (role === 'user') {
+      await pgWrite('DELETE', `/user_roles?uid=eq.${encodeURIComponent(uid)}`);
+    }
+    if (typeof disabled === 'boolean') {
+      await tcRequest('ModifyEndUser', { EnvId: ENV_ID, UUId: uid, Status: disabled ? 'DISABLE' : 'ENABLE' });
+    }
+    if (typeof password === 'string' && password.length >= 6) {
+      await tcRequest('ModifyEndUserAccount', { EnvId: ENV_ID, Uuid: uid, Password: password });
+    }
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
+app.delete('/api/admin/users/:uid', adminGate, async (req, res, next) => {
+  try {
+    const uid = req.params.uid;
+    await pgWrite('DELETE', `/user_roles?uid=eq.${encodeURIComponent(uid)}`);
+    await tcRequest('DeleteEndUser', { EnvId: ENV_ID, UserList: [uid] });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
 
 // ---- TMDB proxy (configurable base URL, key stays server-side) ----
 app.use('/api/tmdb', adminGate, tmdbRouter);
