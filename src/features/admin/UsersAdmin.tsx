@@ -5,12 +5,14 @@ import { Loader } from '../../components/motion/loader';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useToast } from '../../components/ui/Toast';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Badge } from '../../components/ui/badge';
 import {
   Search, UserPlus, Shield, ShieldOff, Ban, CheckCircle2,
   KeyRound, Trash2, Mail, X, AlertCircle, User, Lock,
 } from 'lucide-react';
 
-const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
 const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
 
 type RoleFilter = 'all' | 'user' | 'admin';
@@ -177,13 +179,14 @@ export const UsersAdmin: React.FC = () => {
           <p className="text-xs text-white/50">管理登录账号、管理员角色与登录封禁（封禁即禁止登录）</p>
         </div>
 
-        <button
+        <Button
+          size="lg"
           onClick={() => { setCreateDraft({ username: '', password: '' }); setCreateOpen(true); }}
-          className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] active:scale-95 text-white font-black text-sm px-5 py-3 rounded-2xl transition-all cursor-pointer shadow-[0_8px_20px_rgba(255,54,80,0.3)]"
+          className="active:scale-95 shadow-[0_8px_20px_rgba(255,54,80,0.3)]"
         >
           <UserPlus className="w-4 h-4" />
-          <span>新建账号</span>
-        </button>
+          新建账号
+        </Button>
       </div>
 
       {error && (
@@ -255,9 +258,7 @@ export const UsersAdmin: React.FC = () => {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-black text-white truncate">{u.nickname || u.username || u.uid}</span>
-                    {u.role === 'admin' && (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#ff3650]/15 text-[#ff3650] border border-[#ff3650]/30">ADMIN</span>
-                    )}
+                    {u.role === 'admin' && <Badge>ADMIN</Badge>}
                     {u.disabled ? (
                       <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30">已封禁</span>
                     ) : (
@@ -348,22 +349,22 @@ export const UsersAdmin: React.FC = () => {
             <div className="space-y-3">
               <div className="space-y-1">
                 <label className={LABEL}>用户名 *</label>
-                <input value={createDraft.username} onChange={(e) => setCreateDraft({ ...createDraft, username: e.target.value })} placeholder="用于登录的用户名" className={FIELD} autoFocus />
+                <Input value={createDraft.username} onChange={(e) => setCreateDraft({ ...createDraft, username: e.target.value })} placeholder="用于登录的用户名" autoFocus />
               </div>
               <div className="space-y-1">
                 <label className={LABEL}>密码 *（至少 6 位）</label>
                 <div className="relative">
-                  <input type="text" value={createDraft.password} onChange={(e) => setCreateDraft({ ...createDraft, password: e.target.value })} placeholder="初始密码" className={FIELD} />
+                  <Input type="text" value={createDraft.password} onChange={(e) => setCreateDraft({ ...createDraft, password: e.target.value })} placeholder="初始密码" className="pr-10" />
                   <Lock className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30" />
                 </div>
               </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
-              <button onClick={() => setCreateOpen(false)} className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 cursor-pointer">取消</button>
-              <button onClick={create} disabled={busy} className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] disabled:opacity-50 text-white font-black text-xs uppercase px-6 py-2.5 rounded-xl cursor-pointer shadow-lg shadow-[#ff3650]/20">
+              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>取消</Button>
+              <Button onClick={create} disabled={busy}>
                 <UserPlus className="w-4 h-4" /> {busy ? '创建中...' : '创建账号'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -390,14 +391,14 @@ export const UsersAdmin: React.FC = () => {
 
             <div className="space-y-1">
               <label className={LABEL}>新密码 *（至少 6 位）</label>
-              <input type="text" value={resetPwd} onChange={(e) => setResetPwd(e.target.value)} placeholder="输入新密码" className={FIELD} autoFocus />
+              <Input type="text" value={resetPwd} onChange={(e) => setResetPwd(e.target.value)} placeholder="输入新密码" autoFocus />
             </div>
 
             <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
-              <button onClick={() => setResetTarget(null)} className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 cursor-pointer">取消</button>
-              <button onClick={resetPassword} disabled={busy} className="inline-flex items-center gap-2 bg-[#e0fe3d] hover:bg-white text-[#121212] font-black text-xs uppercase px-6 py-2.5 rounded-xl cursor-pointer">
+              <Button type="button" variant="outline" onClick={() => setResetTarget(null)}>取消</Button>
+              <Button onClick={resetPassword} disabled={busy} className="bg-[#e0fe3d] text-[#121212] hover:bg-white">
                 <KeyRound className="w-4 h-4" /> {busy ? '重置中...' : '确认重置'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
