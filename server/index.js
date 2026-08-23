@@ -323,7 +323,8 @@ app.get('/api/admin/users', adminGate, async (req, res, next) => {
     const resp = await tcRequest('DescribeEndUsers', { EnvId: ENV_ID, Limit: limit, Offset: offset });
     const roles = await pgGet('/user_roles?select=uid,role');
     const roleMap = new Map((roles || []).map((r) => [r.uid, r.role]));
-    res.json({ total: Number(resp.Total) || (resp.Users?.length ?? 0), users: (resp.Users || []).map((u) => mapUser(u, roleMap)) });
+    const users = (resp.Users || []).map((u) => mapUser(u, roleMap));
+    res.json({ total: users.length, users });
   } catch (e) { next(e); }
 });
 
@@ -357,7 +358,17 @@ app.patch('/api/admin/users/:uid', adminGate, async (req, res, next) => {
       await tcRequest('ModifyEndUser', { EnvId: ENV_ID, UUId: uid, Status: disabled ? 'DISABLE' : 'ENABLE' });
     }
     if (typeof password === 'string' && password.length >= 6) {
-      await tcRequest('ModifyEndUserAccount', { EnvId: ENV_ID, Uuid: uid, Password: password });
+      try {
+        await tcRequest('ModifyEndUserAccount', { EnvId: ENV_ID, Uuid: uid, Password: password });
+      } catch (e) {
+        // CloudBase can't modify a DISABLED account's credentials ("user id not exist").
+        if (e?.code === 'InvalidParameter' || /not exist/i.test(e?.message || '')) {
+          const err = new Error('该用户已被封禁，请先解封后再重置密码');
+          err.status = 409;
+          throw err;
+        }
+        throw e;
+      }
     }
     res.json({ ok: true });
   } catch (e) { next(e); }
