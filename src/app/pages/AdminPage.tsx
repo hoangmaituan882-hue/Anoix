@@ -13,6 +13,7 @@ import { RoundsAdmin } from '../../features/admin/RoundsAdmin';
 import { UsersAdmin } from '../../features/admin/UsersAdmin';
 import { PoolAdmin } from '../../features/admin/PoolAdmin';
 import { StatsAdmin } from '../../features/admin/StatsAdmin';
+import { GoodsAdmin } from '../../features/admin/GoodsAdmin';
 import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -50,6 +51,7 @@ import {
   Flame,
   Activity,
   Tv,
+  ShoppingBag,
 } from 'lucide-react';
 
 type AuthState = 'checking' | 'signed-out' | 'signed-in' | 'unauthorized';
@@ -268,7 +270,7 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
 
 // ---------------- Redesigned Studio TRIGGER Admin Panel ----------------
 const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
-  const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds' | 'pool' | 'stats' | 'users'>('films');
+  const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds' | 'pool' | 'stats' | 'goods' | 'users'>('films');
   const [filmsCount, setFilmsCount] = useState<number>(0);
   const [newsCount, setNewsCount] = useState<number>(0);
   const [cmdOpen, setCmdOpen] = useState(false);
@@ -303,7 +305,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
   };
 
   interface TabItem {
-    key: 'films' | 'news' | 'screenings' | 'rounds' | 'pool' | 'stats' | 'users';
+    key: 'films' | 'news' | 'screenings' | 'rounds' | 'pool' | 'stats' | 'goods' | 'users';
     label: string;
     en: string;
     icon: React.ComponentType<{ className?: string }>;
@@ -317,6 +319,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
     { key: 'rounds', label: '选片与投票', en: 'VOTING', icon: Vote },
     { key: 'pool', label: '提名库', en: 'POOL', icon: Flame },
     { key: 'stats', label: '统计', en: 'STATS', icon: Activity },
+    { key: 'goods', label: '周边商品', en: 'GOODS', icon: ShoppingBag },
     { key: 'users', label: '用户管理', en: 'USERS', icon: UserCheck },
   ];
 
@@ -421,6 +424,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
         {tab === 'rounds' && <RoundsAdmin />}
         {tab === 'pool' && <PoolAdmin />}
         {tab === 'stats' && <StatsAdmin />}
+        {tab === 'goods' && <GoodsAdmin />}
         {tab === 'users' && <UsersAdmin />}
       </main>
 

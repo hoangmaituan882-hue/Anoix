@@ -187,7 +187,10 @@ export const CalendarPage: React.FC<{
                       <motion.div key={e.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.06, ease: TRIGGER_EASE }} className="rounded-2xl border border-white/10 bg-black/30 overflow-hidden">
                         {e.type === 'screening' ? (
                           <div className="p-3.5">
-                            <p className="font-black text-white">{e.title}</p>
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-black text-white">{e.title}</p>
+                              <button onClick={() => navigate(`/screenings/${e.id}`, { viewTransition: true })} className="shrink-0 text-[11px] font-black text-[#ff3650] hover:text-white transition-colors cursor-pointer">详情 →</button>
+                            </div>
                             <p className="text-xs text-white/40 mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> {e.venue || '待定场地'}{e.theme ? ` · ${e.theme}` : ''}</p>
                             {e.films.length > 0 && (
                               <div className="flex flex-wrap gap-1.5 mt-2.5">

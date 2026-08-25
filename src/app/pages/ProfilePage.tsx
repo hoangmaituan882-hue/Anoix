@@ -5,7 +5,9 @@ import { Language } from '../../types';
 import { AdminUser } from '../../types/user';
 import { me } from '../../lib/me';
 import { nominations, VoteActivity, NominationActivity } from '../../lib/nominations';
-import { community, FavoriteFilm } from '../../lib/community';
+import { community, FavoriteFilm, WatchItem } from '../../lib/community';
+import { Rating } from '../../components/ui/rating';
+import { YearReview } from '../../features/profile/YearReview';
 import { getSession, signOut } from '../../lib/session';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
@@ -20,7 +22,7 @@ import { Separator } from '../../components/ui/separator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
-import { ArrowLeft, Mail, Calendar, Shield, KeyRound, UserRound, Save, Vote, Heart, X } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, Shield, KeyRound, UserRound, Save, Vote, Heart, X, Eye } from 'lucide-react';
 
 export const ProfilePage: React.FC<{
   lang: Language;
@@ -35,6 +37,8 @@ export const ProfilePage: React.FC<{
   const [loading, setLoading] = useState(true);
   const [activity, setActivity] = useState<{ votes: VoteActivity[]; nominations: NominationActivity[] } | null>(null);
   const [favorites, setFavorites] = useState<FavoriteFilm[] | null>(null);
+  const [watchLog, setWatchLog] = useState<WatchItem[] | null>(null);
+  const [yearReviewOpen, setYearReviewOpen] = useState(false);
 
   const [form, setForm] = useState({ nickname: '', avatarUrl: '' });
   const [saving, setSaving] = useState(false);
@@ -64,6 +68,13 @@ export const ProfilePage: React.FC<{
     try { await community.removeFavorite(filmId); void loadFavorites(); }
     catch (e) { toastError(e instanceof Error ? e.message : '移除失败'); }
   };
+
+  const loadWatch = useCallback(async () => {
+    try { setWatchLog(await community.watchList()); }
+    catch { setWatchLog([]); }
+  }, []);
+
+  useEffect(() => { void loadWatch(); }, [loadWatch]);
 
   const load = useCallback(async () => {
     try {
@@ -207,11 +218,23 @@ export const ProfilePage: React.FC<{
               {/* Right: tabs */}
               <Card className="border-white/10 bg-[#1a1a1a]">
                 <CardContent className="p-6">
+                  <button
+                    onClick={() => setYearReviewOpen(true)}
+                    className="w-full mb-5 flex items-center gap-3 rounded-2xl border border-[#ff3650]/30 bg-gradient-to-r from-[#ff3650]/15 to-[#e0fe3d]/5 px-4 py-3.5 text-left hover:border-[#ff3650]/60 transition-colors cursor-pointer group"
+                  >
+                    <span className="text-2xl">✨</span>
+                    <span className="flex-1">
+                      <span className="block text-sm font-black text-white">2026 年度回顾已生成</span>
+                      <span className="block text-xs text-white/40">看看你今年的选片与放映</span>
+                    </span>
+                    <span className="text-[#ff3650] font-black group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
                   <Tabs defaultValue={params.get('tab') === 'votes' ? 'votes' : 'profile'}>
                     <TabsList className="w-full sm:w-auto">
                       <TabsTrigger value="profile" className="flex-1 sm:flex-none">资料</TabsTrigger>
                       <TabsTrigger value="votes" className="flex-1 sm:flex-none">我的投票</TabsTrigger>
                       <TabsTrigger value="favorites" className="flex-1 sm:flex-none">收藏</TabsTrigger>
+                      <TabsTrigger value="watch" className="flex-1 sm:flex-none">观影记录</TabsTrigger>
                       <TabsTrigger value="security" className="flex-1 sm:flex-none">安全</TabsTrigger>
                     </TabsList>
 
@@ -327,6 +350,37 @@ export const ProfilePage: React.FC<{
                       )}
                     </TabsContent>
 
+                    {/* Watch log tab */}
+                    <TabsContent value="watch" className="space-y-3">
+                      {watchLog === null ? (
+                        <div className="py-8 flex justify-center">
+                          <Loader variant="dots" size={24} label="加载观影记录" className="text-[#ff3650]" />
+                        </div>
+                      ) : watchLog.length === 0 ? (
+                        <div className="py-12 text-center text-white/40">
+                          <Eye className="w-8 h-8 mx-auto mb-2 text-white/20" />
+                          <p className="text-sm font-bold">还没有观影记录</p>
+                          <p className="text-xs text-white/30 mt-1">在作品详情页标记「已看过」并评分</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {watchLog.map((w) => (
+                            <div key={w.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5">
+                              {w.image ? <img src={w.image} alt="" className="w-10 h-14 rounded-md object-cover shrink-0" /> : <div className="w-10 h-14 rounded-md bg-white/5 shrink-0" />}
+                              <div className="min-w-0 flex-1">
+                                <button onClick={() => navigate(`/films/${w.film_id}`)} className="text-left group">
+                                  <p className="text-sm font-bold text-white truncate group-hover:text-[#ff3650] transition-colors">{w.film_title}</p>
+                                </button>
+                                <Rating value={w.rating} readOnly size={14} className="mt-0.5" />
+                                {w.review && <p className="text-xs text-white/40 mt-1 line-clamp-1">「{w.review}」</p>}
+                              </div>
+                              <span className="shrink-0 text-[10px] text-white/30 font-mono">{w.watched_at ? w.watched_at.slice(0, 10) : ''}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+
                     {/* Security tab */}
                     <TabsContent value="security" className="space-y-5">
                       <div className="space-y-1.5">
@@ -360,6 +414,8 @@ export const ProfilePage: React.FC<{
       </motion.main>
 
       <Footer lang={lang} />
+
+      <YearReview open={yearReviewOpen} onClose={() => setYearReviewOpen(false)} userName={profile?.nickname || profile?.username || '影迷'} />
     </>
   );
 };

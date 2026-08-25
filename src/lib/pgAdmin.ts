@@ -124,6 +124,29 @@ export const adminScreenings = {
   remove: (id: string) => pg<null>('DELETE', `/screenings?id=eq.${encodeURIComponent(id)}`),
 };
 
+// ---------- goods (merchandise) ----------
+export interface GoodsRow {
+  id: string;
+  series: string | null;
+  title: string;
+  title_zh: string | null;
+  title_en: string | null;
+  price: string | null;
+  image: string | null;
+  taobao_url: string | null;
+  is_preorder: boolean;
+  description: string | null;
+  sort_order: number;
+}
+
+export const adminGoods = {
+  list: () => pg<GoodsRow[]>('GET', '/goods?select=*&order=sort_order.asc'),
+  create: (row: Partial<GoodsRow>) => pg<GoodsRow[]>('POST', '/goods', row),
+  update: (id: string, row: Partial<GoodsRow>) =>
+    pg<GoodsRow[]>('PATCH', `/goods?id=eq.${encodeURIComponent(id)}`, row),
+  remove: (id: string) => pg<null>('DELETE', `/goods?id=eq.${encodeURIComponent(id)}`),
+};
+
 // ---------- nomination rounds ----------
 export interface RoundRow {
   id: string;

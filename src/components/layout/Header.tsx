@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { TriggerLogo } from '../ui/TriggerLogo';
 import { Language } from '../../types';
 import { I18N } from '../../data/triggerData';
-import { Menu, X, Lock, User, LogOut, UserRound, Vote } from 'lucide-react';
+import { Menu, X, Lock, User, LogOut, UserRound, Vote, Search } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { getSession, signOut, SessionUser } from '../../lib/session';
 import {
@@ -17,6 +17,7 @@ import {
 import { Avatar, AvatarFallback } from '../ui/avatar';
 import { openActivityDrawer } from '../../features/profile/ActivityDrawer';
 import { NotificationBell } from '../../features/community/NotificationBell';
+import { openSearch } from '../../features/search/SearchPalette';
 
 interface HeaderProps {
   lang: Language;
@@ -161,6 +162,15 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
 
           {/* Right Area: Theme + Account + Language + Hamburger */}
           <div className="flex items-center gap-2.5 justify-self-end">
+            <button
+              onClick={() => openSearch()}
+              className="hidden sm:inline-flex items-center gap-2 h-8 px-3 rounded-full bg-white/10 hover:bg-white/20 text-white/50 hover:text-white text-xs font-bold transition-colors cursor-pointer"
+              title="搜索 (⌘K)"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span className="text-white/40">搜索</span>
+              <kbd className="flex items-center gap-0.5 text-[9px] font-bold text-white/30 border border-white/15 rounded px-1 py-0.5">⌘K</kbd>
+            </button>
             <NotificationBell />
             <ThemeToggle />
             {user ? (

@@ -1,26 +1,64 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { WorkItem, Language } from '../../types';
 import { FilmDetailBody } from './FilmDetailBody';
+import { WatchPanel } from './WatchPanel';
 import { TRIGGER_EASE } from '../../lib/motion';
-import { ArrowRight, X } from 'lucide-react';
+import { community } from '../../lib/community';
+import { useToast } from '../../components/ui/Toast';
+import { ArrowRight, X, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 
 interface FilmDetailModalProps {
   work: WorkItem | null;
+  /** Full works list so the modal can offer prev/next browsing. */
+  works: WorkItem[];
   lang: Language;
   onClose: () => void;
+  onSelectWork: (work: WorkItem) => void;
   onPlayTrailer?: (url: string) => void;
 }
 
 /** Quick-preview modal — full detail content lives in FilmDetailBody. */
 export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
   work,
+  works,
   lang,
   onClose,
+  onSelectWork,
   onPlayTrailer,
 }) => {
+  const { success } = useToast();
+  const [favorited, setFavorited] = useState(false);
+
+  useEffect(() => {
+    if (!work) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [work, onClose]);
+
+  useEffect(() => {
+    if (!work) return;
+    let alive = true;
+    community.favorites()
+      .then((list) => { if (alive) setFavorited(list.some((f) => f.id === work.id)); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [work]);
+
   if (!work) return null;
+
+  const index = works.findIndex((w) => w.id === work.id);
+  const prev = index > 0 ? works[index - 1] : null;
+  const next = index >= 0 && index < works.length - 1 ? works[index + 1] : null;
+
+  const toggleFavorite = async () => {
+    try {
+      if (favorited) { await community.removeFavorite(work.id); setFavorited(false); }
+      else { await community.addFavorite(work.id); setFavorited(true); success(`已收藏「${work.titleZh ?? work.title}」`); }
+    } catch { /* ignore */ }
+  };
 
   return (
     <motion.div
@@ -28,9 +66,29 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto"
       onClick={onClose}
     >
+      {/* Prev / Next floating arrows */}
+      {prev && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onSelectWork(prev); }}
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
+          aria-label="上一个作品"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+      )}
+      {next && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onSelectWork(next); }}
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
+          aria-label="下一个作品"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      )}
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -39,14 +97,24 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
         className="relative w-full max-w-4xl bg-[#1a1a1a] border border-white/20 rounded-3xl overflow-hidden shadow-2xl my-8 text-[#f5ffe5]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
-          aria-label="Close modal"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Close + Favorite */}
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          <button
+            onClick={toggleFavorite}
+            className="w-10 h-10 rounded-full bg-black/70 hover:bg-white/20 text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
+            title={favorited ? '取消收藏' : '收藏'}
+            aria-label="收藏"
+          >
+            <Heart className={`w-5 h-5 ${favorited ? 'fill-[#ff3650] text-[#ff3650]' : ''}`} />
+          </button>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         <FilmDetailBody
           work={work}
@@ -64,8 +132,12 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
             </Link>
           }
         />
+
+        {/* Watch log + rating inside the modal */}
+        <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+          <WatchPanel filmId={work.id} filmTitle={work.titleZh ?? work.title} />
+        </div>
       </motion.div>
     </motion.div>
   );
 };
-

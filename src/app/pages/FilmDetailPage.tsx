@@ -7,6 +7,7 @@ import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { FilmDetailBody } from '../../features/films/FilmDetailBody';
+import { WatchPanel } from '../../features/films/WatchPanel';
 import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Check, Sparkles } from 'lucide-react';
 
 interface FilmDetailPageProps {
@@ -114,6 +115,9 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
                   posterViewTransitionName={isTransitioning && work ? `film-poster-${work.id}` : undefined}
                 />
               </div>
+
+              {/* Watch log + rating */}
+              <WatchPanel filmId={work.id} filmTitle={work.titleZh ?? work.title} />
 
               {/* Prev / Next Pagination */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

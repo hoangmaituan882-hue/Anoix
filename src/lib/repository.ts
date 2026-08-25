@@ -4,7 +4,6 @@ import {
   RECRUIT_IMAGE,
   WORKS_LIST,
   NEWS_LIST,
-  GOODS_LIST,
   YOUTUBE_LIST,
   SOCIAL_LINKS,
 } from '../data/triggerData';
@@ -59,6 +58,20 @@ interface NewsRow {
   sort_order: number;
 }
 
+interface GoodsRow {
+  id: string;
+  series: string | null;
+  title: string;
+  title_zh: string | null;
+  title_en: string | null;
+  price: string | null;
+  image: string | null;
+  taobao_url: string | null;
+  is_preorder: boolean | null;
+  description: string | null;
+  sort_order: number;
+}
+
 const mapFilm = (r: FilmRow): WorkItem => ({
   id: r.id,
   title: r.title,
@@ -96,6 +109,19 @@ const mapNews = (r: NewsRow): NewsItem => ({
   link: r.link ?? undefined,
 });
 
+const mapGoods = (r: GoodsRow): GoodsItem => ({
+  id: r.id,
+  series: r.series ?? '',
+  title: r.title,
+  titleZh: r.title_zh ?? undefined,
+  titleEn: r.title_en ?? undefined,
+  price: r.price ?? '',
+  image: r.image ?? '',
+  url: r.taobao_url ?? '',
+  isPreorder: r.is_preorder ?? false,
+  description: r.description ?? undefined,
+});
+
 // ---------- Cache + subscription ----------
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
@@ -108,6 +134,7 @@ const subscribeRepo = (cb: () => void) => {
 
 let filmsCache: WorkItem[] = WORKS_LIST;
 let newsCache: NewsItem[] = NEWS_LIST;
+let goodsCache: GoodsItem[] = [];
 
 export const repository = {
   /** Featured hero artwork for the landing section. */
@@ -122,8 +149,8 @@ export const repository = {
   /** Announcements (seed first, replaced by live PG rows on refresh). */
   news: (): NewsItem[] => newsCache,
 
-  /** Merchandise catalog (static seed; managed content arrives in stage 4). */
-  goods: (): GoodsItem[] => GOODS_LIST,
+  /** Merchandise catalog (live PG rows; no static fallback). */
+  goods: (): GoodsItem[] => goodsCache,
 
   /** Video feed entries (static seed). */
   videos: (): YoutubeItem[] => YOUTUBE_LIST,
@@ -133,15 +160,14 @@ export const repository = {
 
   /** Pull live content from the anoix-api CloudRun service; keeps static data on failure. */
   async refresh(): Promise<void> {
+    const base = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
+    const timer = new AbortController();
+    const timeout = setTimeout(() => timer.abort(), 8000);
     try {
-      const base = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-      const timer = new AbortController();
-      const timeout = setTimeout(() => timer.abort(), 8000);
       const [filmsRes, newsRes] = await Promise.all([
         fetch(`${base}/api/films`, { signal: timer.signal }),
         fetch(`${base}/api/news`, { signal: timer.signal }),
       ]);
-      clearTimeout(timeout);
       if (!filmsRes.ok || !newsRes.ok) throw new Error(`api status ${filmsRes.status}/${newsRes.status}`);
 
       const films = ((await filmsRes.json()) as FilmRow[]).map(mapFilm);
@@ -151,6 +177,17 @@ export const repository = {
       notify();
     } catch (err) {
       console.warn('[repository] cloud fetch failed, keeping static fallback:', err);
+    }
+
+    // Goods is fetched separately so a failure there never blocks films/news.
+    try {
+      const goodsRes = await fetch(`${base}/api/goods`, { signal: timer.signal });
+      if (goodsRes.ok) goodsCache = ((await goodsRes.json()) as GoodsRow[]).map(mapGoods);
+      notify();
+    } catch (err) {
+      console.warn('[repository] goods fetch failed:', err);
+    } finally {
+      clearTimeout(timeout);
     }
   },
 };
