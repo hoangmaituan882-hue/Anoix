@@ -696,23 +696,38 @@ async function adminGate(req, res, next) {
 }
 
 // ---- User management (CloudBase Auth via TC API + local role table) ----
-const mapUser = (u, roleMap) => ({
-  uid: u.UUId,
-  username: u.UserName || '',
-  email: u.Email || '',
-  nickname: u.NickName || '',
-  gender: u.Gender || '',
-  avatarUrl: u.AvatarUrl || '',
-  country: u.Country || '',
-  province: u.Province || '',
-  city: u.City || '',
-  isAnonymous: Boolean(u.IsAnonymous),
-  disabled: Boolean(u.IsDisabled),
-  hasPassword: Boolean(u.HasPassword),
-  createTime: u.CreateTime || '',
-  updateTime: u.UpdateTime || '',
-  role: roleMap.get(u.UUId) === 'admin' ? 'admin' : 'user',
-});
+const mapUser = (u, roleMap) => {
+  const r = roleMap.get(u.UUId);
+  return {
+    uid: u.UUId,
+    username: u.UserName || '',
+    email: u.Email || '',
+    nickname: u.NickName || '',
+    gender: u.Gender || '',
+    avatarUrl: u.AvatarUrl || '',
+    country: u.Country || '',
+    province: u.Province || '',
+    city: u.City || '',
+    isAnonymous: Boolean(u.IsAnonymous),
+    disabled: Boolean(u.IsDisabled),
+    hasPassword: Boolean(u.HasPassword),
+    createTime: u.CreateTime || '',
+    updateTime: u.UpdateTime || '',
+    role: r?.role === 'admin' ? 'admin' : 'user',
+    userNo: r?.user_no || null,
+    registeredAt: r?.registered_at || null,
+  };
+};
+
+async function nextUserNo() {
+  const rows = await pgGet('/user_roles?select=user_no');
+  let max = 0;
+  for (const r of rows || []) {
+    const n = parseInt(String(r.user_no || '').replace(/\D/g, ''), 10) || 0;
+    if (n > max) max = n;
+  }
+  return String(max + 1).padStart(3, '0');
+}
 
 app.get('/api/admin/users', adminGate, async (req, res, next) => {
   try {
@@ -720,8 +735,8 @@ app.get('/api/admin/users', adminGate, async (req, res, next) => {
     const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 100);
     const offset = Math.max(Number(req.query.offset) || 0, 0);
     const resp = await tcRequest('DescribeEndUsers', { EnvId: ENV_ID, Limit: limit, Offset: offset });
-    const roles = await pgGet('/user_roles?select=uid,role');
-    const roleMap = new Map((roles || []).map((r) => [r.uid, r.role]));
+    const roles = await pgGet('/user_roles?select=uid,role,user_no,registered_at');
+    const roleMap = new Map((roles || []).map((r) => [r.uid, r]));
     const users = (resp.Users || []).map((u) => mapUser(u, roleMap));
     res.json({ total: users.length, users });
   } catch (e) { next(e); }
@@ -737,7 +752,14 @@ app.post('/api/admin/users', adminGate, async (req, res, next) => {
     const resp = await tcRequest('CreateEndUserAccount', { EnvId: ENV_ID, Username: name, Password: password });
     const uid = resp?.User?.UUId || resp?.UUId || null;
     if (uid && role === 'admin') {
-      await pgWrite('POST', '/user_roles', { uid, username: name, role: 'admin' });
+      const userNo = await nextUserNo();
+      await pgWrite('POST', '/user_roles', {
+        uid,
+        username: name,
+        role: 'admin',
+        user_no: userNo,
+        registered_at: new Date().toISOString(),
+      });
     }
     res.json({ ok: true, uid });
   } catch (e) { next(e); }

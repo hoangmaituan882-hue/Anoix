@@ -257,6 +257,7 @@ export const UsersAdmin: React.FC = () => {
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
+                    {u.userNo && <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#ff3650]/15 text-[#ff3650] border border-[#ff3650]/40 font-mono">NO.{u.userNo}</span>}
                     <span className="font-black text-white truncate">{u.nickname || u.username || u.uid}</span>
                     {u.role === 'admin' && <Badge>ADMIN</Badge>}
                     {u.disabled ? (
@@ -279,7 +280,7 @@ export const UsersAdmin: React.FC = () => {
               <div className="hidden xl:flex items-center gap-6 text-xs text-white/40 shrink-0">
                 <div className="text-right">
                   <span className="text-[10px] text-white/30 uppercase block">注册时间</span>
-                  <span className="font-mono">{u.createTime || '—'}</span>
+                  <span className="font-mono">{u.registeredAt ? u.registeredAt.slice(0, 10) : (u.createTime || '—')}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] text-white/30 uppercase block">密码</span>
