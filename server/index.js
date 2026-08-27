@@ -87,7 +87,19 @@ app.use((req, res, next) => {
   next();
 });
 
-async function pgGet(path, _retried = false) {
+// Security headers
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-DNS-Prefetch-Control', 'off');
+  next();
+});
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const GATEWAY_RETRYABLE = new Set([502, 503, 504]);
+
+async function pgGet(path, _retried = false, _attempt = 0) {
   if (!dbEnabled) {
     const err = new Error('data APIs disabled: missing admin credentials');
     err.status = 503;
@@ -98,7 +110,11 @@ async function pgGet(path, _retried = false) {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (r.status === 401 && !_retried) {
-    return pgGet(path, true); // token expired mid-flight — re-login once
+    return pgGet(path, true, _attempt); // token expired mid-flight — re-login once
+  }
+  if (GATEWAY_RETRYABLE.has(r.status) && _attempt < 2) {
+    await sleep(200 * (_attempt + 1)); // transient gateway blip — backoff retry
+    return pgGet(path, _retried, _attempt + 1);
   }
   if (!r.ok) {
     const body = await r.text();
@@ -110,7 +126,7 @@ async function pgGet(path, _retried = false) {
 }
 
 /** Write helper (same auth, returns [status, body]) without throwing on 4xx. */
-async function pgWrite(method, path, body, _retried = false) {
+async function pgWrite(method, path, body, _retried = false, _attempt = 0) {
   const token = await getAdminToken(_retried); // force a fresh login on the retry
   const r = await fetch(`${PG_BASE}${path}`, {
     method,
@@ -122,7 +138,11 @@ async function pgWrite(method, path, body, _retried = false) {
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (r.status === 401 && !_retried) {
-    return pgWrite(method, path, body, true);
+    return pgWrite(method, path, body, true, _attempt);
+  }
+  if (GATEWAY_RETRYABLE.has(r.status) && _attempt < 2) {
+    await sleep(200 * (_attempt + 1));
+    return pgWrite(method, path, body, _retried, _attempt + 1);
   }
   const text = await r.text();
   let json = null;
@@ -131,7 +151,7 @@ async function pgWrite(method, path, body, _retried = false) {
 }
 
 /** Atomic upsert via PostgREST `resolution=merge-duplicates` (requires a PK/UNIQUE). */
-async function pgUpsert(path, body, _retried = false) {
+async function pgUpsert(path, body, _retried = false, _attempt = 0) {
   const token = await getAdminToken(_retried);
   const r = await fetch(`${PG_BASE}${path}`, {
     method: 'POST',
@@ -143,7 +163,11 @@ async function pgUpsert(path, body, _retried = false) {
     body: JSON.stringify(body),
   });
   if (r.status === 401 && !_retried) {
-    return pgUpsert(path, body, true);
+    return pgUpsert(path, body, true, _attempt);
+  }
+  if (GATEWAY_RETRYABLE.has(r.status) && _attempt < 2) {
+    await sleep(200 * (_attempt + 1));
+    return pgUpsert(path, body, _retried, _attempt + 1);
   }
   const text = await r.text();
   let json = null;
