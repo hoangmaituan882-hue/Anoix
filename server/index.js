@@ -29,6 +29,7 @@ import {
 } from './auth.js';
 import { tcRequest, tcEnabled } from './tcapi.js';
 import { weekStartDateString, personaFor, nextUserNoFromList } from './lib/pure.js';
+import { corsMiddleware, securityHeaders, errorHandler } from './lib/middleware.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.resolve(__dirname, '../dist');
@@ -70,31 +71,8 @@ async function getAdminToken(force = false) {
 
 const app = express();
 app.use(express.json());
-
-// Public read API. Echo the request origin (instead of a wildcard) so the
-// signed voter cookie can be used cross-origin in local dev; same-origin
-// production traffic is unaffected.
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  res.setHeader('Access-Control-Allow-Origin', origin || '*');
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Vary', 'Origin');
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') return res.sendStatus(204);
-  next();
-});
-
-// Security headers
-app.use((_req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('X-DNS-Prefetch-Control', 'off');
-  next();
-});
+app.use(corsMiddleware);
+app.use(securityHeaders);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const GATEWAY_RETRYABLE = new Set([502, 503, 504]);
@@ -1406,14 +1384,8 @@ app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path.join(DIST_DIR, 'index.html'));
 });
 
-// ---- Unified JSON error handler (routes call next(e); tcRequest sets .status/.code) ----
-// eslint-disable-next-line no-unused-vars
-app.use((err, _req, res, _next) => {
-  const status = typeof err?.status === 'number' ? err.status : 500;
-  const body = { error: err?.code || (status >= 500 ? 'server_error' : 'error') };
-  if (status >= 500 && err?.message) body.message = err.message;
-  if (!res.headersSent) res.status(status).json(body);
-});
+// Unified JSON error handler (routes call next(e); tcRequest sets .status/.code)
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`[anoix] web+api listening on :${PORT}, env=${ENV_ID}, dist=${DIST_DIR}`);
