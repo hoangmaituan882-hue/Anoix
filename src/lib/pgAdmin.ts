@@ -55,6 +55,8 @@ export interface FilmRow {
   title_zh: string | null;
   title_en: string | null;
   year: string | null;
+  release_date: string | null;
+  duration: number | null;
   category: string | null;
   image: string | null;
   landscape_image: string | null;
@@ -205,6 +207,8 @@ export function filmToRow(w: WorkItem): Partial<FilmRow> {
     title_zh: str(w.titleZh),
     title_en: str(w.titleEn),
     year: str(w.year),
+    release_date: str(w.releaseDate),
+    duration: w.duration ?? null,
     category: str(w.category),
     image: str(w.image),
     landscape_image: str(w.landscapeImage),
@@ -231,6 +235,8 @@ export function rowToFilm(r: FilmRow): WorkItem {
     titleZh: r.title_zh ?? undefined,
     titleEn: r.title_en ?? undefined,
     year: r.year ?? '',
+    releaseDate: r.release_date ?? undefined,
+    duration: r.duration ?? undefined,
     category: r.category ?? '',
     image: r.image ?? '',
     landscapeImage: r.landscape_image ?? undefined,

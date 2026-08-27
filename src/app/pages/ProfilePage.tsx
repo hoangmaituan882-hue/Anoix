@@ -22,7 +22,30 @@ import { Separator } from '../../components/ui/separator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
-import { ArrowLeft, Mail, Calendar, Shield, KeyRound, UserRound, Save, Vote, Heart, X, Eye } from 'lucide-react';
+import { PageHero } from '../../components/layout/PageHero';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { ScreeningStandingCard } from '../../features/ranking/ScreeningStandingCard';
+import { LeaderboardModal } from '../../features/ranking/LeaderboardModal';
+import {
+  ArrowLeft,
+  Mail,
+  Calendar,
+  Shield,
+  KeyRound,
+  UserRound,
+  Save,
+  Vote,
+  Heart,
+  X,
+  Eye,
+  User,
+  Award,
+  Sparkles,
+  Film,
+  Clock,
+  Star,
+  CheckCircle2,
+} from 'lucide-react';
 
 export const ProfilePage: React.FC<{
   lang: Language;
@@ -137,24 +160,17 @@ export const ProfilePage: React.FC<{
       <Header lang={lang} setLang={setLang} onNavigate={() => navigate('/')} onOpenModal={onOpenModal} />
 
       <motion.main
-        className="w-full min-h-screen bg-[#151515] px-4 sm:px-8 lg:px-12 py-24 lg:py-28 text-[#f5ffe5]"
+        className="relative w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#f5ffe5]"
         initial={{ x: 80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: TRIGGER_EASE }}
       >
-        <div className="max-w-5xl mx-auto">
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-1.5 text-white/50 hover:text-[#ff3650] font-bold text-xs uppercase tracking-wider transition-colors mb-6 cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>{lang === 'zh' ? '返回首页' : 'BACK TO HOME'}</span>
-          </button>
-
-          <div className="mb-8">
-            <p className="text-xs font-black text-[#ff3650] uppercase tracking-widest mb-1">Anoix Account</p>
-            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">个人资料</h1>
-          </div>
+        <div className="max-w-5xl mx-auto relative z-10">
+          {/* Unified Page Hero: 24px Main Title + 14px Subtitle */}
+          <PageHero
+            title="个人中心与活动档案"
+            subtitle="查看与维护个人资料、放映会观影履历、选片投票及追番收藏。"
+          />
 
           {loading ? (
             <div className="py-20 flex justify-center">
@@ -169,67 +185,90 @@ export const ProfilePage: React.FC<{
             </Card>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
-              {/* Left: identity card */}
-              <Card className="border-white/10 bg-[#1a1a1a]">
-                <CardHeader className="items-center text-center">
-                  <Avatar className="h-24 w-24 ring-2 ring-[#ff3650]/40">
-                    <AvatarImage src={form.avatarUrl || undefined} alt={name} />
-                    <AvatarFallback className="bg-[#ff3650]/20 text-[#ff3650] text-2xl font-black">
-                      {name.slice(0, 1).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <CardTitle className="text-xl font-black mt-2">{name}</CardTitle>
-                  <CardDescription className="flex items-center justify-center gap-1.5 flex-wrap">
-                    {profile.role === 'admin' && <Badge>ADMIN</Badge>}
-                    {profile.disabled ? (
-                      <Badge variant="destructive">已封禁</Badge>
-                    ) : (
-                      <Badge variant="secondary">正常</Badge>
-                    )}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <Separator />
-                  <div className="flex items-center gap-2.5 text-white/70">
-                    <UserRound className="w-4 h-4 text-white/40" />
-                    <span className="text-white/40">用户名</span>
-                    <span className="ml-auto font-mono">{profile.username || '—'}</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-white/70">
-                    <Mail className="w-4 h-4 text-white/40" />
-                    <span className="text-white/40">邮箱</span>
-                    <span className="ml-auto font-mono truncate max-w-[160px]">{profile.email || '—'}</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-white/70">
-                    <Calendar className="w-4 h-4 text-white/40" />
-                    <span className="text-white/40">注册时间</span>
-                    <span className="ml-auto font-mono text-xs">{profile.createTime || '—'}</span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-white/70">
-                    <Shield className="w-4 h-4 text-white/40" />
-                    <span className="text-white/40">UID</span>
-                    <span className="ml-auto font-mono text-xs text-white/40 truncate max-w-[140px]">{profile.uid}</span>
-                  </div>
-                  <Separator />
-                  <Button variant="outline" className="w-full" onClick={doLogout}>退出登录</Button>
-                </CardContent>
-              </Card>
+              {/* Left: identity card + screening standing card */}
+              <div className="space-y-4">
+                <Card className="border-white/10 bg-[#1a1a1a]">
+                  <CardHeader className="items-center text-center">
+                    <Avatar className="h-24 w-24 ring-2 ring-[#ff3650]/40">
+                      <AvatarImage src={form.avatarUrl || undefined} alt={name} />
+                      <AvatarFallback className="bg-[#ff3650]/20 text-[#ff3650] text-2xl font-black">
+                        {name.slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <CardTitle className="text-xl font-black mt-2">{name}</CardTitle>
+                    <CardDescription className="flex items-center justify-center gap-1.5 flex-wrap">
+                      {profile.role === 'admin' && <Badge>ADMIN</Badge>}
+                      {profile.disabled ? (
+                        <Badge variant="destructive">已封禁</Badge>
+                      ) : (
+                        <Badge variant="secondary">正常</Badge>
+                      )}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <Separator />
+                    <div className="flex items-center gap-2.5 text-white/70">
+                      <UserRound className="w-4 h-4 text-white/40" />
+                      <span className="text-white/40">用户名</span>
+                      <span className="ml-auto font-mono">{profile.username || '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-white/70">
+                      <Mail className="w-4 h-4 text-white/40" />
+                      <span className="text-white/40">邮箱</span>
+                      <span className="ml-auto font-mono truncate max-w-[160px]">{profile.email || '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-white/70">
+                      <Calendar className="w-4 h-4 text-white/40" />
+                      <span className="text-white/40">注册时间</span>
+                      <span className="ml-auto font-mono text-xs">{profile.createTime || '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-white/70">
+                      <Shield className="w-4 h-4 text-white/40" />
+                      <span className="text-white/40">UID</span>
+                      <span className="ml-auto font-mono text-xs text-white/40 truncate max-w-[140px]">{profile.uid}</span>
+                    </div>
+                    <Separator />
+                    <Button variant="outline" className="w-full" onClick={doLogout}>退出登录</Button>
+                  </CardContent>
+                </Card>
+
+                <ScreeningStandingCard />
+              </div>
 
               {/* Right: tabs */}
               <Card className="border-white/10 bg-[#1a1a1a]">
                 <CardContent className="p-6">
-                  <button
-                    onClick={() => setYearReviewOpen(true)}
-                    className="w-full mb-5 flex items-center gap-3 rounded-2xl border border-[#ff3650]/30 bg-gradient-to-r from-[#ff3650]/15 to-[#e0fe3d]/5 px-4 py-3.5 text-left hover:border-[#ff3650]/60 transition-colors cursor-pointer group"
-                  >
-                    <span className="text-2xl">✨</span>
-                    <span className="flex-1">
-                      <span className="block text-sm font-black text-white">2026 年度回顾已生成</span>
-                      <span className="block text-xs text-white/40">看看你今年的选片与放映</span>
-                    </span>
-                    <span className="text-[#ff3650] font-black group-hover:translate-x-1 transition-transform">→</span>
-                  </button>
-                  <Tabs defaultValue={params.get('tab') === 'votes' ? 'votes' : 'profile'}>
+                  {/* Credentials & Year Review Banners */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                    <button
+                      onClick={() => navigate('/credentials', { viewTransition: true })}
+                      className="flex items-center gap-3 rounded-2xl border border-[#ff3650]/40 bg-gradient-to-r from-[#ff3650]/20 via-[#ff3650]/10 to-transparent p-3.5 text-left hover:border-[#ff3650] transition-all cursor-pointer group"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-[#ff3650] text-white flex items-center justify-center font-black shrink-0 shadow-lg">
+                        <Award className="w-5 h-5" />
+                      </div>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm font-black text-white truncate">我的放映资历档案</span>
+                        <span className="block text-xs text-white/50 truncate">3D 高光展台与打卡票根</span>
+                      </span>
+                      <span className="text-[#ff3650] font-black group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
+
+                    <button
+                      onClick={() => setYearReviewOpen(true)}
+                      className="flex items-center gap-3 rounded-2xl border border-[#e0fe3d]/30 bg-gradient-to-r from-[#e0fe3d]/15 to-transparent p-3.5 text-left hover:border-[#e0fe3d]/60 transition-all cursor-pointer group"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-[#e0fe3d] text-[#121212] flex items-center justify-center font-black shrink-0 shadow-lg">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm font-black text-white truncate">2026 年度回顾</span>
+                        <span className="block text-xs text-white/50 truncate">年度选片与观影总览</span>
+                      </span>
+                      <span className="text-[#e0fe3d] font-black group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
+                  </div>
+                  <Tabs defaultValue={params.get('tab') === 'votes' ? 'votes' : 'profile'} variant="segment">
                     <TabsList className="w-full sm:w-auto">
                       <TabsTrigger value="profile" className="flex-1 sm:flex-none">资料</TabsTrigger>
                       <TabsTrigger value="votes" className="flex-1 sm:flex-none">我的投票</TabsTrigger>
@@ -416,6 +455,7 @@ export const ProfilePage: React.FC<{
       <Footer lang={lang} />
 
       <YearReview open={yearReviewOpen} onClose={() => setYearReviewOpen(false)} userName={profile?.nickname || profile?.username || '影迷'} />
+      <LeaderboardModal />
     </>
   );
 };

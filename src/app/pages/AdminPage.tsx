@@ -15,6 +15,7 @@ import { PoolAdmin } from '../../features/admin/PoolAdmin';
 import { StatsAdmin } from '../../features/admin/StatsAdmin';
 import { GoodsAdmin } from '../../features/admin/GoodsAdmin';
 import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
+import { AdminHeader, AdminTab } from '../../features/admin/AdminHeader';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
@@ -270,23 +271,48 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
 
 // ---------------- Redesigned Studio TRIGGER Admin Panel ----------------
 const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
-  const [tab, setTab] = useState<'films' | 'news' | 'screenings' | 'rounds' | 'pool' | 'stats' | 'goods' | 'users'>('films');
+  const [tab, setTab] = useState<AdminTab>('films');
   const [filmsCount, setFilmsCount] = useState<number>(0);
   const [newsCount, setNewsCount] = useState<number>(0);
+  const [adminName, setAdminName] = useState<string>('ADMIN');
   const [cmdOpen, setCmdOpen] = useState(false);
 
   useEffect(() => {
-    // Initial fetch counts for badges
+    // Initial fetch counts and admin info for badges
     void adminFilms.list().then((res) => res && setFilmsCount(res.length)).catch(() => {});
     void adminNews.list().then((res) => res && setNewsCount(res.length)).catch(() => {});
+    void getSession().then((u) => {
+      if (u?.name) setAdminName(u.name);
+    });
   }, []);
 
-  // Ctrl/Cmd+K opens the command palette
+  const HOTKEY_MAP: Record<string, AdminTab> = {
+    '1': 'films',
+    '2': 'news',
+    '3': 'goods',
+    '4': 'screenings',
+    '5': 'rounds',
+    '6': 'pool',
+    '7': 'stats',
+    '8': 'users',
+  };
+
+  // Keyboard shortcuts: 1..8 to switch tabs, Cmd/Ctrl+K for command palette
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Don't trigger when user is typing in form inputs or textareas
+      const target = e.target as HTMLElement | null;
+      const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCmdOpen((o) => !o);
+        return;
+      }
+
+      if (!isInput && !e.metaKey && !e.ctrlKey && !e.altKey && HOTKEY_MAP[e.key]) {
+        e.preventDefault();
+        setTab(HOTKEY_MAP[e.key]);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -304,117 +330,37 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
     onSignOut();
   };
 
-  interface TabItem {
-    key: 'films' | 'news' | 'screenings' | 'rounds' | 'pool' | 'stats' | 'goods' | 'users';
-    label: string;
-    en: string;
-    icon: React.ComponentType<{ className?: string }>;
-    count?: number;
-  }
-
-  const TABS: TabItem[] = [
-    { key: 'films', label: '作品资料库', en: 'WORKS', icon: Film, count: filmsCount },
-    { key: 'news', label: '动态与公告', en: 'NEWS', icon: Newspaper, count: newsCount },
-    { key: 'screenings', label: '放映会档案', en: 'SCREENINGS', icon: Calendar },
-    { key: 'rounds', label: '选片与投票', en: 'VOTING', icon: Vote },
-    { key: 'pool', label: '提名库', en: 'POOL', icon: Flame },
-    { key: 'stats', label: '统计', en: 'STATS', icon: Activity },
-    { key: 'goods', label: '周边商品', en: 'GOODS', icon: ShoppingBag },
-    { key: 'users', label: '用户管理', en: 'USERS', icon: UserCheck },
-  ];
-
   const commands: CommandItem[] = [
-    ...TABS.map((t) => ({
-      id: `tab-${t.key}`,
-      label: t.label,
-      hint: t.en,
-      icon: <t.icon className="w-4 h-4" />,
-      action: () => setTab(t.key),
-    })),
+    { id: 'tab-films', category: 'actions', label: '作品资料库 (WORKS)', hint: '按 1 切换', icon: <Film className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('films') },
+    { id: 'tab-news', category: 'actions', label: '动态与公告 (NEWS)', hint: '按 2 切换', icon: <Newspaper className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('news') },
+    { id: 'tab-goods', category: 'actions', label: '周边商品 (GOODS)', hint: '按 3 切换', icon: <ShoppingBag className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('goods') },
+    { id: 'tab-screenings', category: 'actions', label: '放映会档案 (SCREENINGS)', hint: '按 4 切换', icon: <Calendar className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('screenings') },
+    { id: 'tab-rounds', category: 'actions', label: '选片与投票 (ROUNDS)', hint: '按 5 切换', icon: <Vote className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('rounds') },
+    { id: 'tab-pool', category: 'actions', label: '提名池 (POOL)', hint: '按 6 切换', icon: <Flame className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('pool') },
+    { id: 'tab-stats', category: 'actions', label: '统计大屏 (STATS)', hint: '按 7 切换', icon: <Activity className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('stats') },
+    { id: 'tab-users', category: 'actions', label: '用户管理 (USERS)', hint: '按 8 切换', icon: <UserCheck className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('users') },
     {
       id: 'sign-out',
-      label: '退出登录',
+      category: 'actions',
+      label: '退出控制台登录',
       hint: 'Sign out',
+      icon: <LogOut className="w-4 h-4 text-white/50" />,
       action: () => signOut(),
     },
   ];
 
   return (
     <div className="min-h-screen bg-[#121212] text-[#f5ffe5] selection:bg-[#ff3650] selection:text-white flex flex-col">
-      {/* Top Console Navigation Bar */}
-      <header className="border-b border-white/10 bg-[#161616]/95 backdrop-blur-md px-4 sm:px-8 py-3.5 sticky top-0 z-30 shadow-2xl">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Logo & Brand Status */}
-          <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-3 group">
-              <TriggerLogo className="w-28 sm:w-32 text-white group-hover:text-[#ff3650] transition-colors" />
-              <div className="h-6 w-px bg-white/20 hidden sm:block" />
-              <div className="hidden sm:block">
-                <span className="text-[10px] font-black text-[#ff3650] uppercase tracking-widest block leading-none">
-                  ADMIN CONSOLE
-                </span>
-                <span className="text-[11px] font-bold text-white/50 leading-none">
-                  v2.0 STUDIO TRIGGER
-                </span>
-              </div>
-            </Link>
-
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-              <span>CLOUDBASE ADMIN</span>
-            </span>
-          </div>
-
-          {/* Tab Navigation */}
-          <nav className="flex items-center gap-1.5 bg-black/60 p-1.5 rounded-2xl border border-white/10 overflow-x-auto scrollbar-none">
-            {TABS.map((t) => {
-              const Icon = t.icon;
-              const active = tab === t.key;
-              return (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                    active
-                      ? 'bg-[#ff3650] text-white shadow-[0_4px_12px_rgba(255,54,80,0.35)]'
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-[#ff3650]'}`} />
-                  <span>{t.label}</span>
-                  {t.count !== undefined && t.count > 0 && (
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                      active ? 'bg-black/30 text-white' : 'bg-white/10 text-white/60'
-                    }`}>
-                      {t.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Quick Actions & Logout */}
-          <div className="flex items-center gap-2.5">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-xs font-bold text-white transition-all border border-white/10"
-              title="查看前台网站"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-[#e0fe3d]" />
-              <span className="hidden sm:inline">访问前台</span>
-            </Link>
-
-            <button
-              onClick={signOut}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#ff3650]/15 hover:bg-[#ff3650] text-[#ff3650] hover:text-white text-xs font-black transition-all border border-[#ff3650]/30 cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>退出登录</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Studio Cyber-Cockpit Navigation Header */}
+      <AdminHeader
+        tab={tab}
+        onTabChange={setTab}
+        filmsCount={filmsCount}
+        newsCount={newsCount}
+        adminName={adminName}
+        onOpenCmd={() => setCmdOpen(true)}
+        onSignOut={signOut}
+      />
 
       {/* Main Admin Content Canvas */}
       <main className="max-w-7xl w-full mx-auto px-4 sm:px-8 py-8 flex-1">
@@ -906,6 +852,26 @@ const FilmFormModal: React.FC<{
               value={form.year}
               onChange={(e) => set('year', e.target.value)}
               placeholder="2026"
+              className={FIELD}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className={LABEL}>上映日期 (Release Date)</label>
+            <input
+              value={form.releaseDate ?? ''}
+              onChange={(e) => set('releaseDate', e.target.value || undefined)}
+              placeholder="YYYY-MM-DD（如 2019-05-24）"
+              className={FIELD}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className={LABEL}>时长 · 分钟 (Duration)</label>
+            <input
+              value={form.duration ?? ''}
+              onChange={(e) => set('duration', e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="102"
               className={FIELD}
             />
           </div>

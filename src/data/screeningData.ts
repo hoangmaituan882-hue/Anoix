@@ -190,5 +190,83 @@ export const SCREENINGS_DATA: Screening[] = [
     ticket_perks: '入场特典：闪亮之杖亚克力挂件 + 露娜诺娃魔法学校入学通知书',
     status: 'completed',
     ticket_price: '¥2,800'
+  },
+  {
+    id: 'screening-2023-cyberpunk-anniversary',
+    title: '『Cyberpunk: Edgerunners』1st Anniversary 渋谷Night爆音ライブ上映',
+    title_zh: '《赛博朋克：边缘行者》开播1周年 涩谷夜间特设爆音Live与CDPR特别放映',
+    title_en: 'Cyberpunk: Edgerunners - 1st Anniversary Shibuya Night Explosive Screening',
+    screen_date: '2023.09.25',
+    time: '20:00 - 23:00',
+    venue: 'Spotify O-EAST (Shibuya, Tokyo)',
+    city: 'Tokyo',
+    country: 'Japan',
+    theme: '大卫与露西的月球之约！夜之城顶级DJ与大银幕声光电沉浸狂欢',
+    film_ids: ['cyberpunk-edgerunners'],
+    poster_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+    demo_poster_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+    landscape_poster_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80'
+    ],
+    recap: 'アニメ公開1周年を記念し、渋谷のライブハウスにて爆音上映＆劇中曲DJイベントを開催。フロアは熱狂の渦となり、劇中挿入歌の大合唱が巻き起こった。',
+    recap_zh: '开播一周年纪念夜！涩谷Livehouse化身夜之城Afterlife酒吧，今石洋之监督登台与玩家粉丝同唱《I Really Want to Stay at Your House》。',
+    format_tags: ['Livehouse 爆音特映', '剧中曲 DJ Live', 'CDPR 官方连动', '限定月球鸡尾酒'],
+    special_guests: ['今石洋之 (监督)', '吉成曜 (总作画监督)', 'Saya Gray (插曲歌手)'],
+    ticket_perks: '入场特典：夜之城月球之约镭射纪念票 + 荒坂通行挂绳',
+    status: 'completed',
+    ticket_price: '¥4,800'
+  },
+  {
+    id: 'screening-2016-kiznaiver-finale',
+    title: '『キズナイーバー』最終話最速先行上映 ＆ プレミアムキャストトーク',
+    title_zh: '《羁绊者》最终话剧场最速先行放映会 & 伤痕羁绊声优见面会',
+    title_en: 'KIZNAIVER - Grand Finale Cinema Premiere & Cast Special Talk',
+    screen_date: '2016.06.25',
+    time: '18:00 - 20:30',
+    venue: 'シネマート新宿 (Cinemart Shinjuku)',
+    city: 'Tokyo',
+    country: 'Japan',
+    theme: '我们因伤痕而相连！冈田麿里与小林宽监督揭秘终幕故事',
+    film_ids: ['kiznaiver'],
+    poster_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+    demo_poster_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+    landscape_poster_url: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80'
+    ],
+    recap: '感動のクライマックス第12話を劇場スクリーンで世界最速公開。梶裕貴、山村響らキャスト陣が涙ながらに作品への想いを語った。',
+    recap_zh: '第12集大结局大银幕泪目首映！梶裕贵、山村响等全体七人组声优全员登台，现场公布专属伤痕纪念徽章。',
+    format_tags: ['最终话先行', '主创全员登台', '全场泪目放映', '签名板抽赏'],
+    special_guests: ['小林寛 (监督)', '岡田麿里 (系列构成)', '梶裕貴 (阿形胜平 CV)', '山村響 (园崎法子 CV)'],
+    ticket_perks: '入场特典：洲笼市羁绊者实验档案袋 + 七人羁绊亚克力挂件',
+    status: 'completed',
+    ticket_price: '¥3,000'
+  },
+  {
+    id: 'screening-2013-kill-la-kill-premiere',
+    title: '『キルラキル』第1話〜第3話 最速プレミアム先行試写会 ＆ プレスカンファレンス',
+    title_zh: '《斩服少女》第1至3话世界最速先行试映会 & 触发者创社盛典',
+    title_en: 'KILL la KILL - World Premiere Screenings Ep 1-3 & Studio Showcase',
+    screen_date: '2013.09.28',
+    time: '17:30 - 20:00',
+    venue: 'TOHOシネマズ 六本木ヒルズ (TOHO Cinemas Roppongi Hills)',
+    city: 'Tokyo',
+    country: 'Japan',
+    theme: 'TRIGGER 首部原创TV动画大银幕震撼试映！燃尽一切的战斗序曲',
+    film_ids: ['kill-la-kill'],
+    poster_url: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80',
+    demo_poster_url: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80',
+    landscape_poster_url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80'
+    ],
+    recap: 'TRIGGER初のオリジナルTVアニメシリーズの幕開けを飾る伝説の試写会。度肝を抜くハイスピードな作画と圧倒的熱量に業界関係者も熱狂した。',
+    recap_zh: 'TRIGGER创社开山之作全球首度揭开神秘面纱！六本木巨幕全场轰鸣，今石洋之与大冢雅彦宣布TRIGGER正式迈入全球动画舞台。',
+    format_tags: ['创社首映 (Studio Debut)', '六本木巨幕', '主创历史集结', '首版限定宣传物料'],
+    special_guests: ['今石洋之 (监督)', '中島かずき (编剧)', '大塚雅彦 (社长)', 'すしお (角色设计)'],
+    ticket_perks: '入场特典：TRIGGER No.001 创始通行卡 + 片太刀剪金属书签',
+    status: 'completed',
+    ticket_price: '¥2,500'
   }
 ];

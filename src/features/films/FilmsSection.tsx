@@ -144,6 +144,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
                 // inline transform updates and make the slide-in feel sluggish.
                 <motion.article
                   key={work.id}
+                  data-film-id={work.id}
                   onClick={() => onSelectWork(work)}
                   initial={{ x: 90, opacity: 0 }}
                   animate={introStarted ? { x: 0, opacity: 1 } : { x: 90, opacity: 0 }}

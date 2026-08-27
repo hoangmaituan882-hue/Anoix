@@ -10,6 +10,8 @@ import { STUDIO_HISTORY_STATS, STUDIO_HISTORY_ERAS } from '../../data/historyDat
 import { HistoryHeroDashboard } from '../../features/history/HistoryHeroDashboard';
 import { HistoryVisualCharts } from '../../features/history/HistoryVisualCharts';
 import { HistoryEraTimeline } from '../../features/history/HistoryEraTimeline';
+import { PageHero } from '../../components/layout/PageHero';
+import { StatusBadge } from '../../components/ui/StatusBadge';
 import { 
   ArrowLeft, 
   Layers, 
@@ -75,17 +77,14 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
 
       <main
         id="history_page_container"
-        className="w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 py-20 lg:py-24 text-[#f5ffe5]"
+        className="w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#f5ffe5]"
       >
-        <div className="max-w-5xl mx-auto">
-          {/* Back button */}
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-1.5 text-white/50 hover:text-[#ff3650] font-bold text-xs uppercase tracking-wider transition-colors mb-6 cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>{lang === 'zh' ? '返回首页' : 'BACK TO HOME'}</span>
-          </button>
+        <div className="max-w-5xl mx-auto relative z-10">
+          {/* Unified Page Hero: 24px Main Title + 14px Subtitle */}
+          <PageHero
+            title="历史编年史与创作数据"
+            subtitle="自 2011 年创立至今，记录 15 年来动画作品诞生轨迹、核心监督系谱与深层创作基因数据。"
+          />
 
           {/* Top Hero Stats Dashboard */}
           <HistoryHeroDashboard
@@ -105,12 +104,12 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <GitCommit className="w-4 h-4 text-[#ff3650]" />
-                <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-                  {lang === 'zh' ? '四大纪元历史编年演进' : 'FOUR ERAS OF STUDIO EVOLUTION'}
+                <h2 className="text-[18px] font-bold text-white tracking-tight">
+                  四大纪元历史编年演进
                 </h2>
               </div>
-              <p className="text-xs text-white/50 mt-0.5">
-                {lang === 'zh' ? '点击纪元快速筛选特定创作时期的重大事件' : 'Filter milestones across 4 distinct eras'}
+              <p className="text-[12px] text-white/50 mt-0.5">
+                点击纪元快速筛选特定创作时期的重大事件
               </p>
             </div>
 
@@ -122,8 +121,8 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={lang === 'zh' ? '搜索事件/监督...' : 'Search history...'}
-                  className="bg-white/5 border border-white/10 focus:border-[#ff3650] rounded-lg pl-7 pr-2.5 py-1 text-xs text-white placeholder-white/40 focus:outline-none transition-colors w-40"
+                  placeholder="搜索历史事件 / 监督..."
+                  className="bg-white/5 border border-white/10 focus:border-[#ff3650] rounded-lg pl-7 pr-2.5 py-1 text-[12px] text-white placeholder-white/40 focus:outline-none transition-colors w-44"
                 />
               </div>
 

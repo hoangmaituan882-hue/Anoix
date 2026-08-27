@@ -472,7 +472,7 @@ export const I18N = {
     seriesLabel: '系列构成',
     castLabel: '主要配音',
     officialSite: '官方特设网站',
-    allWorksModalTitle: 'TRIGGER 历代动画作品一览',
+    allWorksModalTitle: 'TRIGGER 历代放映作品一览',
     recruitModalTitle: '人才招聘 (RECRUIT)',
     aboutModalTitle: '公司概况 (ABOUT US)',
     contactModalTitle: '业务咨询 (CONTACT)',

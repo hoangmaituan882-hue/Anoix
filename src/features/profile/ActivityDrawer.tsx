@@ -29,9 +29,9 @@ const PlannedBadge = () => (
 
 function VoteRow({ v }: { v: VoteActivity; key?: React.Key }) {
   return (
-    <div className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${v.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30'}`}>
-      <Avatar className="h-12 w-9 rounded-lg">
-        <AvatarImage src={v.image || undefined} alt={v.filmTitle} />
+    <div className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all t-tilt-card ${v.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30 hover:border-white/25'}`}>
+      <Avatar className="h-12 w-9 rounded-lg shrink-0 overflow-hidden">
+        <AvatarImage src={v.image || undefined} alt={v.filmTitle} className="hover:scale-110 transition-transform duration-300 object-cover" />
         <AvatarFallback className="bg-white/10 text-xs">{v.filmTitle.slice(0, 1)}</AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
@@ -45,9 +45,9 @@ function VoteRow({ v }: { v: VoteActivity; key?: React.Key }) {
 
 function NominationRow({ n }: { n: NominationActivity; key?: React.Key }) {
   return (
-    <div className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${n.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30'}`}>
-      <Avatar className="h-12 w-9 rounded-lg">
-        <AvatarImage src={n.image || undefined} alt={n.filmTitle} />
+    <div className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all t-tilt-card ${n.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30 hover:border-white/25'}`}>
+      <Avatar className="h-12 w-9 rounded-lg shrink-0 overflow-hidden">
+        <AvatarImage src={n.image || undefined} alt={n.filmTitle} className="hover:scale-110 transition-transform duration-300 object-cover" />
         <AvatarFallback className="bg-white/10 text-xs">{n.filmTitle.slice(0, 1)}</AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
@@ -91,10 +91,10 @@ export const ActivityDrawer: React.FC = () => {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto p-5">
-          <Tabs defaultValue="votes">
-            <TabsList className="w-full">
-              <TabsTrigger value="votes" className="flex-1">我的投票</TabsTrigger>
-              <TabsTrigger value="nominations" className="flex-1">我的提名</TabsTrigger>
+          <Tabs defaultValue="votes" variant="segment">
+            <TabsList className="w-full grid grid-cols-2">
+              <TabsTrigger value="votes" className="w-full">我的投票</TabsTrigger>
+              <TabsTrigger value="nominations" className="w-full">我的提名</TabsTrigger>
             </TabsList>
 
             <TabsContent value="votes" className="mt-4 space-y-2.5">

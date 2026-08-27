@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "copy-assets": "node scripts/copy_assets.js"
   },
   "dependencies": {
     "@cloudbase/js-sdk": "^3.8.1",

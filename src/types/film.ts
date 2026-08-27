@@ -9,6 +9,10 @@ export interface WorkItem {
   titleZh?: string;
   titleEn?: string;
   year: string;
+  /** 上映/放映日期（YYYY-MM-DD，可选）。 */
+  releaseDate?: string;
+  /** 电影时长（分钟，可选，TV 系列可能为空）。 */
+  duration?: number;
   category: string;
   image: string;
   landscapeImage?: string;

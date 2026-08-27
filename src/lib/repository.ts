@@ -25,6 +25,8 @@ interface FilmRow {
   title_zh: string | null;
   title_en: string | null;
   year: string | null;
+  release_date: string | null;
+  duration: number | null;
   category: string | null;
   image: string | null;
   landscape_image: string | null;
@@ -78,6 +80,8 @@ const mapFilm = (r: FilmRow): WorkItem => ({
   titleZh: r.title_zh ?? undefined,
   titleEn: r.title_en ?? undefined,
   year: r.year ?? '',
+  releaseDate: r.release_date ?? undefined,
+  duration: r.duration ?? undefined,
   category: r.category ?? '',
   image: r.image ?? '',
   landscapeImage: r.landscape_image ?? undefined,

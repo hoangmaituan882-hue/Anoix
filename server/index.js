@@ -570,10 +570,27 @@ async function callerIdentity(accessToken) {
     const rows = await r.json();
     const uid = decodeJwtSub(accessToken);
     if (!uid) return null;
-    return { uid, role: rows?.[0]?.role ?? 'user' };
+    const role = rows?.[0]?.role ?? 'user';
+    // Lazily ensure user metadata (user_no + registered_at) for first-time callers.
+    if (!rows?.length) {
+      ensureUserMeta(uid).catch(() => {});
+    }
+    return { uid, role };
   } catch {
     return null;
   }
+}
+
+async function ensureUserMeta(uid) {
+  const existing = await pgGet(`/user_roles?uid=eq.${encodeURIComponent(uid)}&select=uid`);
+  if (existing?.length) return;
+  const userNo = await nextUserNo();
+  await pgWrite('POST', '/user_roles', {
+    uid,
+    role: 'user',
+    user_no: userNo,
+    registered_at: new Date().toISOString(),
+  }).catch(() => {}); // duplicate PK on race → ignore
 }
 
 /**
@@ -751,15 +768,15 @@ app.post('/api/admin/users', adminGate, async (req, res, next) => {
     }
     const resp = await tcRequest('CreateEndUserAccount', { EnvId: ENV_ID, Username: name, Password: password });
     const uid = resp?.User?.UUId || resp?.UUId || null;
-    if (uid && role === 'admin') {
+    if (uid) {
       const userNo = await nextUserNo();
       await pgWrite('POST', '/user_roles', {
         uid,
         username: name,
-        role: 'admin',
+        role: role === 'admin' ? 'admin' : 'user',
         user_no: userNo,
         registered_at: new Date().toISOString(),
-      });
+      }).catch(() => {});
     }
     res.json({ ok: true, uid });
   } catch (e) { next(e); }

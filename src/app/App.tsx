@@ -5,6 +5,8 @@ import { Language, WorkItem, NewsItem, GoodsItem } from '../types';
 import { TRIGGER_EASE } from '../lib/motion';
 import { repository, useRepo } from '../lib/repository';
 import { registerFilmPreview } from '../lib/filmPreview';
+import { registerWorksModal } from '../lib/worksModal';
+import { DynamicContextMenu } from '../components/ui/DynamicContextMenu';
 import { HomePage } from './pages/HomePage';
 import { FilmDetailPage } from './pages/FilmDetailPage';
 import { ScreeningsPage } from './pages/ScreeningsPage';
@@ -14,9 +16,11 @@ import { AdminPage } from './pages/AdminPage';
 import { AuthPage } from './pages/AuthPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { CalendarPage } from './pages/CalendarPage';
+import { CredentialsPage } from './pages/CredentialsPage';
 import { ScreeningDetailPage } from './pages/ScreeningDetailPage';
 import { ActivityDrawer } from '../features/profile/ActivityDrawer';
 import { SearchPalette } from '../features/search/SearchPalette';
+import { CreditsSheetModal } from '../features/credits/CreditsSheetModal';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
 import { NewsDetailModal } from '../features/news/NewsDetailModal';
@@ -33,7 +37,7 @@ import { NotFound } from '../components/ui/NotFound';
 export default function App() {
   return (
     <ToastProvider>
-      <div className="relative min-h-screen overflow-x-clip bg-[#121212] text-[#f5ffe5] font-sans selection:bg-[#ff3650] selection:text-white">
+      <div className="relative min-h-screen overflow-x-clip bg-[#121212] text-[#f5ffe5] font-sans antialiased selection:bg-[#ff3650] selection:text-white">
         <BrowserRouter>
           <AppShell />
         </BrowserRouter>
@@ -68,6 +72,12 @@ const AppShell: React.FC = () => {
   // Let the global search palette open the film detail modal (unified preview).
   useEffect(() => {
     registerFilmPreview(setSelectedWork);
+    registerWorksModal(() => setAllWorksOpen(true));
+    const handleOpenWorks = () => setAllWorksOpen(true);
+    window.addEventListener('open-all-works-modal', handleOpenWorks);
+    return () => {
+      window.removeEventListener('open-all-works-modal', handleOpenWorks);
+    };
   }, []);
 
   // Close any open modal when the route changes (e.g. "查看完整详情" navigates away).
@@ -194,6 +204,18 @@ const AppShell: React.FC = () => {
               <CalendarPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
             }
           />
+          {/* Credentials / Otaku Resume */}
+          <Route
+            path="/credentials"
+            element={
+              <CredentialsPage
+                lang={lang}
+                setLang={setLang}
+                onOpenModal={handleOpenModal}
+                onPlayTrailer={handlePlayTrailer}
+              />
+            }
+          />
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -214,6 +236,9 @@ const AppShell: React.FC = () => {
 
       {/* Global ⌘K search palette */}
       <SearchPalette />
+
+      {/* Global Credits Top-Up & Usage Sheet Modal */}
+      <CreditsSheetModal lang={lang} />
 
       {/* --- MODALS --- */}
       <AnimatePresence>
@@ -301,6 +326,9 @@ const AppShell: React.FC = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Global Dynamic Context Menu */}
+      <DynamicContextMenu />
     </>
   );
 };

@@ -1,53 +1,218 @@
-import * as React from "react";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
+"use client";
+// beui.dev/components/motion/tabs - Motion-driven Spring Animated Tabs
 
-import { cn } from "@/lib/utils";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useId,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { motion, MotionConfig, useReducedMotion, type Transition } from "motion/react";
+import { EASE_OUT } from "../../lib/ease";
+import { cn } from "../../lib/utils";
 
-const Tabs = TabsPrimitive.Root;
+export type Variant = "pill" | "underline" | "segment";
 
-const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      "inline-flex h-10 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground",
-      className,
-    )}
-    {...props}
-  />
-));
-TabsList.displayName = TabsPrimitive.List.displayName;
+type Ctx = {
+  value: string;
+  setValue: (v: string) => void;
+  layoutId: string;
+  variant: Variant;
+};
 
-const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
-      className,
-    )}
-    {...props}
-  />
-));
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
+const TabsCtx = createContext<Ctx | null>(null);
 
-const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content
-    ref={ref}
-    className={cn(
-      "mt-4 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-      className,
-    )}
-    {...props}
-  />
-));
-TabsContent.displayName = TabsPrimitive.Content.displayName;
+function useTabs() {
+  const ctx = useContext(TabsCtx);
+  if (!ctx) throw new Error("Tabs.* must be used inside <Tabs>");
+  return ctx;
+}
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+// Weighty spring for the active-tab indicator: a touch of overshoot so it
+// settles with life instead of snapping.
+const transition: Transition = {
+  type: "spring",
+  stiffness: 220,
+  damping: 26,
+  mass: 1.0,
+};
+
+export function Tabs({
+  defaultValue,
+  value,
+  onValueChange,
+  variant = "pill",
+  children,
+  className,
+}: {
+  defaultValue?: string;
+  value?: string;
+  onValueChange?: (v: string) => void;
+  variant?: Variant;
+  children: ReactNode;
+  className?: string;
+}) {
+  const [internal, setInternal] = useState(defaultValue ?? "");
+  const layoutId = useId();
+  const reduce = useReducedMotion();
+  const controlled = value !== undefined;
+  const current = controlled ? value : internal;
+
+  const setValue = useCallback(
+    (v: string) => {
+      if (!controlled) setInternal(v);
+      onValueChange?.(v);
+    },
+    [controlled, onValueChange],
+  );
+
+  const contextValue = useMemo(
+    () => ({ value: current, setValue, layoutId, variant }),
+    [current, layoutId, setValue, variant],
+  );
+
+  return (
+    <MotionConfig transition={reduce ? { duration: 0 } : transition}>
+      <TabsCtx.Provider value={contextValue}>
+        {/* layoutRoot: the indicator's layoutId measures in page coordinates, so
+            inside fixed/scrolled containers it would replay scroll offsets as
+            movement. Scoping projection to the Tabs wrapper is always correct. */}
+        <motion.div layoutRoot className={cn("w-full", className)}>
+          {children}
+        </motion.div>
+      </TabsCtx.Provider>
+    </MotionConfig>
+  );
+}
+
+const listClasses: Record<Variant, string> = {
+  pill: "inline-flex items-center gap-1 rounded-full bg-black/40 border border-white/10 p-1 select-none",
+  underline: "inline-flex items-center gap-1 border-b border-white/10 select-none",
+  segment: "inline-flex items-center gap-0.5 rounded-xl bg-black/40 border border-white/10 p-1 select-none",
+};
+
+export function TabsList({ children, className }: { children: ReactNode; className?: string }) {
+  const { variant } = useTabs();
+  return (
+    <div role="tablist" className={cn(listClasses[variant], className)}>
+      {children}
+    </div>
+  );
+}
+
+export function TabsTrigger({
+  value,
+  children,
+  className,
+  indicatorClassName,
+}: {
+  key?: React.Key;
+  value: string;
+  children: ReactNode;
+  className?: string;
+  indicatorClassName?: string;
+}) {
+  const { value: current, setValue, layoutId, variant } = useTabs();
+  const active = current === value;
+
+  if (variant === "underline") {
+    return (
+      <button
+        type="button"
+        role="tab"
+        aria-selected={active}
+        onClick={() => setValue(value)}
+        className={cn(
+          "relative isolate px-3 pb-2.5 pt-1 -mb-px text-sm font-bold transition-colors min-h-[40px] inline-flex items-center cursor-pointer",
+          active ? "text-white" : "text-white/50 hover:text-white",
+          className,
+        )}
+      >
+        {children}
+        {active ? (
+          <motion.span
+            layoutId={layoutId}
+            layout="position"
+            className={cn(
+              "absolute -bottom-px left-0 right-0 h-0.5 bg-[#ff3650]",
+              indicatorClassName,
+            )}
+          />
+        ) : null}
+      </button>
+    );
+  }
+
+  const radius = variant === "pill" ? "rounded-full" : "rounded-lg";
+
+  return (
+    <div className="relative">
+      {active ? (
+        <motion.span
+          layoutId={layoutId}
+          layout="position"
+          style={{ borderRadius: variant === "pill" ? 9999 : 8 }}
+          className={cn(
+            "absolute inset-0 bg-[#ff3650] shadow-sm",
+            radius,
+            indicatorClassName,
+          )}
+        />
+      ) : null}
+      <button
+        type="button"
+        role="tab"
+        aria-selected={active}
+        onClick={() => setValue(value)}
+        className={cn(
+          "relative z-10 inline-flex items-center justify-center whitespace-nowrap bg-transparent px-3.5 py-1.5 text-xs font-bold outline-none cursor-pointer",
+          "transition-colors",
+          active
+            ? "text-white font-black"
+            : "text-white/60 hover:text-white",
+          radius,
+          className,
+        )}
+      >
+        {children}
+      </button>
+    </div>
+  );
+}
+
+export function TabsContent({
+  value,
+  children,
+  className,
+}: {
+  value: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  const { value: current } = useTabs();
+  const reduce = useReducedMotion();
+  const active = current === value;
+
+  if (!active) {
+    return (
+      <div hidden className={className}>
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      key={value}
+      initial={{ opacity: 0, y: reduce ? 0 : 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18, ease: EASE_OUT }}
+      className={cn("mt-4", className)}
+    >
+      {children}
+    </motion.div>
+  );
+}

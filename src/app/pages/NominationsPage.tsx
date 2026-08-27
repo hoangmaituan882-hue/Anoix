@@ -17,9 +17,11 @@ import { nominations, Quota, PlazaItem } from '../../lib/nominations';
 import { NominateDialog } from '../../features/nominations/NominateDialog';
 import { CoverFlowCarousel, CoverFlowItem } from '../../features/nominations/CoverFlowCarousel';
 import { FilmContextMenu } from '../../features/nominations/FilmContextMenu';
+import { PageHero } from '../../components/layout/PageHero';
+import { StatusBadge } from '../../components/ui/StatusBadge';
 import {
   ArrowLeft, Crown, Hourglass, PencilLine, Vote, Plus,
-  Flame, Trophy, LayoutGrid, ListOrdered, Radio, Check, Undo2,
+  Flame, Trophy, LayoutGrid, ListOrdered, Radio, Check, Undo2, Sparkles,
 } from 'lucide-react';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
@@ -119,7 +121,22 @@ export const NominationsPage: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scope]);
 
+  const [quotaShake, setQuotaShake] = useState(false);
+
+  const triggerQuotaShake = () => {
+    setQuotaShake(false);
+    requestAnimationFrame(() => {
+      setQuotaShake(true);
+      setTimeout(() => setQuotaShake(false), 450);
+    });
+  };
+
   const castVote = async (roundId: string, optionId: number) => {
+    if (quota && quota.remainingVotes <= 0) {
+      triggerQuotaShake();
+      toastError(lang === 'zh' ? '本周投票配额已用完' : 'Weekly vote quota reached');
+      return;
+    }
     setVotingOption(optionId);
     try {
       const res = await fetch(`${API_BASE}/api/vote`, {
@@ -131,6 +148,7 @@ export const NominationsPage: React.FC<{
       if (res.status === 409) {
         toastError(lang === 'zh' ? '你已经投过这部了' : 'You already voted for this film');
       } else if (res.status === 429) {
+        triggerQuotaShake();
         toastError(lang === 'zh' ? '本周投票配额已用完' : 'Weekly vote quota reached');
       } else if (!res.ok) {
         toastError(lang === 'zh' ? '投票失败,请稍后再试' : 'Vote failed, try again later');
@@ -191,70 +209,111 @@ export const NominationsPage: React.FC<{
     <>
       <Header lang={lang} setLang={setLang} onNavigate={() => navigate('/')} onOpenModal={onOpenModal} />
 
-      <motion.main
-        className="w-full min-h-screen bg-[#151515] px-4 sm:px-8 lg:px-12 py-24 lg:py-28 text-[#f5ffe5]"
-        initial={{ x: 80, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: TRIGGER_EASE }}
+      <main
+        className="relative w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#f5ffe5] overflow-hidden"
       >
-        <div className="max-w-6xl mx-auto">
-          <button onClick={() => navigate('/')} className="inline-flex items-center gap-2 text-white/60 hover:text-[#ff3650] font-black text-sm uppercase tracking-wider transition-colors mb-6 cursor-pointer">
-            <ArrowLeft className="w-4 h-4" />
-            <span>{lang === 'zh' ? '返回首页' : 'BACK TO HOME'}</span>
-          </button>
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Unified Page Hero: 24px Main Title + 14px Subtitle */}
+          <PageHero
+            title="选片提名与社区公投"
+            subtitle="浏览广场提案、提报心仪神作、投出属于影迷社区的下一场特设放映现场。"
+          />
 
-          {/* Hero */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 mb-3">
-            <div>
-              <p className="text-xs font-black text-[#ff3650] uppercase tracking-widest mb-1">Nominate & Vote</p>
-              <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">{lang === 'zh' ? '提名与选片' : 'NOMINATIONS'}</h1>
-              <p className="text-white/50 font-bold mt-1.5 flex items-center gap-2">
-                {lang === 'zh' ? '看广场、提名、投票，一场由你决定的放映会' : 'Browse, nominate, and vote for the next screening'}
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#e0fe3d]"><Radio className="w-3 h-3 animate-pulse" /> 实时</span>
-              </p>
-              <p className="text-xs font-bold mt-2">
+          {/* Participatory Quota & Nomination Action Panel */}
+          <div className="bg-[#181818] border border-white/10 rounded-2xl p-4 sm:p-5 mb-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            {/* Left: User Identity & Quota Info */}
+            <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
                 {user ? (
-                  <span className="text-[#e0fe3d]">{lang === 'zh' ? `已以 ${user.name} 的身份实名参与` : `Participating as ${user.name}`}</span>
+                  <span className="text-[#e0fe3d] bg-[#e0fe3d]/10 px-3 py-1 rounded-full border border-[#e0fe3d]/20 flex items-center gap-1.5 font-bold">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    已认证成员：{user.name}
+                  </span>
                 ) : (
-                  <span className="text-white/40">
-                    {lang === 'zh' ? '当前为匿名参与 · ' : 'Anonymous · '}
-                    <button onClick={() => navigate('/auth?redirect=/nominations')} className="text-[#ff3650] hover:text-white underline underline-offset-2 cursor-pointer">
-                      {lang === 'zh' ? '登录可提名 3 部 / 投票 6 部' : 'Sign in for 3 nominations / 6 votes'}
+                  <span className="text-white/60 bg-white/5 px-3 py-1 rounded-full border border-white/10 text-[12px]">
+                    当前为匿名参与 ·{' '}
+                    <button
+                      onClick={() => navigate('/auth?redirect=/nominations')}
+                      className="text-[#ff3650] hover:text-white underline underline-offset-2 cursor-pointer font-bold ml-1"
+                    >
+                      登录提升周配额（3 提名 / 6 票）
                     </button>
                   </span>
                 )}
+              </div>
+              <p className="text-[12px] text-white/50">
+                每位社区影迷每周拥有专属提名与投票配额，每周一凌晨自动重置。
               </p>
             </div>
 
-            <div className="flex flex-col items-start gap-3">
+            {/* Middle/Right: Quota Progress Indicators & Action Button */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto shrink-0">
               {quota && (
-                <div className="w-60 space-y-2.5 text-xs font-bold">
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="flex items-center gap-1.5 text-white/60"><Plus className="w-3.5 h-3.5 text-[#ff3650]" /> {lang === 'zh' ? '提名' : 'Nominate'}</span>
-                      <span className="text-white/40 tabular-nums">{quota.nominationsUsed}/{quota.nominationsLimit}</span>
+                <div className={`flex items-center gap-4 bg-black/40 px-4 py-2.5 rounded-xl border transition-all t-shake ${quotaShake ? 'is-shaking border-[#ff3650] shadow-[0_0_20px_rgba(255,54,80,0.4)]' : 'border-white/10'}`}>
+                  {/* Nominate Quota */}
+                  <div className="w-28 space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-white/60 flex items-center gap-1">
+                        <Plus className="w-3 h-3 text-[#ff3650]" /> 周提名
+                      </span>
+                      <span className="text-[#ff3650] font-bold font-mono">
+                        {quota.nominationsUsed}/{quota.nominationsLimit}
+                      </span>
                     </div>
                     <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
-                      <motion.div className={`h-full rounded-full ${quota.remainingNominations <= 0 ? 'bg-red-500' : 'bg-[#ff3650]'}`} initial={false} animate={{ width: `${Math.min(100, (quota.nominationsUsed / quota.nominationsLimit) * 100)}%` }} transition={{ type: 'spring', stiffness: 120, damping: 22 }} />
+                      <motion.div
+                        className="h-full rounded-full bg-[#ff3650]"
+                        initial={false}
+                        animate={{
+                          width: `${Math.min(100, (quota.nominationsUsed / quota.nominationsLimit) * 100)}%`,
+                        }}
+                        transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+                      />
                     </div>
                   </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="flex items-center gap-1.5 text-white/60"><Vote className="w-3.5 h-3.5 text-[#e0fe3d]" /> {lang === 'zh' ? '投票' : 'Votes'}</span>
-                      <span className="text-white/40 tabular-nums">{quota.votesUsed}/{quota.votesLimit}</span>
+
+                  <div className="w-px h-6 bg-white/15" />
+
+                  {/* Vote Quota */}
+                  <div className="w-28 space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-white/60 flex items-center gap-1">
+                        <Vote className="w-3 h-3 text-[#e0fe3d]" /> 周投票
+                      </span>
+                      <span className="text-[#e0fe3d] font-bold font-mono">
+                        {quota.votesUsed}/{quota.votesLimit}
+                      </span>
                     </div>
                     <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
-                      <motion.div className={`h-full rounded-full ${quota.remainingVotes <= 0 ? 'bg-red-500' : 'bg-[#e0fe3d]'}`} initial={false} animate={{ width: `${Math.min(100, (quota.votesUsed / quota.votesLimit) * 100)}%` }} transition={{ type: 'spring', stiffness: 120, damping: 22 }} />
+                      <motion.div
+                        className="h-full rounded-full bg-[#e0fe3d]"
+                        initial={false}
+                        animate={{
+                          width: `${Math.min(100, (quota.votesUsed / quota.votesLimit) * 100)}%`,
+                        }}
+                        transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+                      />
                     </div>
                   </div>
                 </div>
               )}
+
+              {/* Initiate Nomination Button */}
               <button
-                onClick={() => openNominate()}
-                disabled={quota !== null && quota.remainingNominations <= 0}
-                className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] hover:scale-[1.03] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100 text-white font-black text-sm px-6 py-3 rounded-2xl transition-all duration-200 cursor-pointer shadow-[0_8px_24px_rgba(255,54,80,0.35)] hover:shadow-[0_12px_32px_rgba(255,54,80,0.5)]"
+                onClick={() => {
+                  if (quota !== null && quota.remainingNominations <= 0) {
+                    triggerQuotaShake();
+                    toastError(lang === 'zh' ? '本周提名配额已用完' : 'Weekly nomination quota reached');
+                  } else {
+                    openNominate();
+                  }
+                }}
+                className={`inline-flex items-center justify-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] active:scale-[0.98] text-white font-bold text-[16px] px-5 py-2.5 rounded-xl transition-all duration-200 cursor-pointer shadow-[0_4px_16px_rgba(255,54,80,0.35)] shrink-0 ${
+                  quota !== null && quota.remainingNominations <= 0 ? 'opacity-50' : ''
+                }`}
               >
-                <Plus className="w-5 h-5" /> {lang === 'zh' ? '我要提名' : 'Nominate a film'}
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>发起新提名</span>
               </button>
             </div>
           </div>
@@ -407,7 +466,7 @@ export const NominationsPage: React.FC<{
                         const isMine = myOptionIds.includes(opt.id);
                         return (
                           <FilmContextMenu key={opt.id} filmId={opt.film_id ?? ''} title={opt.film?.title_zh ?? opt.film?.title ?? opt.note ?? opt.film_id ?? ''}>
-                          <motion.div initial={{ x: 60, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: i * 0.07, ease: TRIGGER_EASE }} className={`group rounded-2xl overflow-hidden border-2 transition-all bg-[#1a1a1a] ${isMine ? 'border-[#ff3650] shadow-[0_8px_30px_rgba(255,54,80,0.3)]' : 'border-white/10 hover:border-white/30'}`}>
+                          <motion.div initial={{ x: 60, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: i * 0.07, ease: TRIGGER_EASE }} className={`group rounded-2xl overflow-hidden border-2 transition-all bg-[#1a1a1a] t-tilt-card ${isMine ? 'border-[#ff3650] shadow-[0_8px_30px_rgba(255,54,80,0.3)]' : 'border-white/10 hover:border-white/30'}`}>
                             {opt.film?.image ? (
                               <div className="relative aspect-[27/40] overflow-hidden">
                                 <img src={opt.film.image} alt={opt.film.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
@@ -426,12 +485,17 @@ export const NominationsPage: React.FC<{
                                 isMine ? (
                                   <div className="flex items-center gap-1.5">
                                     <motion.span
-                                      initial={{ scale: 0.5, opacity: 0 }}
+                                      initial={{ scale: 0.85, opacity: 0 }}
                                       animate={{ scale: 1, opacity: 1 }}
-                                      transition={{ type: 'spring', stiffness: 320, damping: 18 }}
-                                      className="flex-1 inline-flex items-center justify-center gap-1.5 text-sm font-black py-2.5 rounded-xl bg-[#ff3650] text-white"
+                                      transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                                      className="flex-1 inline-flex items-center justify-center gap-2 text-sm font-black py-2.5 rounded-xl bg-[#ff3650] text-white"
                                     >
-                                      <Check className="w-4 h-4" strokeWidth={3} /> {lang === 'zh' ? '已投' : 'VOTED'}
+                                      <span className="t-success-check" data-state="in">
+                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                                          <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                      </span>
+                                      <span>{lang === 'zh' ? '已投票' : 'VOTED'}</span>
                                     </motion.span>
                                     <button
                                       onClick={() => revokeVote(round.id, opt.id)}
@@ -486,7 +550,7 @@ export const NominationsPage: React.FC<{
             </section>
           )}
         </div>
-      </motion.main>
+      </main>
 
       <Footer lang={lang} />
 

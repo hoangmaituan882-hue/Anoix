@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "./styles/transitions.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
    shadcn-style theme tokens for beUI components (Select, etc.)
@@ -52,10 +55,64 @@ html.light {
   --color-strong: #18181b;
 }
 
-/* Prevent horizontal scrollbars during the RTL site entrance sweep (x: 100vw) */
+/* ============================================================
+   Grayscale Antialiasing Typography Rendering (灰度抗锯齿渲染)
+   -webkit-font-smoothing: antialiased; (WebKit/Blink - Chrome, Safari, Edge)
+   -moz-osx-font-smoothing: grayscale; (Gecko - Firefox macOS)
+   text-rendering: optimizeLegibility;
+   ============================================================ */
 html,
 body {
   overflow-x: clip;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  line-height: 1.55;
+  letter-spacing: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga" 1, "kern" 1;
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   Anoix Strict 6-Level Pure Chinese Typography Scale
+   ============================================================ */
+.text-page-title {
+  font-size: 24px !important;
+  line-height: 1.25 !important;
+  font-weight: 900 !important;
+}
+.text-section-title {
+  font-size: 18px !important;
+  line-height: 1.30 !important;
+  font-weight: 700 !important;
+}
+.text-card-title {
+  font-size: 16px !important;
+  line-height: 1.40 !important;
+  font-weight: 700 !important;
+}
+.text-body {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  font-weight: 400 !important;
+}
+.text-btn {
+  font-size: 16px !important;
+  line-height: 1.00 !important;
+  font-weight: 600 !important;
+}
+.text-caption {
+  font-size: 12px !important;
+  line-height: 1.40 !important;
+  font-weight: 400 !important;
 }
 
 /* Smooth transition when toggling themes */
@@ -70,6 +127,11 @@ html {
    maintains brand identity (#ff3650 red, #4246ff cobalt, #e0fe3d lime),
    and fixes all text-contrast, button-invert, input, and modal styles.
    ============================================================ */
+body {
+  background-color: #050505;
+  color: #f5ffe5;
+}
+
 html.light {
   color-scheme: light;
 }
@@ -482,5 +544,162 @@ html.vt-theme::view-transition-new(root) {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
 
+/* ============================================================
+   TRIGGER Industrial UI Accents & Cut Corners
+   ============================================================ */
+.clip-corner {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
 
+.clip-corner-br {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+
+.clip-corner-tl {
+  clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%, 0 12px);
+}
+
+:root {
+  --surface-primary: #121214;
+  --surface-secondary: #1a1a1c;
+  --surface-tertiary: #232326;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a0a0a5;
+  --text-tertiary: #6b6b70;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --interactive-hover: rgba(255, 255, 255, 0.06);
+}
+
+html.light {
+  --surface-primary: #ffffff;
+  --surface-secondary: #f5f5f5;
+  --surface-tertiary: #d9d9d9;
+  --text-primary: #0c0a09;
+  --text-secondary: #6b6b70;
+  --text-tertiary: #9ca3af;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --interactive-hover: rgba(0, 0, 0, 0.05);
+}
+
+.dark, html:not(.light) {
+  --surface-primary: #121214;
+  --surface-secondary: #1a1a1c;
+  --surface-tertiary: #232326;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a0a0a5;
+  --text-tertiary: #6b6b70;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --interactive-hover: rgba(255, 255, 255, 0.06);
+}
+
+.bg-surface-primary { background-color: var(--surface-primary); }
+.bg-surface-secondary { background-color: var(--surface-secondary); }
+.bg-surface-tertiary { background-color: var(--surface-tertiary); }
+.text-text-primary { color: var(--text-primary); }
+.text-text-secondary { color: var(--text-secondary); }
+.text-text-tertiary { color: var(--text-tertiary); }
+.border-border-color { border-color: var(--border-color); }
+.hover\:bg-interactive-hover:hover { background-color: var(--interactive-hover); }
+
+/* ---- SCREENINGS PAGE LIGHT THEME OPTIMIZATIONS ---- */
+html.light #screening_container {
+  background-color: #f8f7f4;
+  color: #18181b;
+}
+html.light #screening_container .bg-\[\#181818\],
+html.light #screening_container .bg-\[\#181818\]\/90 {
+  background-color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+}
+html.light #screening_container .bg-black\/40 {
+  background-color: #f3f2ee;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light #screening_container .bg-white\/5 {
+  background-color: #f3f2ee;
+  color: #18181b;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light #screening_container .bg-white\/5:hover {
+  background-color: #e8e7e2;
+  color: #18181b;
+}
+html.light #screening_container input {
+  background-color: #ffffff;
+  color: #18181b;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+html.light #screening_container input::placeholder {
+  color: rgba(24, 24, 27, 0.45);
+}
+
+/* ---- CREDITS DROPDOWN LIGHT THEME ---- */
+html.light .credits-popover-card {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 20px 45px -4px rgba(0, 0, 0, 0.1), 0 8px 16px -2px rgba(0, 0, 0, 0.04) !important;
+}
+html.light .credits-popover-card p {
+  color: #18181b;
+}
+html.light .credits-popover-card .credits-stat-label {
+  color: rgba(24, 24, 27, 0.55) !important;
+}
+html.light .credits-popover-card .credits-inactive-bar {
+  background-color: #e5e7eb !important;
+}
+html.light .credits-popover-card .credits-usage-btn {
+  background-color: #f3f2ee !important;
+  color: #18181b !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+html.light .credits-popover-card .credits-usage-btn:hover {
+  background-color: #e8e7e2 !important;
+}
+html.light .credits-popover-card .credits-recharge-btn {
+  background-color: #18181b !important;
+  color: #ffffff !important;
+}
+
+/* ---- COMMAND PALETTE LIGHT THEME ---- */
+html.light .command-modal-card {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 24px 70px -12px rgba(0, 0, 0, 0.18) !important;
+}
+html.light .command-modal-card input {
+  color: #18181b !important;
+}
+html.light .command-modal-card input::placeholder {
+  color: rgba(24, 24, 27, 0.4) !important;
+}
+html.light .command-modal-card p,
+html.light .command-modal-card h4,
+html.light .command-modal-card span {
+  color: inherit;
+}
+
+/* ---- CREDITS SHEET MODAL LIGHT THEME ---- */
+html.light .credits-sheet-card {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 24px 80px -12px rgba(0, 0, 0, 0.2) !important;
+}
+html.light .credits-sheet-card h3,
+html.light .credits-sheet-card h4,
+html.light .credits-sheet-card p {
+  color: #18181b;
+}

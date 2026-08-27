@@ -1,12 +1,29 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WorkItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { repository, useRepo } from '../../lib/repository';
+import { community, WatchItem } from '../../lib/community';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { TiltCard } from '../../components/motion/TiltCard';
 import { AnimatedBadge } from '../../components/motion/AnimatedBadge';
-import { X, Play, Filter, Search, Sparkles, Film, ArrowUpDown } from 'lucide-react';
+import { useToast } from '../../components/ui/Toast';
+import {
+  X,
+  Play,
+  Filter,
+  Search,
+  Sparkles,
+  Film,
+  ArrowUpDown,
+  Check,
+  CheckSquare,
+  Square,
+  Eye,
+  EyeOff,
+  SlidersHorizontal,
+  RotateCcw,
+} from 'lucide-react';
 
 interface FilmsLibraryModalProps {
   lang: Language;
@@ -24,6 +41,32 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const films = useRepo(repository.films);
   const t = I18N[lang];
+  const { success, error: toastError } = useToast();
+
+  // Batch Selection & Watched Records State
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [watchedMap, setWatchedMap] = useState<Record<string, WatchItem>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load existing watch-log on mount
+  useEffect(() => {
+    let alive = true;
+    community
+      .watchList()
+      .then((list) => {
+        if (!alive) return;
+        const map: Record<string, WatchItem> = {};
+        (list || []).forEach((w) => {
+          map[w.film_id] = w;
+        });
+        setWatchedMap(map);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const filteredWorks = useMemo(() => {
     return films
@@ -48,7 +91,6 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
         return titleMatch || directorMatch || tagMatch || yearMatch;
       })
       .sort((a, b) => {
-        // Sort by year
         const getYearNum = (str: string) => {
           const match = str.match(/\d{4}/);
           return match ? parseInt(match[0], 10) : 0;
@@ -58,6 +100,77 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
         return sortOrder === 'desc' ? yearB - yearA : yearA - yearB;
       });
   }, [films, filter, searchQuery, sortOrder]);
+
+  // Toggle selection for a single work
+  const handleToggleSelect = (workId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(workId)) {
+        next.delete(workId);
+      } else {
+        next.add(workId);
+      }
+      return next;
+    });
+  };
+
+  // Toggle Select All filtered items
+  const handleToggleSelectAll = () => {
+    if (selectedIds.size === filteredWorks.length && filteredWorks.length > 0) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredWorks.map((w) => w.id)));
+    }
+  };
+
+  // Batch mark selected as Watched
+  const handleBatchMarkWatched = async () => {
+    if (selectedIds.size === 0) return;
+    setIsSubmitting(true);
+    const ids: string[] = Array.from(selectedIds);
+    try {
+      await Promise.all(ids.map((id: string) => community.saveWatch(String(id), 5, '批量标记已看过')));
+      const updatedList = await community.watchList();
+      const map: Record<string, WatchItem> = {};
+      (updatedList || []).forEach((w) => {
+        map[w.film_id] = w;
+      });
+      setWatchedMap(map);
+      success(`已成功将 ${ids.length} 部作品批量标记为「已看过」！`);
+      setSelectedIds(new Set());
+      setIsBatchMode(false);
+    } catch {
+      toastError('批量标记失败，请重试');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Batch remove watch record
+  const handleBatchRemoveWatched = async () => {
+    if (selectedIds.size === 0) return;
+    setIsSubmitting(true);
+    const ids: string[] = Array.from(selectedIds);
+    try {
+      await Promise.all(ids.map((id: string) => community.removeWatch(String(id))));
+      const updatedList = await community.watchList();
+      const map: Record<string, WatchItem> = {};
+      (updatedList || []).forEach((w) => {
+        map[w.film_id] = w;
+      });
+      setWatchedMap(map);
+      success(`已成功清除 ${ids.length} 部作品的观影记录`);
+      setSelectedIds(new Set());
+      setIsBatchMode(false);
+    } catch {
+      toastError('清除失败，请重试');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isAllSelected = filteredWorks.length > 0 && selectedIds.size === filteredWorks.length;
 
   return (
     <motion.div
@@ -85,7 +198,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             <div>
               <span className="text-[11px] font-black text-[#ff3650] uppercase tracking-widest flex items-center gap-1.5">
                 <Sparkles className="w-3 h-3" />
-                ANIMATION STUDIO TRIGGER
+                FANSHI ANIMATION ARCHIVE
               </span>
               <h2 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tight">
                 {t.allWorksModalTitle}
@@ -93,13 +206,35 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2.5">
+            {/* Toggle Batch Management Button */}
+            <button
+              onClick={() => {
+                if (isBatchMode) {
+                  setIsBatchMode(false);
+                  setSelectedIds(new Set());
+                } else {
+                  setIsBatchMode(true);
+                }
+              }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+                isBatchMode
+                  ? 'bg-[#ff3650] text-white border-[#ff3650] shadow-md'
+                  : 'bg-white/10 hover:bg-white/20 text-white/90 border-white/15'
+              }`}
+            >
+              <CheckSquare className="w-3.5 h-3.5" />
+              <span>{isBatchMode ? '退出批量' : '批量标记已看'}</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Filter & Search Bar */}
@@ -110,7 +245,9 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             <button
               onClick={() => setFilter('all')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase transition-all whitespace-nowrap cursor-pointer ${
-                filter === 'all' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                filter === 'all'
+                  ? 'bg-[#ff3650] text-white shadow-md'
+                  : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
               }`}
             >
               {lang === 'zh' ? `全部 (${films.length})` : `ALL (${films.length})`}
@@ -118,7 +255,9 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             <button
               onClick={() => setFilter('TV Series')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase transition-all whitespace-nowrap cursor-pointer ${
-                filter === 'TV Series' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                filter === 'TV Series'
+                  ? 'bg-[#ff3650] text-white shadow-md'
+                  : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
               }`}
             >
               {lang === 'zh' ? '电视动画 (TV Series)' : 'TV Series'}
@@ -126,7 +265,9 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             <button
               onClick={() => setFilter('Movie')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase transition-all whitespace-nowrap cursor-pointer ${
-                filter === 'Movie' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                filter === 'Movie'
+                  ? 'bg-[#ff3650] text-white shadow-md'
+                  : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
               }`}
             >
               {lang === 'zh' ? '剧场版电影 (Movie)' : 'Theatrical Movie'}
@@ -134,7 +275,9 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             <button
               onClick={() => setFilter('Original Animation')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase transition-all whitespace-nowrap cursor-pointer ${
-                filter === 'Original Animation' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                filter === 'Original Animation'
+                  ? 'bg-[#ff3650] text-white shadow-md'
+                  : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
               }`}
             >
               {lang === 'zh' ? '原创/网播动画 (Original)' : 'Original / Streaming'}
@@ -149,7 +292,13 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={lang === 'zh' ? '搜索作品/监督/年份...' : lang === 'ja' ? '作品名・監督・年代で検索...' : 'Search titles, staff, year...'}
+                placeholder={
+                  lang === 'zh'
+                    ? '搜索作品/监督/年份...'
+                    : lang === 'ja'
+                    ? '作品名・監督・年代で検索...'
+                    : 'Search titles, staff, year...'
+                }
                 className="w-full bg-white/5 border border-white/15 rounded-full pl-9 pr-4 py-1.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff3650] transition-colors"
               />
               {searchQuery && (
@@ -163,18 +312,62 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             </div>
 
             <button
-              onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+              onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white/80 transition-colors cursor-pointer whitespace-nowrap border border-white/10"
               title={sortOrder === 'desc' ? '最新在前' : '早期在前'}
             >
-              <ArrowUpDown className="w-3 h-3 text-[#ff3650]" />
-              <span>{sortOrder === 'desc' ? (lang === 'zh' ? '最新优先' : 'Newest') : (lang === 'zh' ? '年代顺序' : 'Oldest')}</span>
+              <ArrowUpDown className="w-3.5 h-3.5 text-[#ff3650]" />
+              <span>
+                {sortOrder === 'desc'
+                  ? lang === 'zh'
+                    ? '最新优先'
+                    : 'Newest'
+                  : lang === 'zh'
+                  ? '年代顺序'
+                  : 'Oldest'}
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Grid of works with layout animations & automatic fade-in/out */}
-        <div className="p-6 sm:p-8 overflow-y-auto flex-1">
+        {/* Batch Selection Banner (when in Batch Mode) */}
+        <AnimatePresence>
+          {isBatchMode && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="px-6 sm:px-8 py-2.5 bg-[#141414] border-b border-white/10 flex items-center justify-between text-xs"
+            >
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleToggleSelectAll}
+                  className="flex items-center gap-1.5 font-bold text-white hover:text-[#ff3650] transition-colors cursor-pointer"
+                >
+                  {isAllSelected ? (
+                    <CheckSquare className="w-4 h-4 text-[#ff3650]" />
+                  ) : (
+                    <Square className="w-4 h-4 text-white/50" />
+                  )}
+                  <span>{isAllSelected ? '取消全选' : `全选当前页 (${filteredWorks.length})`}</span>
+                </button>
+
+                <span className="text-white/40">|</span>
+
+                <span className="font-mono text-white/80">
+                  已勾选 <span className="font-bold text-[#ff3650]">{selectedIds.size}</span> 部作品
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-white/50 text-[11px]">
+                <span>点击任意卡片即可快速勾选/取消</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Grid of works with layout animations */}
+        <div className="p-6 sm:p-8 overflow-y-auto flex-1 relative pb-28">
           <AnimatePresence mode="popLayout">
             {filteredWorks.length === 0 ? (
               <motion.div
@@ -186,10 +379,16 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                 className="py-16 text-center text-white/60"
               >
                 <p className="text-lg font-bold mb-2">
-                  {lang === 'zh' ? '未找到匹配的作品' : lang === 'ja' ? '該当する作品が見つかりませんでした' : 'No matching titles found'}
+                  {lang === 'zh'
+                    ? '未找到匹配的作品'
+                    : lang === 'ja'
+                    ? '該当する作品が見つかりませんでした'
+                    : 'No matching titles found'}
                 </p>
                 <p className="text-xs text-white/40 mb-4">
-                  {lang === 'zh' ? '请尝试切换分类或更换搜索关键词' : 'Try adjusting your search or category filter.'}
+                  {lang === 'zh'
+                    ? '请尝试切换分类或更换搜索关键词'
+                    : 'Try adjusting your search or category filter.'}
                 </p>
                 <button
                   onClick={() => {
@@ -202,78 +401,176 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                 </button>
               </motion.div>
             ) : (
-              <motion.div
-                layout
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6"
-              >
+              <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 <AnimatePresence mode="popLayout">
-                  {filteredWorks.map((work) => (
-                    <motion.div
-                      layout
-                      key={work.id}
-                      initial={{ opacity: 0, scale: 0.88, y: 16 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.88, y: -12 }}
-                      transition={{
-                        duration: 0.32,
-                        ease: TRIGGER_EASE,
-                        layout: { duration: 0.35, ease: TRIGGER_EASE },
-                      }}
-                    >
-                      <TiltCard
-                        onClick={() => onSelectWork(work)}
-                        className="group/item cursor-pointer flex flex-col bg-[#222222] rounded-2xl overflow-hidden border border-white/10 hover:border-[#ff3650] hover:shadow-[0_12px_30px_rgba(255,54,80,0.25)] transition-colors duration-300"
+                  {filteredWorks.map((work) => {
+                    const isSelected = selectedIds.has(work.id);
+                    const isWatched = !!watchedMap[work.id];
+
+                    return (
+                      <motion.div
+                        layout
+                        key={work.id}
+                        data-film-id={work.id}
+                        initial={{ opacity: 0, scale: 0.88, y: 16 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.88, y: -12 }}
+                        transition={{
+                          duration: 0.32,
+                          ease: TRIGGER_EASE,
+                          layout: { duration: 0.35, ease: TRIGGER_EASE },
+                        }}
                       >
-                      <div className="relative aspect-[27/40] overflow-hidden bg-black/40">
-                        <img
-                          src={work.image}
-                          alt={lang === 'zh' && work.titleZh ? work.titleZh : lang === 'en' && work.titleEn ? work.titleEn : work.title}
-                          className="w-full h-full object-cover group-hover/item:scale-108 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                        
-                        {/* Dark gradient backdrop & Quick hover badge */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 opacity-0 group-hover/item:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#ff3650] px-3.5 py-1.5 rounded-full shadow-lg transform scale-90 group-hover/item:scale-100 transition-transform">
-                            <Play className="w-3.5 h-3.5 fill-current" />
-                            <span>{lang === 'zh' ? '查看详情' : 'VIEW'}</span>
+                        <TiltCard
+                          data-film-id={work.id}
+                          onClick={() => {
+                            if (isBatchMode) {
+                              handleToggleSelect(work.id);
+                            } else {
+                              onSelectWork(work);
+                            }
+                          }}
+                          className={`group/item cursor-pointer flex flex-col bg-[#222222] rounded-2xl overflow-hidden border transition-all duration-300 relative ${
+                            isSelected
+                              ? 'border-[#ff3650] ring-2 ring-[#ff3650] shadow-[0_12px_30px_rgba(255,54,80,0.35)]'
+                              : 'border-white/10 hover:border-[#ff3650] hover:shadow-[0_12px_30px_rgba(255,54,80,0.25)]'
+                          }`}
+                        >
+                          <div className="relative aspect-[27/40] overflow-hidden bg-black/40">
+                            <img
+                              src={work.image}
+                              alt={
+                                lang === 'zh' && work.titleZh
+                                  ? work.titleZh
+                                  : lang === 'en' && work.titleEn
+                                  ? work.titleEn
+                                  : work.title
+                              }
+                              className={`w-full h-full object-cover transition-transform duration-500 ${
+                                isBatchMode ? '' : 'group-hover/item:scale-108'
+                              }`}
+                              loading="lazy"
+                            />
+
+                            {/* Batch Selection Checkbox Indicator */}
+                            {isBatchMode ? (
+                              <div
+                                onClick={(e) => handleToggleSelect(work.id, e)}
+                                className={`absolute top-2.5 right-2.5 z-20 w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
+                                  isSelected
+                                    ? 'bg-[#ff3650] text-white shadow-lg ring-2 ring-white'
+                                    : 'bg-black/60 backdrop-blur-md text-white/40 border border-white/30 hover:border-white'
+                                }`}
+                              >
+                                {isSelected ? (
+                                  <Check className="w-4 h-4 stroke-[3]" />
+                                ) : (
+                                  <span className="w-2 h-2 rounded-sm bg-white/30" />
+                                )}
+                              </div>
+                            ) : null}
+
+                            {/* Watched Status Badge (Always Visible If Marked) */}
+                            {isWatched && (
+                              <div className="absolute top-2.5 right-2.5 z-10 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-bold text-[#e0fe3d] border border-[#e0fe3d]/40 flex items-center gap-1 shadow-sm">
+                                <Eye className="w-3 h-3" />
+                                <span>已看</span>
+                              </div>
+                            )}
+
+                            {/* Year Badge */}
+                            <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-black text-white border border-white/15">
+                              {work.year}{work.releaseDate ? ` · ${work.releaseDate}` : ''}
+                            </div>
+
+                            {/* Normal Hover Play Badge */}
+                            {!isBatchMode && (
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 opacity-0 group-hover/item:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-white bg-[#ff3650] px-3.5 py-1.5 rounded-full shadow-lg transform scale-90 group-hover/item:scale-100 transition-transform">
+                                  <Play className="w-3.5 h-3.5 fill-current" />
+                                  <span>{lang === 'zh' ? '查看详情' : 'VIEW'}</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
 
-                        <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-black text-white border border-white/15">
-                          {work.year}
-                        </div>
-
-                        {work.isNew && (
-                          <AnimatedBadge className="absolute top-2.5 right-2.5 bg-[#ff3650] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md">
-                            NEW
-                          </AnimatedBadge>
-                        )}
-                      </div>
-
-                      <div className="p-4 flex-1 flex flex-col justify-between">
-                        <div>
-                          <span className="text-[10px] font-black text-[#ff3650] uppercase tracking-wider block mb-1">
-                            {work.category}
-                          </span>
-                          <h3 className="text-xs sm:text-sm font-black text-white line-clamp-2 leading-snug group-hover/item:text-[#ff3650] transition-colors">
-                            {lang === 'zh' && work.titleZh ? work.titleZh : lang === 'en' && work.titleEn ? work.titleEn : work.title}
-                          </h3>
-                          {work.director && (
-                            <p className="text-[11px] text-white/50 line-clamp-1 mt-1 font-medium">
-                              {work.director}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      </TiltCard>
-                    </motion.div>
-                  ))}
+                          <div className="p-4 flex-1 flex flex-col justify-between">
+                            <div>
+                              <span className="text-[10px] font-black text-[#ff3650] uppercase tracking-wider block mb-1">
+                                {work.category}
+                              </span>
+                              <h3 className="text-xs sm:text-sm font-black text-white line-clamp-2 leading-snug group-hover/item:text-[#ff3650] transition-colors">
+                                {lang === 'zh' && work.titleZh
+                                  ? work.titleZh
+                                  : lang === 'en' && work.titleEn
+                                  ? work.titleEn
+                                  : work.title}
+                              </h3>
+                              {(work.director || work.duration != null) && (
+                                <p className="text-[11px] text-white/50 line-clamp-1 mt-1 font-medium">
+                                  {work.director}{work.director && work.duration != null ? ' · ' : ''}{work.duration != null ? `${work.duration} 分钟` : ''}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </TiltCard>
+                      </motion.div>
+                    );
+                  })}
                 </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+
+        {/* Floating Bottom Batch Action Bar */}
+        <AnimatePresence>
+          {isBatchMode && selectedIds.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ duration: 0.25, ease: TRIGGER_EASE }}
+              className="absolute bottom-6 left-6 right-6 z-30 bg-[#151515]/95 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-white"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#ff3650] text-white flex items-center justify-center font-bold text-xs">
+                  {selectedIds.size}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white">
+                    已勾选 {selectedIds.size} 部作品
+                  </p>
+                  <p className="text-[11px] text-white/50">
+                    可一键批量记录为「已看过」并同步至资历档案
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleBatchRemoveWatched}
+                  disabled={isSubmitting}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-white/70 hover:text-white bg-white/10 hover:bg-white/15 transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span>批量清除已看</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleBatchMarkWatched}
+                  disabled={isSubmitting}
+                  className="px-5 py-2 rounded-xl text-xs font-black text-white bg-[#ff3650] hover:bg-[#ff203c] shadow-lg transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>{isSubmitting ? '正在标记...' : '批量标记为已看过'}</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   );
