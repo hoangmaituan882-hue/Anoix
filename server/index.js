@@ -28,6 +28,7 @@ import {
   resolveVoterId,
 } from './auth.js';
 import { tcRequest, tcEnabled } from './tcapi.js';
+import { weekStartDateString, personaFor, nextUserNoFromList } from './lib/pure.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = path.resolve(__dirname, '../dist');
@@ -129,6 +130,43 @@ async function pgWrite(method, path, body, _retried = false) {
   return [r.status, json];
 }
 
+/** Atomic upsert via PostgREST `resolution=merge-duplicates` (requires a PK/UNIQUE). */
+async function pgUpsert(path, body, _retried = false) {
+  const token = await getAdminToken(_retried);
+  const r = await fetch(`${PG_BASE}${path}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=representation',
+    },
+    body: JSON.stringify(body),
+  });
+  if (r.status === 401 && !_retried) {
+    return pgUpsert(path, body, true);
+  }
+  const text = await r.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch { /* keep null */ }
+  return [r.status, json];
+}
+
+/** Minimal in-memory TTL cache for read-heavy, rarely-changing content. */
+function ttlCache(ttlMs) {
+  const store = new Map();
+  return {
+    get(key) {
+      const v = store.get(key);
+      if (!v) return undefined;
+      if (Date.now() - v.ts > ttlMs) { store.delete(key); return undefined; }
+      return v.value;
+    },
+    set(key, value) { store.set(key, { ts: Date.now(), value }); },
+    clear() { store.clear(); },
+  };
+}
+const contentCache = ttlCache(15_000); // 15s TTL for films/news/goods
+
 app.get('/api/health', async (_req, res) => {
   let db = 'ok';
   if (!dbEnabled) db = 'disabled';
@@ -138,8 +176,11 @@ app.get('/api/health', async (_req, res) => {
 
 app.get('/api/films', async (_req, res, next) => {
   try {
+    const cached = contentCache.get('films');
+    if (cached) return res.json(cached);
     const rows = await pgGet('/films?select=*&order=sort_order.asc');
-    res.json(rows);
+    contentCache.set('films', rows ?? []);
+    res.json(rows ?? []);
   } catch (e) { next(e); }
 });
 
@@ -152,18 +193,21 @@ app.get('/api/films/:id', async (req, res, next) => {
 
 app.get('/api/news', async (_req, res, next) => {
   try {
+    const cached = contentCache.get('news');
+    if (cached) return res.json(cached);
     const rows = await pgGet('/news?select=*&order=sort_order.asc');
     // Publish control: only show items that are published (or scheduled whose
     // time has arrived); pinned items float to the top. Lazy scheduling — no
     // cron needed, the time comparison does the job.
     const now = Date.now();
-    const visible = rows
+    const visible = (rows ?? [])
       .filter((r) => {
         if (r.status === 'draft' || r.status === 'archived') return false;
         if (!r.published_at) return r.status === 'published';
         return new Date(r.published_at).getTime() <= now;
       })
       .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+    contentCache.set('news', visible);
     res.json(visible);
   } catch (e) { next(e); }
 });
@@ -326,6 +370,9 @@ app.delete('/api/vote', async (req, res, next) => {
     if (!roundId || !Number.isInteger(optionId) || optionId <= 0) {
       return res.status(400).json({ error: 'bad_request' });
     }
+    if (!allowRate(`vote:${clientIp(req)}`, 30, 60_000)) {
+      return res.status(429).json({ error: 'rate_limited' });
+    }
     const ident = await resolveIdentity(req);
     if (!ident) return res.status(401).json({ error: 'identity_required' });
 
@@ -369,6 +416,7 @@ app.post('/api/nominations', async (req, res, next) => {
   try {
     const ident = await resolveIdentity(req);
     if (!ident) return res.status(401).json({ error: 'identity_required' });
+    if (!allowRate(`nom:${clientIp(req)}`, 20, 60_000)) return res.status(429).json({ error: 'rate_limited' });
 
     const { filmId, tmdb, note } = req.body ?? {};
     if (typeof note !== 'string' || note.trim().length === 0) {
@@ -419,6 +467,7 @@ app.post('/api/nominations/:roundId/nominate', async (req, res, next) => {
   try {
     const ident = await resolveIdentity(req);
     if (!ident) return res.status(401).json({ error: 'identity_required' });
+    if (!allowRate(`nom:${clientIp(req)}`, 20, 60_000)) return res.status(429).json({ error: 'rate_limited' });
 
     const roundId = req.params.roundId;
     const { filmId, tmdb, note } = req.body ?? {};
@@ -584,13 +633,7 @@ async function callerIdentity(accessToken) {
 async function ensureUserMeta(uid) {
   const existing = await pgGet(`/user_roles?uid=eq.${encodeURIComponent(uid)}&select=uid`);
   if (existing?.length) return;
-  const userNo = await nextUserNo();
-  await pgWrite('POST', '/user_roles', {
-    uid,
-    role: 'user',
-    user_no: userNo,
-    registered_at: new Date().toISOString(),
-  }).catch(() => {}); // duplicate PK on race → ignore
+  await insertUserRole(uid, 'user', null);
 }
 
 /**
@@ -618,14 +661,6 @@ const QUOTA_LIMITS = {
   user: { nominations: 3, votes: 6 },
   anon: { nominations: 1, votes: 2 },
 };
-
-function weekStartDateString(now = Date.now()) {
-  const sh = new Date(now + 8 * 3600 * 1000); // shift to Asia/Shanghai (UTC+8)
-  const day = sh.getUTCDay(); // 0=Sun, 1=Mon
-  const diff = (day + 6) % 7; // days since Monday
-  const monday = new Date(Date.UTC(sh.getUTCFullYear(), sh.getUTCMonth(), sh.getUTCDate() - diff));
-  return monday.toISOString().slice(0, 10);
-}
 
 async function quotaInfo(identityId, kind) {
   const ws = weekStartDateString();
@@ -738,12 +773,28 @@ const mapUser = (u, roleMap) => {
 
 async function nextUserNo() {
   const rows = await pgGet('/user_roles?select=user_no');
-  let max = 0;
-  for (const r of rows || []) {
-    const n = parseInt(String(r.user_no || '').replace(/\D/g, ''), 10) || 0;
-    if (n > max) max = n;
+  return nextUserNoFromList((rows || []).map((r) => r.user_no));
+}
+
+/** Insert a user_roles row, retrying on user_no UNIQUE collision (race-safe). */
+async function insertUserRole(uid, role, username) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const userNo = await nextUserNo();
+    const [status] = await pgWrite('POST', '/user_roles', {
+      uid,
+      role,
+      username: username ?? null,
+      user_no: userNo,
+      registered_at: new Date().toISOString(),
+    });
+    if (status < 400) return true;
+    if (status !== 409) return false; // non-duplicate error → give up
+    // 409 → duplicate uid (already has a row) OR duplicate user_no (race)
+    const exists = await pgGet(`/user_roles?uid=eq.${encodeURIComponent(uid)}&select=uid`);
+    if (exists?.length) return true; // uid already registered → done
+    // else user_no collision → retry with the next number
   }
-  return String(max + 1).padStart(3, '0');
+  return false;
 }
 
 app.get('/api/admin/users', adminGate, async (req, res, next) => {
@@ -769,14 +820,7 @@ app.post('/api/admin/users', adminGate, async (req, res, next) => {
     const resp = await tcRequest('CreateEndUserAccount', { EnvId: ENV_ID, Username: name, Password: password });
     const uid = resp?.User?.UUId || resp?.UUId || null;
     if (uid) {
-      const userNo = await nextUserNo();
-      await pgWrite('POST', '/user_roles', {
-        uid,
-        username: name,
-        role: role === 'admin' ? 'admin' : 'user',
-        user_no: userNo,
-        registered_at: new Date().toISOString(),
-      }).catch(() => {});
+      await insertUserRole(uid, role === 'admin' ? 'admin' : 'user', name);
     }
     res.json({ ok: true, uid });
   } catch (e) { next(e); }
@@ -1110,8 +1154,9 @@ app.put('/api/watch/:filmId', async (req, res, next) => {
       review: typeof review === 'string' ? review.trim().slice(0, 200) || null : null,
       watched_at: new Date().toISOString(),
     };
-    await pgWrite('DELETE', `/watch_log?film_id=eq.${encodeURIComponent(filmId)}&uid=eq.${encodeURIComponent(ident.identityId)}`);
-    await pgWrite('POST', '/watch_log', body);
+    // Atomic upsert on the (film_id, uid) UNIQUE key.
+    const [status] = await pgUpsert('/watch_log', body);
+    if (status >= 400) return res.status(502).json({ error: 'watch_failed' });
     res.json({ ok: true });
   } catch (e) { next(e); }
 });
@@ -1127,17 +1172,6 @@ app.delete('/api/watch/:filmId', async (req, res, next) => {
 });
 
 // ---- Year in review (aggregate the caller's annual participation) ----
-function personaFor(n, v, w) {
-  if (n === 0 && v === 0 && w === 0) return '旁观者 · 来年加油';
-  const tags = [];
-  if (n >= 3) tags.push('选片策展人');
-  if (v >= 6) tags.push('投票狂人');
-  if (w >= 3) tags.push('放映常客');
-  if (tags.length >= 2) return '全能影迷';
-  if (tags.length === 1) return tags[0];
-  return '新晋影迷';
-}
-
 app.get('/api/me/year-review', async (req, res, next) => {
   try {
     const ident = await resolveIdentity(req);
@@ -1190,8 +1224,11 @@ app.get('/api/me/year-review', async (req, res, next) => {
 // ---- Goods (merchandise) public read ----
 app.get('/api/goods', async (_req, res, next) => {
   try {
+    const cached = contentCache.get('goods');
+    if (cached) return res.json(cached);
     const rows = await pgGet('/goods?select=*&order=sort_order.asc');
-    res.json(rows);
+    contentCache.set('goods', rows ?? []);
+    res.json(rows ?? []);
   } catch (e) { next(e); }
 });
 
@@ -1343,6 +1380,15 @@ app.use((err, _req, res, _next) => {
 app.use(express.static(DIST_DIR));
 app.get(/^(?!\/api).*/, (_req, res) => {
   res.sendFile(path.join(DIST_DIR, 'index.html'));
+});
+
+// ---- Unified JSON error handler (routes call next(e); tcRequest sets .status/.code) ----
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  const status = typeof err?.status === 'number' ? err.status : 500;
+  const body = { error: err?.code || (status >= 500 ? 'server_error' : 'error') };
+  if (status >= 500 && err?.message) body.message = err.message;
+  if (!res.headersSent) res.status(status).json(body);
 });
 
 app.listen(PORT, () => {
