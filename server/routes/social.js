@@ -1,11 +1,13 @@
+import { personaFor } from '../lib/pure.js';
+import { pgGet, pgWrite, pgUpsert, contentCache } from '../lib/db.js';
+import { resolveIdentity } from '../lib/identity.js';
+import { allowRate, clientIp } from '../auth.js';
+
 /**
  * Social / community endpoints: notifications, favorites, calendar, watch log,
  * year-in-review, goods. Bound to the caller identity (uid or anon cookie).
  */
-import { personaFor } from '../lib/pure.js';
-
-export function socialRoutes(app, d) {
-  const { pgGet, pgWrite, pgUpsert, resolveIdentity, allowRate, clientIp, contentCache } = d;
+export function socialRoutes(app) {
 
   // ---- Notifications (list / mark read) ----
   app.get('/api/notifications', async (req, res, next) => {

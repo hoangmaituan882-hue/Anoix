@@ -1,11 +1,13 @@
+import { issueVoterCookie, allowRate, clientIp } from '../auth.js';
+import { pgGet, pgWrite } from '../lib/db.js';
+import { resolveIdentity, resolveVoter } from '../lib/identity.js';
+import { quotaInfo, bumpQuota, unbumpQuota, QUOTA_LIMITS } from '../lib/quota.js';
+
 /**
  * Voting + nominations: ticket, vote (cast/status/revoke), quota, nominations
  * (rounds/continuous/direct/plaza). voterId is NEVER trusted from the body.
  */
-import { issueVoterCookie } from '../auth.js';
-
-export function votingRoutes(app, d) {
-  const { pgGet, pgWrite, resolveIdentity, resolveVoter, quotaInfo, bumpQuota, unbumpQuota, allowRate, clientIp, QUOTA_LIMITS } = d;
+export function votingRoutes(app) {
 
   // ---- Nominations (rounds + options + film join + live vote counts) ----
   app.get('/api/nominations', async (_req, res, next) => {

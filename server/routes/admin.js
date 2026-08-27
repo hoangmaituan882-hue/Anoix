@@ -1,9 +1,14 @@
-﻿/**
+import { ENV_ID } from '../lib/config.js';
+import { pgGet, pgWrite } from '../lib/db.js';
+import { mapUser, insertUserRole } from '../lib/users.js';
+import { adminGate } from '../lib/identity.js';
+import { tcRequest, tcEnabled } from '../tcapi.js';
+
+/**
  * Admin endpoints (user management, nomination pool, scheduling, rounds, stats).
  * Admin-only via adminGate (rate-limited + verified role).
  */
-export function adminRoutes(app, d) {
-  const { ENV_ID, tcRequest, tcEnabled, pgGet, pgWrite, mapUser, nextUserNo, insertUserRole, adminGate } = d;
+export function adminRoutes(app) {
 
   app.get('/api/admin/users', adminGate, async (req, res, next) => {
     try {

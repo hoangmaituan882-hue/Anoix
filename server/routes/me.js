@@ -3,10 +3,15 @@
  * change password, and my activity (nominations + votes).
  */
 
+import { ENV_ID } from '../lib/config.js';
+import { pgGet } from '../lib/db.js';
+import { callerIdentity } from '../lib/identity.js';
+import { mapUser } from '../lib/users.js';
+import { tcRequest } from '../tcapi.js';
+
 const pickField = (v, max) => (typeof v === 'string' ? v.slice(0, max) : undefined);
 
-export function meRoutes(app, d) {
-  const { ENV_ID, tcRequest, pgGet, callerIdentity, mapUser } = d;
+export function meRoutes(app) {
 
   async function verifyUserPassword(username, password) {
     try {

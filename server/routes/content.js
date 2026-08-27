@@ -1,8 +1,12 @@
+import { ENV_ID, dbEnabled } from '../lib/config.js';
+import { getAdminToken, pgGet, pgWrite, contentCache } from '../lib/db.js';
+import { resolveIdentity } from '../lib/identity.js';
+import { allowRate, clientIp } from '../auth.js';
+
 /**
  * Public content + screening participation: health, films, news, screenings, rsvp.
  */
-export function contentRoutes(app, d) {
-  const { ENV_ID, dbEnabled, getAdminToken, pgGet, pgWrite, contentCache, resolveIdentity, allowRate, clientIp } = d;
+export function contentRoutes(app) {
 
   app.get('/api/health', async (_req, res) => {
     let db = 'ok';
