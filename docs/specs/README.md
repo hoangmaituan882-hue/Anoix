@@ -66,8 +66,17 @@
 | [frontend/client-state.md](frontend/client-state.md) | 客户端数据层：repository / community / nominations / pgAdmin |
 | [frontend/components.md](frontend/components.md) | 通用组件 + 动效组件 |
 
-## 维护约定
+## 维护约束（硬性）
 
-- **代码改了，同步更新对应 spec**（像改代码必跑测试一样）。
-- 元信息「状态」标记 `已上线 / 开发中`；review 时抽查 spec 与代码一致性。
+> **每次改功能/模块，收尾时必须顺手更新对应 spec，否则视为「没做完」。**
+
+| 改了什么 | 必须更新哪个 spec |
+|---|---|
+| 新增/改端点、改鉴权/限流/错误码 | `api/*.md` 对应路由 |
+| 新增/改表、改字段/约束/RLS | `data/schema.md` |
+| 改 lib 导出函数签名/语义 | `lib/*.md` |
+| 改前端功能/页面/组件 | `frontend/*.md` |
+| 新增模块/端点/表 | **同时新建对应 spec**（按上面统一模板） |
+
+- 元信息「状态」标记 `已上线 / 开发中`；review 时抽查 spec 与代码一致性（漂移即修改）。
 - 顶层 `agend.md` 是「项目议程」，这里是「逐模块规格」，两者分工：agend 看全局，spec 看细节。

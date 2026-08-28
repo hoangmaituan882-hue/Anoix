@@ -84,3 +84,4 @@
 - **TMDB 代理**：已对全民开放（限流 20/min），仅刮削进提名库（受周提名配额约束）。
 - **写接口限流**：vote/tmdb/admin/rsvp/fav/watch/notif 均走 `allowRate`（clientIp 维度）。
 - **用户编号**：`user_roles.user_no` 顺序 001/002/…，`nextUserNo()` 在创建用户时自动分配（不替换 CloudBase uid 内部身份）。
+- **Spec 同步约束（硬性）**：每次改功能/模块，**收尾时必须顺手更新对应 `docs/specs/*` 的 spec**（改端点→更新 `api/*.md` 的端点表/错误码；改表→更新 `data/schema.md`；改导出→更新 `lib/*.md`；改前端功能→更新 `frontend/*.md`）。新增模块/端点时**同时新建对应 spec**。详见 `docs/specs/README.md`。
