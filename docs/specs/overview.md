@@ -84,7 +84,7 @@ routes/* ──→ lib/identity.js ──→ lib/users.js ──→ lib/db.js �
 | `data/` | 每张表的 schema spec（列/约束/RLS/用途） |
 | `api/` | 每个路由模块的端点 spec（方法/鉴权/限流/错误码） |
 | `lib/` | 每个 lib 模块的导出函数 spec |
-| `frontend/` | 前端大功能的 spec（待补，可分配给其他 AI） |
+| `frontend/` | 前端页面、功能、客户端数据层与组件的 spec（共 12 篇） |
 
 ## 8. 关键约定
 
