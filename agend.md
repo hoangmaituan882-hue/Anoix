@@ -1,87 +1,77 @@
 # Anoix · 项目议程（Agenda）
 
-> TRIGGER 官网复刻 + 放映会选片社区站。本文档记录项目状态、已完成能力、部署信息与后续路线图。
+> TRIGGER 官网复刻 + 放映会选片社区站。本文档只记「全局概览 + 约定 + 待办」，**逐模块细节全部在 [docs/specs/](docs/specs/)（先读 [README](docs/specs/README.md)）**。
 
-## 1. 项目概览
+## 概览
 
-- **定位**：株式会社 TRIGGER 官网 1:1 复刻，叠加完整「选片社区」玩法：提名库 → 投票 → 入库 → 排期 → 放映 → 参与 → 观影评分 → 年度回顾。
-- **技术栈**：React 19 + TypeScript + Vite 6 + Tailwind CSS 4 + `motion` + react-router-dom 7 + shadcn/ui + `masonic` + `react-day-picker`。
-- **后端**：CloudBase（PostgreSQL + 身份认证）+ Express（`server/`）+ 腾讯云 API v3（用户管理 / TMDB 刮削 / 云托管配置）。
+- **定位**：株式会社 TRIGGER 官网 1:1 复刻 + 选片社区闭环（提名 → 投票 → 入库 → 排期 → 放映 → 参与 → 评分 → 年度回顾）。
+- **技术栈**：React 19 + TS + Vite 6 + Tailwind 4 + `motion`；后端 CloudBase PG + Express + 腾讯云 API v3。
 - **线上**：`https://ces123-299456-11-1407057491.sh.run.tcloudbase.com`
-- **环境**：CloudBase envId `a213-d4gzgo1mn873d99da`（上海 · PG 模式 · 个人版）。
+- **环境**：envId `a213-d4gzgo1mn873d99da`（上海 PG）。
 
-## 2. 部署与环境变量
+## 文档导航
 
-云托管服务 `ces123`（容器型，Dockerfile 构建），GitHub `main` 推送即自动部署。
+- **架构 / 表 / API / lib / 前端** → [docs/specs/README.md](docs/specs/README.md)（26+ 个 spec）。
+- 改任何模块后**同步更新对应 spec**（见下方「关键约定」）。
+
+## 部署 & 环境变量
+
+云托管 `ces123`（Dockerfile 构建），GitHub `main` push 自动部署。
 
 | 环境变量 | 状态 |
 |---|---|
-| `CLOUDBASE_ENV_ID` | ✅ 已配 |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | ✅ 已配（2026-08 更新过密码；服务端 PG admin 会话） |
-| `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` | ✅ 已配（腾讯云 API v3） |
-| `TMDB_API_KEY` | ⚠️ **未配**（TMDB 刮削提名当前 503） |
+| `CLOUDBASE_ENV_ID` / `ADMIN_USERNAME` / `ADMIN_PASSWORD` / `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` | ✅ 已配 |
+| `TMDB_API_KEY` | ⚠️ **未配**（TMDB 刮削提名 503） |
 
-## 3. 已完成能力（全部已上线）
+## 待办
 
-| 模块 | 说明 |
-|---|---|
-| 内容展示 | 作品 / 新闻 / 周边 / 媒体 / 放映会 / 历史 |
-| 选片主线 | 提名库 + 持续提名 + 轮次(6 态) + 多票投票 + 周配额 + 广场(瀑布流/排行) + 封面流动轮播 |
-| 排期 | 后台勾选入库(可逆) + 排期(待定/日历/下周六) + 一场多片 + 放映日历页 `/calendar` |
-| 统计 | 后台统计面板（谁提名 / 谁投票 / 人数） |
-| 用户管理 | 后台 CRUD + 角色 + 封禁 + 顺序编号 `user_no`(001…) + 注册时间 |
-| 个人系统 | 资料 / 改密 / 我的投票与提名 / 收藏 / 观影记录 / 年度回顾(5 幕) |
-| 社区互动 | 通知铃铛 + 收藏 + 放映会参与(rsvp) + 观影评分(五星) + 短评 + 批量标记已看 |
-| 全站搜索 | ⌘K Command Palette（作品 / 新闻 / 放映会） |
-| 商品 | 周边商品 DB 化 + 淘宝链接 + 后台 GoodsAdmin CRUD（5 件种子已入库） |
-| 动效 | View Transitions（右滑入 + 圆形扩散 + 共享元素 morph）+ motion 微交互 |
-| 交互 | 右键上下文菜单 + 撤票 + 配额进度条 + live 倒计时 + Toast 统一 |
-| 弹窗 | 作品详情弹窗（Esc / 上一部下一部 / 收藏 / 评分）+ 作品库返回修复 |
-| 数据 | 作品上映日期 `release_date` + 用户注册时间 `registered_at` |
+**阻塞**
+- [ ] 补 `TMDB_API_KEY`（themoviedb.org 申请 → 云托管环境变量）。
+- [ ] 商品 5 件种子的价格/主图（淘宝加密反爬，后台手动补）。
+- [ ] 未来作品上映日期（新吊带袜 / 迷宫饭S2 / 边缘行者2）。
 
-## 4. 部署历史（最近）
+**可选**
+- [ ] `@types/react` 类型安全。
+- [ ] 放映库卡片上映日期展示（等另一个 AI 停下 FilmsLibraryModal）。
 
-| commit | 内容 | deploy |
-|---|---|---|
-| `65d4fd4` | P1-P5 提名库/排期/统计 | 022 |
-| `a694a62` | Round 4 通知/收藏/日历 | 023 |
-| `df449b9` | Round 5 参与/观影/搜索/回顾 + 商品 + 弹窗 | 025 |
-| `7e8066d` | 上映日期/注册时间/uid 001 | 026 |
-| `5ed1b0e` | 忽略设计导出目录 | — |
+## 路线图（候选）
 
-## 5. 当前状态
+- [ ] 评论区 · 用户主页 · 达人榜接真实数据 · 选片数据洞察（recharts）· 投票竞猜 · 角色/主创库 · 推荐语点赞
 
-- **我的工作**：✅ 全部提交 + 部署 + 冒烟通过。
-- **构建健康**：`tsc` + `vite build` 全绿（3251 模块）。
-- **另一个 AI 的前端 WIP**：🔄 未提交（泛式 rebrand + credentials/credits/ranking + CalendarPage 大改等 44 项），编译构建干净，待其完成后统一审查 + 提交。
+## 关键约定
 
-## 6. 待办事项
+- **身份**：匿名 = 签名 Cookie `anoix_voter`；登录 = Bearer → `callerIdentity` uid；**永不信任 body 里的身份**。
+- **配额**：自然周（周一 00:00 Asia/Shanghai），匿名 1提/2投、登录 3提/6投。
+- **权限**：DB RLS（admin 白名单 + `is_admin()`）+ 服务端 `adminGate`。
+- **限流**：写接口走 `allowRate`（vote/nom/rsvp/notif/fav/watch/tmdb/admin）。
+- **用户编号**：`user_no` 001/002/…（展示用；内部身份仍是 CloudBase uid）。
+- **Spec 同步（硬性）**：改功能/模块收尾必同步更新 `docs/specs/*`，否则视为没做完（映射见 [specs README](docs/specs/README.md)）。
 
-### 阻塞项
-- [ ] **补 `TMDB_API_KEY`**：去 themoviedb.org 申请 key，配到云托管环境变量，否则「TMDB 刮削提名」返回 503。
-- [ ] **商品价格/主图**：淘宝 5 件种子商品价格加密、主图懒加载反爬，需后台手动补齐。
-- [ ] **未来作品上映日期**：新吊带袜 / 迷宫饭S2 / 边缘行者2 待定。
+## 开发准则（lazy senior developer）
 
-### 可选
-- [ ] 补 `@types/react`，获得真正的类型安全。
-- [ ] 放映库卡片展示上映日期（等另一个 AI 停下 FilmsLibraryModal 后再动）。
-
-## 7. 路线图（下一轮候选）
-
-- [ ] 评论区（作品/放映会）
-- [ ] 达人榜 / 成就（已有 mock 的 LeaderboardModal，待接真实数据）
-- [ ] 用户主页（公开个人页）
-- [ ] 选片数据洞察页（recharts）
-- [ ] 投票预测竞猜
-- [ ] 角色 & 主创数据库（长期内容工程）
-- [ ] 点赞推荐语 / 社交分享
-
-## 8. 关键约定
-
-- **身份模型**：匿名 = 签名 Cookie（`anoix_voter`）；登录 = 访问令牌 → uid（`callerIdentity`）。
-- **配额**：自然周（周一 00:00 Asia/Shanghai）重置；匿名 1 提名 / 2 投票，登录 3 提名 / 6 投票。
-- **权限边界**：RLS（`user_roles` admin 白名单 + `is_admin()` security-definer 函数）+ 服务端 `adminGate`。
-- **TMDB 代理**：已对全民开放（限流 20/min），仅刮削进提名库（受周提名配额约束）。
-- **写接口限流**：vote/tmdb/admin/rsvp/fav/watch/notif 均走 `allowRate`（clientIp 维度）。
-- **用户编号**：`user_roles.user_no` 顺序 001/002/…，`nextUserNo()` 在创建用户时自动分配（不替换 CloudBase uid 内部身份）。
-- **Spec 同步约束（硬性）**：每次改功能/模块，**收尾时必须顺手更新对应 `docs/specs/*` 的 spec**（改端点→更新 `api/*.md` 的端点表/错误码；改表→更新 `data/schema.md`；改导出→更新 `lib/*.md`；改前端功能→更新 `frontend/*.md`）。新增模块/端点时**同时新建对应 spec**。详见 `docs/specs/README.md`。
+> You are a lazy senior developer. Lazy means efficient, not careless. The best code is the code never written.
+>
+> Before writing any code, stop at the first rung that holds:
+> - Does this need to be built at all? (YAGNI)
+> - Does it already exist in this codebase? Reuse the helper / util / pattern already here, don't re-write it.
+> - Does the standard library already do this? Use it.
+> - Does a native platform feature cover it? Use it.
+> - Does an already-installed dependency solve it? Use it.
+> - Can this be one line? Make it one line.
+> - Only then: write the minimum code that works.
+>
+> The ladder runs after you understand the problem, not instead of it: read the task and the code it touches, trace the real flow end to end, then climb.
+>
+> **Bug fix = root cause, not symptom**: a report names a symptom. Grep every caller of the function you touch and fix the shared function once — one guard there is a smaller diff than one per caller, and patching only the path the ticket names leaves a sibling caller still broken.
+>
+> Rules:
+> - No abstractions that weren't explicitly requested.
+> - No new dependency if it can be avoided.
+> - No boilerplate nobody asked for.
+> - Deletion over addition. Boring over clever. Fewest files possible.
+> - Shortest working diff wins, but only once you understand the problem. The smallest change in the wrong place isn't lazy, it's a bug waiting to happen.
+> - Question complex requests: "Do you actually need X, or does Y cover it?"
+> - Pick the edge-case-correct option when two stdlib approaches are the same size; lazy means less code, not the flimsier algorithm.
+> - Mark deliberate simplifications that cut a real corner with a known ceiling (global lock, O(n²) scan, naive heuristic) with a comment naming the ceiling and the upgrade path.
+> - Not lazy about: understanding the problem (read it fully + trace the real flow before picking a rung), input validation at trust boundaries, error handling that prevents data loss, security, accessibility, the calibration real hardware needs, anything explicitly requested.
+> - Lazy code without its check is unfinished: non-trivial logic leaves ONE runnable check behind — the smallest thing that fails if the logic breaks (an assert-based demo/self-check or one small test file; no frameworks, no fixtures). Trivial one-liners need no test.
