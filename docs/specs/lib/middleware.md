@@ -10,6 +10,7 @@
 | corsMiddleware | `(req,res,next)` | 回显请求 origin + Allow-Credentials；OPTIONS 直接 204 |
 | securityHeaders | `(req,res,next)` | nosniff / SAMEORIGIN / referrer-policy / dns-prefetch |
 | errorHandler | `(err,req,res,next)` | 统一 JSON 错误：读 `err.status`/`err.code`/`err.message` |
+| asyncHandler | `(fn) → middleware` | 包 async 处理器，reject 自动 `next(err)`（消 try/catch 样板） |
 
 ## 备注
 

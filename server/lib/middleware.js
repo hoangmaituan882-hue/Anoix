@@ -35,3 +35,8 @@ export function errorHandler(err, _req, res, _next) {
   if (status >= 500 && err?.message) body.message = err.message;
   if (!res.headersSent) res.status(status).json(body);
 }
+
+/** Wrap an async route handler so thrown/rejected errors flow to next(err). */
+export function asyncHandler(fn) {
+  return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+}
