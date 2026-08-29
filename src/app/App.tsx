@@ -102,7 +102,7 @@ const AppShell: React.FC = () => {
         // News library page arrives with the archive stage; no-op for now.
         break;
       case 'recruit':
-        setRecruitModalOpen(true);
+        document.getElementById('cb_content_427')?.scrollIntoView({ behavior: 'smooth' });
         break;
       case 'contact':
         setContactModalOpen(true);
@@ -140,8 +140,6 @@ const AppShell: React.FC = () => {
                 onOpenAllWorks={() => setAllWorksOpen(true)}
                 onSelectNews={(news) => setSelectedNews(news)}
                 onSelectGoods={(goods) => setSelectedGoods(goods)}
-                onOpenRecruitModal={() => setRecruitModalOpen(true)}
-                onOpenAboutModal={() => setAboutModalOpen(true)}
                 onOpenModal={handleOpenModal}
               />
             }

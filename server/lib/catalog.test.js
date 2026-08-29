@@ -25,6 +25,8 @@ import {
   screeningRoundStatus,
   screeningAutoTitle,
   displayScreeningTitle,
+  assembleUpcomingNights,
+  assembleCalendarEvents,
 } from './catalog.js';
 
 test('shanghaiDateString: uses Asia/Shanghai calendar date', () => {
@@ -298,4 +300,62 @@ test('displayScreeningTitle: generic round slogans collapse to the date title', 
     displayScreeningTitle({ title: '2026-08-23', screen_date: '2026-08-23' }),
     '2026年8月23日放映',
   );
+});
+
+test('assembleUpcomingNights: one node per tonight/future night, posters follow film_ids', () => {
+  const today = '2026-08-29';
+  const { nights } = assembleUpcomingNights({
+    today,
+    screenings: [
+      { id: 'past', title: '', screen_date: '2026-08-20', film_ids: ['old'] },
+      { id: 'later', title: '今石夜', screen_date: '2026-09-06', film_ids: ['b', 'a'] },
+      { id: 'tonight', title: '', screen_date: '2026-08-29', film_ids: ['c'] },
+    ],
+    films: [
+      { id: 'a', title: 'A', title_zh: '甲', year: '2019', category: 'Movie', image: 'a.jpg' },
+      { id: 'b', title: 'B', title_zh: '乙', year: '2018', category: 'Movie', image: 'b.jpg' },
+      { id: 'c', title: 'C', title_zh: '丙', year: '2020', category: 'Movie', image: 'c.jpg' },
+      { id: 'old', title: 'Old', year: '2010', category: 'Movie', image: 'o.jpg' },
+    ],
+  });
+  assert.deepEqual(nights.map((n) => n.id), ['tonight', 'later']);
+  assert.equal(nights[0].status, 'tonight');
+  assert.equal(nights[1].status, 'upcoming');
+  assert.deepEqual(nights[1].films.map((f) => f.id), ['b', 'a']);
+  assert.equal(nights[1].title, '今石夜');
+  assert.equal(nights[1].films[0].titleZh, '乙');
+});
+
+test('assembleUpcomingNights: empty future schedule is zero nodes', () => {
+  const { nights } = assembleUpcomingNights({
+    today: '2026-08-29',
+    screenings: [{ id: 'past', screen_date: '2026-08-01', film_ids: ['a'] }],
+    films: [{ id: 'a', title: 'A' }],
+  });
+  assert.deepEqual(nights, []);
+});
+
+test('assembleCalendarEvents: one event per night, posters follow film_ids, past nights stay', () => {
+  const { events } = assembleCalendarEvents({
+    screenings: [
+      { id: 'past', title: '', screen_date: '2026-08-01', venue: '厅A', film_ids: ['b', 'missing', 'a'] },
+      { id: 'soon', title: '今石夜', screen_date: '2026-09-06', theme: '今石', film_ids: ['a'] },
+      { id: 'nodate', title: '无日期', film_ids: ['a'] },
+    ],
+    films: [
+      { id: 'a', title: 'A', title_zh: '甲', image: 'a.jpg', year: '2019' },
+      { id: 'b', title: 'B', title_zh: '乙', image: 'b.jpg', year: '2018' },
+    ],
+  });
+  assert.deepEqual(events.map((e) => e.id), ['past', 'soon']);
+  assert.equal(events[0].type, 'screening');
+  assert.equal(events[0].title, '2026年8月1日放映');
+  assert.deepEqual(events[0].films.map((f) => f.id), ['b', 'a']);
+  assert.equal(events[1].title, '今石夜');
+  assert.equal(events[1].theme, '今石');
+});
+
+test('assembleCalendarEvents: empty table is zero events', () => {
+  assert.deepEqual(assembleCalendarEvents({ screenings: [], films: [] }).events, []);
+  assert.deepEqual(assembleCalendarEvents({}).events, []);
 });

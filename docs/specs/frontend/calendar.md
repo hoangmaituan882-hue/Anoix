@@ -5,40 +5,40 @@
 - 状态: 已上线
 
 ## 目的
-提供参考 Cal.com / Google Calendar 交互体验的放映与活动排期日历，支持按月/日视图浏览未来放映会、新片上映、线上交流会与连映马拉松，支持全球多时区无缝切换与日历预约。
+按月浏览社内放映场次：一场一格，日期来自 `screenings.screen_date`（Asia/Shanghai 日历日）。
 
 ## 结构 / 组件
 
 | 组件 / 页面 | 路径 | 职责 |
 |---|---|---|
-| `CalendarPage` | `src/app/pages/CalendarPage.tsx` | 放映日历大屏页面，左侧月历选择器与时区配置，右侧按所选日期筛选的高亮事件流与场次卡片 |
-| 事件色调体系 (`EventTone`) | `CalendarPage.tsx` 内置 | `rose`（连映马拉松）、`amber`（首映/Live）、`blue`（杜比特设放映）、`purple`（线上讨论）、`emerald`（常规放映） |
-| 单场多片联动 | `CalendarPage.tsx` 内置 | 每场放映日程清晰标注关联展映影片（`films: [{ id, title, year }]`）并支持一键跳转作品详情 |
+| `CalendarPage` | `src/app/pages/CalendarPage.tsx` | 左侧场次摘要，中间月历色条，右侧当日场次与真实 RSVP |
 
 ## 数据 / 状态
 
 ### 依赖数据层
-- `src/lib/community.ts`（日历事件数据）
-- `src/lib/session.ts`（登录态获取）
+- `src/lib/community.ts`（`/api/calendar`、`/api/rsvp`）
+- `src/lib/catalog.ts`（点片名拉详情）
+- `src/lib/scheduleOps.ts`（`screeningRoundStatus` 上色）
 
 ### 调用的后端 API
 
 | 端点 | 方法 | 鉴权 | 说明 |
 |---|---|---|---|
-| `/api/calendar` | GET | 无 | 拉取全量放映日历事件列表（支持日期范围查询） |
+| `/api/calendar` | GET | 无 | 全量场次事件 |
+| `/api/rsvp/:id` | GET / POST / DELETE | 写需登录 | 预约 / 取消预约该晚 |
 
 ### 关键状态
-- `selectedDate: string`: 当前高亮选中的日期（YYYY-MM-DD）。
-- `activeMonth: Date`: 当前正在查看的月份。
-- `activeTimezone: string`: 当前选中的时区（`Asia/Shanghai`, `Asia/Tokyo`, `America/New_York`, `UTC` 等）。
-- `selectedType: string`: 事件类型过滤（全部 / 放映 / 直播 / 马拉松）。
+- `selectedDate: string`: 当前高亮日期（YYYY-MM-DD），默认上海今日。
+- `schedules`: `GET /api/calendar` 映射后的场次条。
 
 ## 交互
 
-1. **日历网格选日与微动**：点击日历单元格即时筛选右侧事件，带有高亮指示环与弹性滑动。
-2. **多时区即时转换**：切换时区下拉框后，自动重算各场次起止时间字符串并展示对应时区偏移（Offset）。
-3. **日程卡片深层导航**：点击日程中的影片标签可直接唤起作品预览弹窗或跳转放映详情。
+1. 点格子或色条筛选右侧场次。
+2. 点片名打开作品预览；点标题进 `/screenings/:id`。
+3. 「预约席位」走真实 RSVP，未登录去 `/auth`。
 
 ## 边界与备注
 
-- **静态兜底数据**：若服务端 `/api/calendar` 接口不可用，自动使用内置 `SCHEDULES_DATA` 进行兜底展示。
+- 无 TRIGGER 直播假数据、无 Cal.com 假时段预约。拉失败则空日历，不回落到种子片单。
+- 时区下拉仅对照；排期本身是上海日历日，不做时钟换算。
+- 色条：已放映 emerald、今晚 amber、未放映 blue。

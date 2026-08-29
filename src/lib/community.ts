@@ -22,7 +22,7 @@ export interface FavoriteFilm {
 
 export interface CalendarEvent {
   date: string;
-  type: 'screening' | 'film';
+  type: 'screening';
   id: string;
   title: string;
   venue: string;
@@ -88,6 +88,7 @@ export const community = {
   removeFavorite: (filmId: string) =>
     api<{ ok: boolean }>(`/api/favorites/${encodeURIComponent(filmId)}`, { method: 'DELETE' }),
   screening: (id: string) => api<ScreeningDetail>(`/api/screenings/${encodeURIComponent(id)}`),
+  upcomingNights: () => api<{ nights: UpcomingNight[] }>('/api/screenings/upcoming'),
   rsvp: (id: string) => api<{ rsvped: boolean; count: number }>(`/api/rsvp/${encodeURIComponent(id)}`),
   joinRsvp: (id: string) => api<{ ok: boolean }>(`/api/rsvp/${encodeURIComponent(id)}`, { method: 'POST' }),
   cancelRsvp: (id: string) => api<{ ok: boolean }>(`/api/rsvp/${encodeURIComponent(id)}`, { method: 'DELETE' }),
@@ -102,4 +103,23 @@ export interface ScreeningDetail {
   film_ids: string[] | null;
   recap: string | null;
   films: { id: string; title: string; title_zh: string | null; title_en: string | null; year: string | null; category: string | null; image: string | null }[];
+}
+
+export interface UpcomingPoster {
+  id: string;
+  title: string;
+  titleZh: string | null;
+  titleEn: string | null;
+  year: string;
+  category: string;
+  image: string;
+}
+
+export interface UpcomingNight {
+  id: string;
+  screenDate: string;
+  title: string;
+  status: 'tonight' | 'upcoming';
+  venue: string | null;
+  films: UpcomingPoster[];
 }

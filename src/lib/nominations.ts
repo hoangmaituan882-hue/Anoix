@@ -23,27 +23,25 @@ export interface PlazaItem {
 
 export interface NominationActivity {
   id: number;
-  roundId: string;
-  roundTitle: string;
-  roundStatus: string;
   filmId: string;
   filmTitle: string;
   image: string;
   note: string;
   planned: boolean;
+  status: string;
   source: string;
   createdAt: string;
 }
 
 export interface VoteActivity {
-  roundId: string;
-  roundTitle: string;
-  roundStatus: string;
-  filmId: string | null;
+  filmId: string;
   filmTitle: string;
   image: string;
+  count: number;
+  weeks: number;
   planned: boolean;
-  votedAt: string;
+  gate: 'open' | 'frozen' | 'screened';
+  lastWeek: string;
 }
 
 export interface TmdbNominationPayload {

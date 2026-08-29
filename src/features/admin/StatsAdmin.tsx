@@ -1,13 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { statsAdmin, StatsResponse } from '../../lib/poolAdmin';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
+import { statsAdmin, StatsFilm, StatsResponse } from '../../lib/poolAdmin';
 import { Badge } from '../../components/ui/badge';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
-import { Vote, PencilLine, Users } from 'lucide-react';
+import { Users, Ghost, UserCheck } from 'lucide-react';
 
-const fmt = (iso: string) => (iso ? new Date(iso).toLocaleString('zh-CN', { hour12: false }) : '');
-
-/** 统计面板：谁提名 / 谁投票。 */
+/** 后台统计大屏：每部提名片的匿名 / 登录提名与周票。数字不出现在前台。 */
 export const StatsAdmin: React.FC = () => {
   const [data, setData] = useState<StatsResponse | null>(null);
   const [error, setError] = useState('');
@@ -19,9 +16,7 @@ export const StatsAdmin: React.FC = () => {
 
   useEffect(() => { void reload(); }, [reload]);
 
-  const nomCount = data?.nominations.length ?? 0;
-  const voteCount = data?.votes.length ?? 0;
-  const voterCount = data ? new Set(data.votes.map((v) => v.voter)).size : 0;
+  const t = data?.totals;
 
   return (
     <div className="space-y-5">
@@ -34,75 +29,80 @@ export const StatsAdmin: React.FC = () => {
 
       {error && <p className="text-sm text-[#ffb3bd] bg-[#2a1518] border border-[#ff3650]/40 rounded-xl px-4 py-3">{error}</p>}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-4">
-          <p className="text-xs text-white/40 font-bold">提名总数</p>
-          <p className="text-2xl font-black text-white"><AnimatedNumber value={nomCount} /></p>
-        </div>
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-4">
-          <p className="text-xs text-white/40 font-bold">投票总数</p>
-          <p className="text-2xl font-black text-white"><AnimatedNumber value={voteCount} /></p>
-        </div>
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-4">
-          <p className="text-xs text-white/40 font-bold">投票人数</p>
-          <p className="text-2xl font-black text-white"><AnimatedNumber value={voterCount} /></p>
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <StatCard label="提名片目" value={t?.films ?? 0} />
+        <StatCard label="匿名提名" value={t?.anonymousNominations ?? 0} />
+        <StatCard label="登录提名" value={t?.memberNominations ?? 0} />
+        <StatCard label="匿名票" value={t?.anonymousVotes ?? 0} />
+        <StatCard label="登录票" value={t?.memberVotes ?? 0} />
       </div>
 
       {data === null ? (
         <p className="text-white/40 text-sm py-6">加载中…</p>
+      ) : data.films.length === 0 ? (
+        <p className="text-white/40 text-sm py-4">暂无提名记录。</p>
       ) : (
-        <Tabs defaultValue="nominations">
-          <TabsList className="w-full sm:w-auto">
-            <TabsTrigger value="nominations" className="flex-1 sm:flex-none">
-              <PencilLine className="w-3.5 h-3.5 mr-1" /> 谁提名 ({nomCount})
-            </TabsTrigger>
-            <TabsTrigger value="votes" className="flex-1 sm:flex-none">
-              <Vote className="w-3.5 h-3.5 mr-1" /> 谁投票 ({voteCount})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="nominations" className="mt-4 space-y-2">
-            {data.nominations.length === 0 ? (
-              <p className="text-white/40 text-sm py-4">暂无提名记录。</p>
-            ) : (
-              data.nominations.map((n) => (
-                <div key={n.id} className="flex items-center gap-3 bg-[#1a1a1a] border border-white/10 rounded-xl px-3 py-2.5">
-                  <PencilLine className="w-4 h-4 text-[#ff3650] shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-white truncate">{n.title}</p>
-                    {n.note && <p className="text-xs text-white/40 truncate">「{n.note}」</p>}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <Badge variant="secondary">{n.nominee}</Badge>
-                    <p className="text-[10px] text-white/30 font-mono mt-1">{fmt(n.created_at)}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="votes" className="mt-4 space-y-2">
-            {data.votes.length === 0 ? (
-              <p className="text-white/40 text-sm py-4">暂无投票记录。</p>
-            ) : (
-              data.votes.map((v, i) => (
-                <div key={i} className="flex items-center gap-3 bg-[#1a1a1a] border border-white/10 rounded-xl px-3 py-2.5">
-                  <Vote className="w-4 h-4 text-[#e0fe3d] shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-white truncate">{v.film_title}</p>
-                    <p className="text-xs text-white/40 truncate">{v.round_title}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <Badge variant="secondary">{v.voter}</Badge>
-                    <p className="text-[10px] text-white/30 font-mono mt-1">{fmt(v.voted_at)}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </TabsContent>
-        </Tabs>
+        <ul className="space-y-3">
+          {data.films.map((film) => (
+            <li key={film.filmId}>
+              <FilmStatCard film={film} />
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
 };
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-4">
+      <p className="text-xs text-white/40 font-bold">{label}</p>
+      <p className="text-2xl font-black text-white"><AnimatedNumber value={value} /></p>
+    </div>
+  );
+}
+
+function FilmStatCard({ film }: { film: StatsFilm }) {
+  return (
+    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-4 space-y-3">
+      <div className="flex items-start gap-3">
+        {film.image ? (
+          <img src={film.image} alt="" className="w-12 h-[72px] object-cover rounded-lg shrink-0 bg-black" />
+        ) : (
+          <div className="w-12 h-[72px] rounded-lg shrink-0 bg-white/5" />
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-white truncate">{film.title}</p>
+          {film.year && <p className="text-xs text-white/40 font-mono mt-0.5">{film.year}</p>}
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            <Badge variant="secondary" className="gap-1">
+              <Ghost className="w-3 h-3" /> 匿名提名 {film.anonymousNominations}
+            </Badge>
+            <Badge variant="secondary" className="gap-1">
+              <Ghost className="w-3 h-3" /> 匿名票 {film.anonymousVotes}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      {film.members.length === 0 ? (
+        <p className="text-xs text-white/30">尚无登录用户提名或投票。</p>
+      ) : (
+        <ul className="space-y-1.5">
+          {film.members.map((m) => (
+            <li
+              key={m.uid}
+              className="flex items-center gap-2 bg-black/30 border border-white/5 rounded-xl px-3 py-2"
+            >
+              <UserCheck className="w-3.5 h-3.5 text-[#e0fe3d] shrink-0" />
+              <span className="text-sm font-bold text-white truncate min-w-0 flex-1">{m.name}</span>
+              <span className="text-xs text-white/50 shrink-0">提名 {m.nominations}</span>
+              <span className="text-xs text-white/50 shrink-0">票 {m.votes}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

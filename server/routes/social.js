@@ -3,7 +3,7 @@ import { personaFor } from '../lib/pure.js';
 import { pgGet, pgWrite, pgUpsert, contentCache } from '../lib/db.js';
 import { resolveIdentity } from '../lib/identity.js';
 import { allowRate, clientIp } from '../auth.js';
-import { displayScreeningTitle } from '../lib/catalog.js';
+import { assembleCalendarEvents } from '../lib/catalog.js';
 
 /**
  * Social / community endpoints: notifications, favorites, calendar, watch log,
@@ -64,45 +64,13 @@ export function socialRoutes(app) {
     res.json({ ok: true });
   }));
 
-  // ---- Calendar: future live-stream / screening schedule ----
+  // ---- Calendar: one event per club screening night ----
   app.get('/api/calendar', asyncHandler(async (_req, res) => {
-    const [screenings, scheduled, films] = await Promise.all([
+    const [screenings, films] = await Promise.all([
       pgGet('/screenings?select=id,title,screen_date,venue,theme,film_ids&order=screen_date.asc'),
-      pgGet('/films?select=id,title,title_zh,title_en,image,year,screening_date&screening_status=eq.scheduled&order=screening_date.asc'),
       pgGet('/films?select=id,title,title_zh,title_en,image,year'),
     ]);
-    const filmMap = new Map((films || []).map((f) => [f.id, f]));
-    const events = [];
-    for (const s of screenings || []) {
-      if (!s.screen_date) continue;
-      events.push({
-        date: s.screen_date,
-        type: 'screening',
-        id: s.id,
-        title: displayScreeningTitle(s) || s.title,
-        venue: s.venue || '',
-        theme: s.theme || '',
-        films: (s.film_ids || []).map((id) => {
-          const f = filmMap.get(id);
-          return { id, title: f ? (f.title_zh || f.title_en || f.title) : id, image: f?.image || '', year: f?.year || '' };
-        }),
-      });
-    }
-    for (const f of scheduled || []) {
-      if (!f.screening_date) continue;
-      events.push({
-        date: f.screening_date,
-        type: 'film',
-        id: f.id,
-        title: f.title_zh || f.title_en || f.title,
-        image: f.image || '',
-        year: f.year || '',
-        venue: '',
-        theme: '',
-        films: [],
-      });
-    }
-    res.json({ events });
+    res.json(assembleCalendarEvents({ screenings, films }));
   }));
 
   // ---- Watch log + rating + review ----
@@ -158,9 +126,9 @@ export function socialRoutes(app) {
     const start = `${year}-01-01`;
     const end = `${year + 1}-01-01`; // exclusive upper bound (lt)
 
-    const [noms, votes, watches, favs, rsvps] = await Promise.all([
+    const [noms, weekVotes, watches, favs, rsvps] = await Promise.all([
       pgGet(`/nomination_pool?nominee_identity_id=eq.${encodeURIComponent(uid)}&created_at=gte.${start}&created_at=lt.${end}&select=id,title,image,planned,status`),
-      pgGet(`/votes?voter_id=eq.${encodeURIComponent(uid)}&created_at=gte.${start}&created_at=lt.${end}&select=round_id,option_id`),
+      pgGet(`/film_week_votes?identity_id=eq.${encodeURIComponent(uid)}&week_start=gte.${start}&week_start=lt.${end}&select=film_id,count`),
       pgGet(`/watch_log?uid=eq.${encodeURIComponent(uid)}&watched_at=gte.${start}&watched_at=lt.${end}&select=film_id,rating,review`),
       pgGet(`/favorites?uid=eq.${encodeURIComponent(uid)}&select=film_id`),
       pgGet(`/rsvps?uid=eq.${encodeURIComponent(uid)}&created_at=gte.${start}&created_at=lt.${end}&select=screening_id`),
@@ -180,20 +148,28 @@ export function socialRoutes(app) {
     const avgRating = watchedFilms.length
       ? Math.round((watchedFilms.reduce((s, w) => s + w.rating, 0) / watchedFilms.length) * 10) / 10
       : 0;
-    const rounds = new Set((votes || []).map((v) => v.round_id)).size;
+    let voteCount = 0;
+    const votedFilms = new Set();
+    for (const v of weekVotes || []) {
+      const id = String(v.film_id || '').trim();
+      const n = Number(v.count);
+      if (!id || !Number.isFinite(n) || n <= 0) continue;
+      voteCount += n;
+      votedFilms.add(id);
+    }
 
     res.json({
       year,
       nominations: nominatedFilms.length,
       nominatedFilms,
-      votes: (votes || []).length,
-      rounds,
+      votes: voteCount,
+      rounds: votedFilms.size,
       watches: watchedFilms.length,
       avgRating,
       watchedFilms,
       favorites: (favs || []).length,
       rsvps: (rsvps || []).length,
-      persona: personaFor(nominatedFilms.length, (votes || []).length, watchedFilms.length),
+      persona: personaFor(nominatedFilms.length, voteCount, watchedFilms.length),
     });
   }));
 

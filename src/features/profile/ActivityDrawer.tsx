@@ -15,10 +15,10 @@ export function openActivityDrawer() {
   openListener?.();
 }
 
-const STATUS_BADGE = ({ status }: { status: string }) => {
-  if (status === 'revealed') return <Badge variant="secondary">已揭晓</Badge>;
-  if (status === 'voting') return <Badge>投票中</Badge>;
-  return <Badge variant="outline">收集中</Badge>;
+const GATE_BADGE = ({ gate }: { gate: VoteActivity['gate'] }) => {
+  if (gate === 'screened') return <Badge variant="secondary">已放映</Badge>;
+  if (gate === 'frozen') return <Badge>已排期</Badge>;
+  return <Badge variant="outline">可投</Badge>;
 };
 
 const PlannedBadge = () => (
@@ -27,7 +27,7 @@ const PlannedBadge = () => (
   </span>
 );
 
-function VoteRow({ v }: { v: VoteActivity; key?: React.Key }) {
+const VoteRow: React.FC<{ v: VoteActivity }> = ({ v }) => {
   return (
     <div className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all t-tilt-card ${v.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30 hover:border-white/25'}`}>
       <Avatar className="h-12 w-9 rounded-lg shrink-0 overflow-hidden">
@@ -36,14 +36,14 @@ function VoteRow({ v }: { v: VoteActivity; key?: React.Key }) {
       </Avatar>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold truncate flex items-center gap-2">{v.filmTitle}{v.planned && <PlannedBadge />}</p>
-        <p className="text-xs text-white/40 truncate">{v.roundTitle}</p>
+        <p className="text-xs text-white/40 truncate">叠票 {v.count} · {v.weeks} 周</p>
       </div>
-      <div className="text-right shrink-0"><STATUS_BADGE status={v.roundStatus} /></div>
+      <div className="text-right shrink-0"><GATE_BADGE gate={v.gate} /></div>
     </div>
   );
-}
+};
 
-function NominationRow({ n }: { n: NominationActivity; key?: React.Key }) {
+const NominationRow: React.FC<{ n: NominationActivity }> = ({ n }) => {
   return (
     <div className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all t-tilt-card ${n.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30 hover:border-white/25'}`}>
       <Avatar className="h-12 w-9 rounded-lg shrink-0 overflow-hidden">
@@ -52,12 +52,11 @@ function NominationRow({ n }: { n: NominationActivity; key?: React.Key }) {
       </Avatar>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold truncate flex items-center gap-2">{n.filmTitle}{n.planned && <PlannedBadge />}</p>
-        <p className="text-xs text-white/40 truncate">{n.note || n.roundTitle}</p>
+        <p className="text-xs text-white/40 truncate">{n.note || (n.status === 'promoted' ? '已入库' : '提名中')}</p>
       </div>
-      <div className="text-right shrink-0"><STATUS_BADGE status={n.roundStatus} /></div>
     </div>
   );
-}
+};
 
 /** Global right-side drawer showing the signed-in user's votes & nominations. */
 export const ActivityDrawer: React.FC = () => {
@@ -106,7 +105,7 @@ export const ActivityDrawer: React.FC = () => {
                   <p className="text-sm font-bold">还没有投票</p>
                 </div>
               ) : (
-                votes.map((v) => <VoteRow key={`${v.roundId}-${v.filmId}`} v={v} />)
+                votes.map((v) => <VoteRow key={v.filmId} v={v} />)
               )}
             </TabsContent>
 

@@ -1,10 +1,12 @@
 ﻿import { asyncHandler } from '../lib/middleware.js';
 import { ENV_ID } from '../lib/config.js';
-import { pgGet, pgWrite } from '../lib/db.js';
+import { pgGet, pgWrite, contentCache } from '../lib/db.js';
 import { mapUser, insertUserRole } from '../lib/users.js';
 import { adminGate } from '../lib/identity.js';
 import { tcRequest, tcEnabled } from '../tcapi.js';
 import { resolveVideoMeta } from '../lib/channel.js';
+import { assembleNominationStats } from '../lib/nominationStats.js';
+import { socialPayload } from '../lib/socialLinks.js';
 
 /**
  * Admin endpoints (user management, nomination pool, scheduling, rounds, stats).
@@ -155,42 +157,66 @@ export function adminRoutes(app) {
   }));
 
   app.get('/api/admin/stats', adminGate, asyncHandler(async (_req, res) => {
-    const [pool, votes, options, rounds, films] = await Promise.all([
-      pgGet('/nomination_pool?select=id,title,note,source,status,nominee_identity_id,created_at&order=created_at.desc&limit=500'),
-      pgGet('/votes?select=round_id,option_id,voter_id,created_at&order=created_at.desc&limit=500'),
-      pgGet('/nomination_options?select=id,round_id,film_id'),
-      pgGet('/nomination_rounds?select=id,title'),
-      pgGet('/films?select=id,title,title_zh,title_en'),
+    const [pool, weekVotes, members] = await Promise.all([
+      pgGet('/nomination_pool?select=film_id,tmdb_id,title,image,year,nominee_identity_id'),
+      pgGet('/film_week_votes?select=identity_id,film_id,count'),
+      pgGet('/user_roles?select=uid,username,user_no'),
     ]);
+    res.json(assembleNominationStats({ pool, weekVotes, members }));
+  }));
 
-    let userMap = new Map();
-    try {
-      const resp = await tcRequest('DescribeEndUsers', { EnvId: ENV_ID, Limit: 100, Offset: 0 });
-      for (const u of resp.Users || []) userMap.set(u.UUId, u.UserName || u.Email || u.PhoneNumber || u.UUId);
-    } catch { }
+  app.get('/api/admin/social-links', adminGate, asyncHandler(async (_req, res) => {
+    const rows = await pgGet('/social_links?select=*&order=sort_order.asc');
+    res.json(rows ?? []);
+  }));
 
-    const name = (id) => (id ? (userMap.get(id) || (String(id).length > 30 ? '匿名' : id)) : '匿名');
-    const roundTitle = new Map((rounds || []).map((r) => [r.id, r.title]));
-    const filmTitle = new Map((films || []).map((f) => [f.id, f.title_zh || f.title_en || f.title]));
-    const optInfo = new Map((options || []).map((o) => [o.id, { round_id: o.round_id, film_id: o.film_id }]));
-
-    const nominations = (pool || []).map((p) => ({
-      id: p.id, title: p.title, note: p.note, source: p.source, status: p.status,
-      nominee: name(p.nominee_identity_id), created_at: p.created_at,
-    }));
-    const votesList = (votes || []).map((v) => {
-      const o = optInfo.get(v.option_id);
-      return {
-        round_id: v.round_id,
-        round_title: o ? (roundTitle.get(o.round_id) || v.round_id) : v.round_id,
-        film_id: o?.film_id ?? null,
-        film_title: o?.film_id ? (filmTitle.get(o.film_id) || o.film_id) : '—',
-        voter: name(v.voter_id),
-        voted_at: v.created_at,
-      };
+  app.post('/api/admin/social-links', adminGate, asyncHandler(async (req, res) => {
+    const parsed = socialPayload(null, req.body ?? {});
+    if (!parsed.ok) return res.status(400).json({ error: parsed.error });
+    const last = await pgGet('/social_links?select=sort_order&order=sort_order.desc&limit=1');
+    const sort_order = Number(last?.[0]?.sort_order);
+    const id = `sns-${Date.now()}`;
+    await pgWrite('POST', '/social_links', {
+      id,
+      ...parsed.body,
+      sort_order: Number.isFinite(sort_order) ? sort_order + 1 : 0,
     });
+    contentCache.delete('social');
+    res.json({ ok: true, id });
+  }));
 
-    res.json({ nominations, votes: votesList });
+  app.patch('/api/admin/social-links/:id', adminGate, asyncHandler(async (req, res) => {
+    const id = String(req.params.id || '').trim();
+    if (!id) return res.status(400).json({ error: 'bad_request' });
+    const rows = await pgGet(`/social_links?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
+    const current = rows?.[0];
+    if (!current) return res.status(404).json({ error: 'not_found' });
+    const parsed = socialPayload(current, req.body ?? {});
+    if (!parsed.ok) return res.status(400).json({ error: parsed.error });
+    await pgWrite('PATCH', `/social_links?id=eq.${encodeURIComponent(id)}`, {
+      ...parsed.body,
+      updated_at: new Date().toISOString(),
+    });
+    contentCache.delete('social');
+    res.json({ ok: true });
+  }));
+
+  app.delete('/api/admin/social-links/:id', adminGate, asyncHandler(async (req, res) => {
+    const id = String(req.params.id || '').trim();
+    if (!id) return res.status(400).json({ error: 'bad_request' });
+    await pgWrite('DELETE', `/social_links?id=eq.${encodeURIComponent(id)}`);
+    contentCache.delete('social');
+    res.json({ ok: true });
+  }));
+
+  app.post('/api/admin/social-links/reorder', adminGate, asyncHandler(async (req, res) => {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map((x) => String(x || '').trim()).filter(Boolean) : [];
+    if (!ids.length) return res.status(400).json({ error: 'bad_request' });
+    await Promise.all(ids.map((id, i) =>
+      pgWrite('PATCH', `/social_links?id=eq.${encodeURIComponent(id)}`, { sort_order: i, updated_at: new Date().toISOString() }),
+    ));
+    contentCache.delete('social');
+    res.json({ ok: true });
   }));
 
   app.post('/api/admin/channel/resolve', adminGate, asyncHandler(async (req, res) => {
@@ -198,5 +224,20 @@ export function adminRoutes(app) {
     const meta = await resolveVideoMeta(url);
     if (!meta.ok) return res.status(400).json({ error: meta.error || 'bad_url' });
     res.json(meta);
+  }));
+
+  app.post('/api/admin/news/flush', adminGate, asyncHandler(async (_req, res) => {
+    contentCache.delete('news');
+    res.json({ ok: true });
+  }));
+
+  app.post('/api/admin/news/reorder', adminGate, asyncHandler(async (req, res) => {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map((x) => String(x || '').trim()).filter(Boolean) : [];
+    if (!ids.length) return res.status(400).json({ error: 'bad_request' });
+    await Promise.all(ids.map((id, i) =>
+      pgWrite('PATCH', `/news?id=eq.${encodeURIComponent(id)}`, { sort_order: i }),
+    ));
+    contentCache.delete('news');
+    res.json({ ok: true });
   }));
 }

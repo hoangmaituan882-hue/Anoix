@@ -1,6 +1,6 @@
 # Specs 索引
 
-> Anoix 的逐模块规格说明（spec）。本文档是**导航入口**：共 31 个 spec，覆盖架构、数据表、API、lib 模块、前端功能。
+> Anoix 的逐模块规格说明（spec）。本文档是**导航入口**：共 34 个 spec，覆盖架构、数据表、API、lib 模块、前端功能。
 
 ## 统一模板（每个 spec 遵循）
 
@@ -25,15 +25,15 @@
 
 | 文件 | 说明 |
 |---|---|
-| [data/schema.md](data/schema.md) | 17 张表完整 schema（列/约束/RLS/用途） |
+| [data/schema.md](data/schema.md) | 18 张表完整 schema（列/约束/RLS/用途） |
 
-### api/ — 后端路由（47 端点）
+### api/ — 后端路由（58 端点）
 
 | 文件 | 端点数 | 说明 |
 |---|---|---|
-| [api/content.md](api/content.md) | 11 | 健康检查 / 作品（featured + 分页列表） / 新闻 / 放映会 / 官方频道 / 参与 rsvp |
+| [api/content.md](api/content.md) | 13 | 健康检查 / 作品 / 新闻 / 放映会 / 未来场次时间线 / 官方频道 / 页脚社交 / 参与 rsvp |
 | [api/voting.md](api/voting.md) | 10 | 片库叠票 / 配额 / 提名 / 提名广场（轮次票保留给后台） |
-| [api/admin.md](api/admin.md) | 12 | 用户管理 / 提名池 / 排期 / 频道解析 / 统计 |
+| [api/admin.md](api/admin.md) | 19 | 用户管理 / 提名池 / 排期 / 频道解析 / 统计 / 页脚社交 / 新闻缓存与排序 |
 | [api/social.md](api/social.md) | 11 | 通知 / 收藏 / 日历 / 观影评分 / 年度回顾 / 商品 |
 | [api/me.md](api/me.md) | 4 | 个人资料 / 改密 / 我的活动 |
 | [api/ranking.md](api/ranking.md) | 1 | 全站社内已看时长榜（可选登录填 `me`） |
@@ -51,6 +51,9 @@
 | [lib/meStats.md](lib/meStats.md) | 纯函数：个人放映账口径（有单测） |
 | [lib/channel.md](lib/channel.md) | 纯函数：Bilibili/YouTube 链接解析与频道卡片组装（有单测） |
 | [lib/ranking.md](lib/ranking.md) | 纯函数：社内已看时长榜组装（有单测） |
+| [lib/nominationStats.md](lib/nominationStats.md) | 纯函数：后台提名归因（匿名 vs user_roles，有单测） |
+| [lib/socialLinks.md](lib/socialLinks.md) | 纯函数：页脚社交格子组装（https、可变条数，有单测） |
+| [lib/newsFeed.md](lib/newsFeed.md) | 纯函数：首页动态可见性与预览拖动（有单测） |
 | [lib/middleware.md](lib/middleware.md) | CORS / 安全头 / 统一错误处理 |
 | [lib/support.md](lib/support.md) | 支撑模块：auth（匿名身份+限流）/ tcapi / tmdb |
 

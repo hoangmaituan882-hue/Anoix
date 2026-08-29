@@ -23,11 +23,12 @@
 | pgGetPage | `(path, offset, limit)` | Range GET + `Prefer: count=exact`；416 → 空页 + total；返回 `{rows,total,offset,limit}` |
 | pgWrite | `(method, path, body, ...)` | 写，返回 `[status, json]`，不抛 4xx |
 | pgUpsert | `(path, body, ...)` | POST + `resolution=merge-duplicates`（原子 upsert） |
-| ttlCache | `(ttlMs)` | 内存 TTL 缓存（get/set/clear） |
-| contentCache | — | films/news/goods 15s 缓存实例 |
+| ttlCache | `(ttlMs)` | 内存 TTL 缓存（get/set/delete/clear） |
+| contentCache | — | films/news/goods/channel/social 15s 缓存实例 |
 
 ## 备注
 
 - **重试语义**：`_retried`（401 重登）、`_attempt`（5xx 退避 200ms/400ms，最多 2 次）互不干扰。
 - Content-type 约定：`pgWrite` 固定 `application/json` + `Prefer: return=representation`；`pgUpsert` 额外 `resolution=merge-duplicates`。
 - admin 写走 admin token，RLS 对服务端透明。
+- 后台改动态后 `contentCache.delete('news')`（`/api/admin/news/flush` / reorder）。

@@ -30,6 +30,7 @@ server/
 │   ├── meStats.js    ← 纯函数：个人放映账口径
 │   ├── channel.js    ← 纯函数：Bilibili/YouTube 链接解析与频道卡片组装
 │   ├── ranking.js    ← 纯函数：社内已看时长榜
+│   ├── newsFeed.js   ← 纯函数：首页动态可见性 / 预览拖动
 │   └── middleware.js ← corsMiddleware / securityHeaders / errorHandler
 └── routes/           ← HTTP 端点（直接 import lib，无依赖注入）
     ├── content.js    ← /api/health /films /news /screenings /channel /rsvp

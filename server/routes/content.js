@@ -12,8 +12,12 @@ import {
   stampIsNew,
   displayScreeningTitle,
   screeningRoundStatus,
+  assembleUpcomingNights,
+  FILM_CARD_COLUMNS,
 } from '../lib/catalog.js';
 import { assembleChannel } from '../lib/channel.js';
+import { assembleSocialLinks } from '../lib/socialLinks.js';
+import { homepageNews } from '../lib/newsFeed.js';
 
 /**
  * Public content + screening participation: health, films, news, screenings, rsvp.
@@ -83,22 +87,32 @@ export function contentRoutes(app) {
     const cached = contentCache.get('news');
     if (cached) return res.json(cached);
     const rows = await pgGet('/news?select=*&order=sort_order.asc');
-    // Publish control: only show items that are published (or scheduled whose
-    // time has arrived); pinned items float to the top. Lazy scheduling — no
-    // cron needed, the time comparison does the job.
-    const now = Date.now();
-    const visible = (rows ?? [])
-      .filter((r) => {
-        if (r.status === 'draft' || r.status === 'archived') return false;
-        if (!r.published_at) return r.status === 'published';
-        return new Date(r.published_at).getTime() <= now;
-      })
-      .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+    const visible = homepageNews(rows ?? []);
     contentCache.set('news', visible);
     res.json(visible);
   }));
 
   // ---- Screenings (archive): one night = one round; title/status derived from date ----
+  app.get('/api/screenings/upcoming', asyncHandler(async (_req, res) => {
+    const today = shanghaiDateString();
+    const rows = await pgGet('/screenings?select=id,title,screen_date,film_ids,venue,theme&order=screen_date.asc');
+    const ids = [];
+    const seen = new Set();
+    for (const row of rows ?? []) {
+      const status = screeningRoundStatus(row.screen_date, today);
+      if (status !== 'tonight' && status !== 'upcoming') continue;
+      for (const raw of row.film_ids || []) {
+        const id = String(raw || '').trim();
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        ids.push(id);
+      }
+    }
+    const path = filmsByIdPath(ids, FILM_CARD_COLUMNS);
+    const films = path ? await pgGet(path) : [];
+    res.json(assembleUpcomingNights({ screenings: rows, films: films ?? [], today }));
+  }));
+
   app.get('/api/screenings', asyncHandler(async (_req, res) => {
     const rows = await pgGet('/screenings?select=*&order=screen_date.desc');
     const today = shanghaiDateString();
@@ -125,6 +139,15 @@ export function contentRoutes(app) {
     ]);
     const body = assembleChannel(settings?.[0], videos);
     contentCache.set('channel', body);
+    res.json(body);
+  }));
+
+  app.get('/api/social-links', asyncHandler(async (_req, res) => {
+    const cached = contentCache.get('social');
+    if (cached) return res.json(cached);
+    const rows = await pgGet('/social_links?select=id,name,url,desc_zh,desc_en,desc_ja,sort_order&order=sort_order.asc');
+    const body = assembleSocialLinks(rows);
+    contentCache.set('social', body);
     res.json(body);
   }));
 

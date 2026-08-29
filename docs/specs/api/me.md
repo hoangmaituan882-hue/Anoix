@@ -12,7 +12,7 @@
 | PATCH | /api/me | 改昵称/头像（`pickField` 截断：昵称 64、头像 URL 1024） |
 | POST | /api/me/password | 改密码（校验 `currentPassword` 后 ModifyEndUserAccount） |
 | GET | /api/me/stats | 登录用户放映统计（已看/未看/总时长与片数、按月已放映、提名池去重、周票 SUM） |
-| GET | /api/me/activity | 我的提名 + 投票（join 轮次/影片/planned 状态） |
+| GET | /api/me/activity | 我的提名池行 + 周票按片 SUM（`gate`=open/frozen/screened） |
 
 ## 鉴权
 
@@ -31,5 +31,5 @@
 
 - `verifyUserPassword`：直连 auth 网关 `signin` 验证旧密码（不落库）。
 - `me/stats`：历史场次片单去重（第一次放映日），足迹交集为已看；不算今晚与未来；缺 `duration` 当 0 分钟。
-- `me/activity` 是我个人中心「我的投票与提名」的数据源。
+- `me/activity` 是我个人中心「我的投票与提名」的数据源；只读 `nomination_pool` + `film_week_votes`，不读旧轮次票。
 - 懒写元数据：`callerIdentity` 首次调用时若无 `user_roles` 行，`ensureUserMeta` 自动补 user_no/registered_at。

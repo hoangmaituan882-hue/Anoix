@@ -120,7 +120,7 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
                         <p className="text-white/40 font-bold pb-2">次投票</p>
                       </div>
                       <div className="flex items-center justify-center gap-2 text-white/50 font-bold">
-                        <Trophy className="w-5 h-5 text-[#e0fe3d]" /> 参与 {data.rounds} 轮选片
+                        <Trophy className="w-5 h-5 text-[#e0fe3d]" /> 为 {data.rounds} 部片子叠过票
                       </div>
                     </div>
                   )}

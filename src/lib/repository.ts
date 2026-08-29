@@ -85,6 +85,7 @@ const subscribeRepo = (cb: () => void) => {
 let filmsCache: WorkItem[] = WORKS_LIST;
 let newsCache: NewsItem[] = NEWS_LIST;
 let goodsCache: GoodsItem[] = [];
+let socialCache: SocialLink[] | null = null;
 
 export const repository = {
   /** Featured hero artwork for the landing section. */
@@ -105,10 +106,10 @@ export const repository = {
   /** Video feed entries (static seed). */
   videos: (): YoutubeItem[] => YOUTUBE_LIST,
 
-  /** External social/profile links for the footer. */
-  socialLinks: (): SocialLink[] => SOCIAL_LINKS,
+  /** External social/profile links for the footer. Live rows replace the seed; `[]` hides tiles. */
+  socialLinks: (): SocialLink[] => socialCache ?? SOCIAL_LINKS,
 
-  /** Pull live news + goods. Films are not part of boot — use catalog.*. */
+  /** Pull live news + goods + footer social tiles. Films are not part of boot — use catalog.*. */
   async refresh(): Promise<void> {
     const base = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
     const timer = new AbortController();
@@ -130,6 +131,19 @@ export const repository = {
       notify();
     } catch (err) {
       console.warn('[repository] goods fetch failed:', err);
+    }
+
+    try {
+      const snsRes = await fetch(`${base}/api/social-links`, { signal: timer.signal, credentials: 'include' });
+      if (snsRes.ok) {
+        const body = (await snsRes.json()) as { items?: SocialLink[] };
+        if (Array.isArray(body.items)) {
+          socialCache = body.items;
+          notify();
+        }
+      }
+    } catch (err) {
+      console.warn('[repository] social-links fetch failed, keeping seed:', err);
     } finally {
       clearTimeout(timeout);
     }

@@ -3,7 +3,7 @@
 - 类型: 路由模块
 - 路径: `server/routes/admin.js`
 - 鉴权: 全部经 `adminGate`（admin 限流 120/min + `role='admin'` 校验）
-- 依赖: `lib/db` `lib/users` `lib/identity` `tcapi` `lib/config`
+- 依赖: `lib/db` `lib/users` `lib/identity` `lib/socialLinks` `tcapi` `lib/config`
 
 ## 端点
 
@@ -20,7 +20,14 @@
 | POST | /api/admin/films/:id/schedule | 排期（screening_status + screening_date） |
 | POST | /api/admin/channel/resolve | 解析视频链接（Bilibili BV / YouTube），返回标题、封面、canonical URL |
 | POST | /api/admin/rounds/:id/status | 遗留：轮次 6 态流转（后台 UI 已移除） |
-| GET | /api/admin/stats | 统计（谁提名 / 谁投票，含匿名判定） |
+| GET | /api/admin/stats | 每部提名片：匿名提名/票 + 登录用户各自提名与票数 |
+| GET | /api/admin/social-links | 页脚社交原行（含排序） |
+| POST | /api/admin/social-links | 新增格子（https + 名称） |
+| PATCH | /api/admin/social-links/:id | 改名称 / 链接 / 三语简介 |
+| DELETE | /api/admin/social-links/:id | 删除格子 |
+| POST | /api/admin/social-links/reorder | `{ ids: string[] }` 按数组重排 |
+| POST | /api/admin/news/flush | 立刻丢掉 `contentCache` 的 news 键 |
+| POST | /api/admin/news/reorder | `{ ids: string[] }` 按数组写 `sort_order` 并 flush |
 
 ## 鉴权失败码
 
@@ -35,7 +42,7 @@
 
 | 码 | 值 |
 |---|---|
-| 400 | `bad_request` / `bad_status` / `no_film` |
+| 400 | `bad_request` / `bad_status` / `no_film` / `name_required` / `bad_url` |
 | 404 | `not_found` |
 | 409 | 重置被封禁账号密码（「该用户已被封禁…」） |
 
@@ -46,4 +53,6 @@
 - **demote 可逆**：只把 pool status 重置回 pending，不删影片。
 - **排期三态**：unscheduled（待定）/ scheduled（已排期）/ screened（已放映）。
 - **命名投票轮次已废弃**：后台不再创建 `nomination_rounds`；`POST /api/admin/rounds/:id/status` 仅遗留。一场 `screenings` 即一轮，状态由日期自动标记。
-- 统计：匿名 cookie id（长度 >30）显示为「匿名」。
+- 统计：`assembleNominationStats`；匿名 = 不在 `user_roles`。只读 `nomination_pool` + `film_week_votes`，不读旧 `votes` 表。数字仅此后台端点，不进公开广场。
+- 页脚社交：写成功后 `contentCache.delete('social')`，避免 15s 内仍吐旧格子。
+- 首页动态：写成功后 `contentCache.delete('news')`。首页 NEWS 区块无开关。

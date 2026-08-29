@@ -16,7 +16,7 @@
 | `ScreeningFilterPills` | `src/features/screenings/ScreeningFilterPills.tsx` | 多维胶囊筛选器，支持按年份、场地、主题多选过滤与重置 |
 | `ScreeningPosterModal` | `src/features/screenings/ScreeningPosterModal.tsx` | 特设放映会海报与票根大图弹窗，支持一键下载与分享 |
 | `ScreeningSkeleton` | `src/features/screenings/ScreeningSkeleton.tsx` | 列表加载过程中的骨架屏流光占位 |
-| `ScreeningTimelineCard` / `ScreeningPosterCard` / `ScreeningTicketStub` | `src/features/screenings/` | 时间线卡片、海报展卡与实体票根原语组件 |
+| `UpcomingSection` | `src/features/screenings/UpcomingSection.tsx` | 首页柠檬黄区块：横向时间线，一场一节点、当晚多张海报；悬停自定义准星光标 |
 
 ## 数据 / 状态
 
@@ -29,7 +29,7 @@
 
 | 端点 | 方法 | 鉴权 | 说明 |
 |---|---|---|---|
-| `/api/screenings` | GET | 无 | 获取全量放映会场次与关联影片 ID |
+| `/api/screenings/upcoming` | GET | 无 | 首页未来场次时间线（今晚 + 未放映） |
 | `/api/screenings/:id` | GET | 无 | 获取指定放映会详情 |
 | `/api/rsvp/:id` | GET | 必选 | 获取当前用户对该场次的报名状态与总报名人数 |
 | `/api/rsvp/:id` | POST | 必选 | 报名参与放映会（RSVP +1） |

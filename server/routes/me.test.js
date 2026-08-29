@@ -108,3 +108,40 @@ test('GET /api/me/stats: unique past nights + watch intersection + week votes', 
     ]);
   });
 });
+
+test('GET /api/me/activity: no bearer → 401', async () => {
+  st.ident = { uid: 'u1', role: 'user' };
+  await withServer(async (base) => {
+    const r = await fetch(`${base}/api/me/activity`);
+    assert.equal(r.status, 401);
+  });
+});
+
+test('GET /api/me/activity: pool nominations + stacked week votes', async () => {
+  st.ident = { uid: 'u1', role: 'user' };
+  st.pool = [{
+    id: 9,
+    film_id: 'a',
+    title: 'Alpha',
+    note: '想看',
+    planned: true,
+    status: 'promoted',
+    created_at: '2026-08-01T00:00:00Z',
+  }];
+  st.weekVotes = [{ film_id: 'a', count: 4, week_start: '2026-08-24' }];
+  st.films = [{ id: 'a', title: 'A', title_zh: '甲', image: 'a.jpg' }];
+  st.screenings = [{ screen_date: '2026-08-20', film_ids: ['a'] }];
+
+  await withServer(async (base) => {
+    const r = await fetch(`${base}/api/me/activity`, {
+      headers: { Authorization: 'Bearer tok' },
+    });
+    assert.equal(r.status, 200);
+    const body = await r.json();
+    assert.equal(body.nominations[0].filmTitle, '甲');
+    assert.equal(body.nominations[0].planned, true);
+    assert.equal(body.votes[0].count, 4);
+    assert.equal(body.votes[0].gate, 'screened');
+    assert.equal(body.votes[0].roundId, undefined);
+  });
+});

@@ -311,3 +311,81 @@ export function displayScreeningTitle(row) {
   if (!isGenericRoundTitle(title, date)) return title;
   return screeningAutoTitle(date);
 }
+
+/**
+ * Homepage timeline: one node per tonight/upcoming night, posters in film_ids order.
+ * Past nights are dropped. Missing catalog rows are skipped.
+ */
+export function assembleUpcomingNights({ screenings = [], films = [], today } = {}) {
+  const byId = new Map();
+  for (const f of films || []) {
+    const id = String(f?.id || '').trim();
+    if (id) byId.set(id, f);
+  }
+  const nights = [];
+  for (const row of screenings || []) {
+    const status = screeningRoundStatus(row?.screen_date, today);
+    if (status !== 'tonight' && status !== 'upcoming') continue;
+    const posters = [];
+    for (const raw of Array.isArray(row?.film_ids) ? row.film_ids : []) {
+      const id = String(raw || '').trim();
+      const f = byId.get(id);
+      if (!f) continue;
+      posters.push({
+        id,
+        title: String(f.title || ''),
+        titleZh: f.title_zh ?? null,
+        titleEn: f.title_en ?? null,
+        year: String(f.year || ''),
+        category: String(f.category || ''),
+        image: String(f.image || ''),
+      });
+    }
+    nights.push({
+      id: String(row.id || row.screen_date || ''),
+      screenDate: String(row.screen_date || '').slice(0, 10),
+      title: displayScreeningTitle(row),
+      status,
+      venue: row.venue || null,
+      films: posters,
+    });
+  }
+  nights.sort((a, b) => a.screenDate.localeCompare(b.screenDate) || a.id.localeCompare(b.id));
+  return { nights };
+}
+
+/**
+ * Full calendar: one event per screening night (past + future).
+ * Missing catalog rows are skipped. Nights without a date are dropped.
+ */
+export function assembleCalendarEvents({ screenings = [], films = [] } = {}) {
+  const byId = new Map((films || []).filter((f) => f?.id).map((f) => [String(f.id), f]));
+  const events = [];
+  for (const row of screenings || []) {
+    const date = String(row?.screen_date || '').slice(0, 10);
+    if (date.length < 10) continue;
+    const posters = [];
+    for (const raw of Array.isArray(row?.film_ids) ? row.film_ids : []) {
+      const id = String(raw || '').trim();
+      const f = byId.get(id);
+      if (!f) continue;
+      posters.push({
+        id,
+        title: String(f.title_zh || f.title_en || f.title || id),
+        image: String(f.image || ''),
+        year: String(f.year || ''),
+      });
+    }
+    events.push({
+      date,
+      type: 'screening',
+      id: String(row.id || date),
+      title: displayScreeningTitle(row),
+      venue: row.venue || '',
+      theme: row.theme || '',
+      films: posters,
+    });
+  }
+  events.sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  return { events };
+}

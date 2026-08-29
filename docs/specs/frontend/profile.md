@@ -32,7 +32,7 @@
 | `/api/me/stats` | GET | 必选 | 放映账：已看/未看时长、提名、周票 |
 | `/api/me` | PATCH | 必选 | 更新昵称与头像 URL |
 | `/api/me/password` | POST | 必选 | 修改密码（需校验原密码） |
-| `/api/me/activity` | GET | 必选 | 获取本人所有提名与投票明细列表 |
+| `/api/me/activity` | GET | 必选 | 提名池行 + 周票 SUM；`gate` 来自社内场次 |
 | `/api/favorites` | GET | 必选 | 获取收藏影片列表 |
 | `/api/favorites/:filmId` | DELETE | 必选 | 移出收藏夹 |
 | `/api/watch` | GET | 必选 | 获取全部观影记录 |
@@ -42,7 +42,7 @@
 
 ### 关键状态
 - `profile: AdminUser | null`: 用户信息。
-- `activity: { votes, nominations } | null`: 个人参与记录。
+- `activity: { votes, nominations } | null`: 周票与提名池记录（无命名轮次）。
 - `favorites: FavoriteFilm[] | null`: 收藏影片列表。
 - `watchLog: WatchItem[] | null`: 观影记录列表。
 - `yearReviewOpen: boolean`: 年度回顾全屏弹窗开闭状态。

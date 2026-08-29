@@ -14,7 +14,7 @@
 | 组件 | 路径 | 职责 |
 |---|---|---|
 | `Header` | `src/components/layout/Header.tsx` | 浮动三栏毛玻璃顶栏 (`max-w-[1720px]`, `backdrop-blur-md`)，集成矢量 Logo、快速导航、搜索入口、通知铃铛、多语言与用户下拉菜单 |
-| `Footer` | `src/components/layout/Footer.tsx` | 底部版权声明、株式会社 TRIGGER 官方社媒外链与备案信息 |
+| `Footer` | `src/components/layout/Footer.tsx` | 页脚社交格子（条数随 `/api/social-links` 变）+ 备案 |
 | `PageHero` | `src/components/layout/PageHero.tsx` | 二级页面统一的大标题 Hero 区块与面包屑 |
 
 ### 2. 通用 UI 原语（`src/components/ui/`）
@@ -47,8 +47,8 @@
 
 ### 1. 空间构成与大字报水印
 - **分屏对峙硬切**：Hero 首屏采用 50/50 纯正赤红（`#ff3650`）与深黑（`#151515`）硬切二分屏，粗黑分割线，大魄力人物立绘直接切入。
-- **巨字水印（Giant Typography Watermarks）**：各板块底层嵌入 **130px ~ 280px** 巨大半透明英文字水印（`NEWS`, `RECRUIT`, `GOODS`, `YOUTUBE`），作为版面的建筑骨架。
-- **整版色块节奏**：NEWS 整版电光钴蓝（`#4246ff`）、RECRUIT 极光柠檬黄（`#e0fe3d`）强硬撞色，形成类似特种纸印刷特刊的视觉韵律。
+- **巨字水印（Giant Typography Watermarks）**：各板块底层嵌入 **130px ~ 280px** 巨大半透明英文字水印（`NEWS`, `NEXT`, `GOODS`, `YOUTUBE`），作为版面的建筑骨架。
+- **整版色块节奏**：NEWS 整版电光钴蓝（`#4246ff`）、NEXT 极光柠檬黄（`#e0fe3d`）强硬撞色，形成类似特种纸印刷特刊的视觉韵律。
 - **实体胶囊按键**：粗圆大胶囊（`rounded-full`）嵌套独立的反色圆形箭头（`w-7 h-7 rounded-full`），悬停产生硬派位移击发感。
 
 ### 2. 色彩与主题 Tokens

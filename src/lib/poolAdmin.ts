@@ -39,26 +39,30 @@ export const poolAdmin = {
     write<{ ok: boolean }>('POST', `/api/admin/rounds/${encodeURIComponent(roundId)}/status`, { status }),
 };
 
-export interface StatsNomination {
-  id: number;
-  title: string;
-  note: string | null;
-  source: string;
-  status: string;
-  nominee: string;
-  created_at: string;
+export interface StatsMember {
+  uid: string;
+  name: string;
+  nominations: number;
+  votes: number;
 }
-export interface StatsVote {
-  round_id: string;
-  round_title: string;
-  film_id: string | null;
-  film_title: string;
-  voter: string;
-  voted_at: string;
+export interface StatsFilm {
+  filmId: string;
+  title: string;
+  image: string;
+  year: string;
+  anonymousNominations: number;
+  anonymousVotes: number;
+  members: StatsMember[];
 }
 export interface StatsResponse {
-  nominations: StatsNomination[];
-  votes: StatsVote[];
+  films: StatsFilm[];
+  totals: {
+    films: number;
+    anonymousNominations: number;
+    anonymousVotes: number;
+    memberNominations: number;
+    memberVotes: number;
+  };
 }
 
 export const statsAdmin = {

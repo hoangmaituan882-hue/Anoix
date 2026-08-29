@@ -1,6 +1,6 @@
 # Spec: 数据库 Schema
 
-> 来源：`migrations/*.sql`（已全部应用）。共 17 张表。RLS 默认启用；服务端写操作走 admin token 绕开 RLS。
+> 来源：`migrations/*.sql`（已全部应用）。共 18 张表。RLS 默认启用；服务端写操作走 admin token 绕开 RLS。
 
 ## 内容类
 
@@ -36,7 +36,7 @@ RLS：公开读 `films_public_read`；admin 写 `films_admin_write`。
 | id | text PK |
 | date / category / title(_zh/_en) / content(_zh/_en) | text |
 | image / link | text |
-| status | text | `draft/published/archived`（Check） |
+| status | text | `draft/scheduled/published/archived`（Check） |
 | published_at | timestamptz |
 | pinned | boolean |
 | sort_order / created_at | — |
@@ -89,6 +89,20 @@ RLS：公开读 `goods_public_read`；admin 写。种子 5 件淘宝 TOP5 已入
 | sort_order / created_at / updated_at | — |
 
 RLS：公开读；admin 写。无种子；后台粘贴链接解析封面后写入。
+
+### `social_links` — 页脚社交格子
+
+用途：站点页脚外链卡片，条数可变。
+
+| 列 | 类型 |
+|---|---|
+| id | text PK |
+| name | text（格子标题，如 X / Instagram） |
+| url | text（必须 https，公开接口会丢掉不合格行） |
+| desc_zh / desc_en / desc_ja | text |
+| sort_order / created_at / updated_at | — |
+
+RLS：公开读；admin 写。种子 6 条（X / Instagram / YouTube / Twitch / Discord / Patreon）。后台可增删，页脚格子数跟着变。
 
 ## 选片类
 

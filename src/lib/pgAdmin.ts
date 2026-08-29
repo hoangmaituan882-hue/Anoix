@@ -1,5 +1,6 @@
 import { auth, CLOUDBASE_ENV_ID } from './cloudbase';
-import { WorkItem, NewsItem } from '../types';
+import { WorkItem } from '../types';
+import { api } from './api/client';
 
 /**
  * Admin PG REST client — drives CloudBase PG directly with the signed-in
@@ -83,9 +84,12 @@ export interface NewsRow {
   category: string | null;
   title: string;
   title_zh: string | null;
+  title_en: string | null;
   content: string | null;
   content_zh: string | null;
+  content_en: string | null;
   image: string | null;
+  link: string | null;
   sort_order: number;
   status: 'draft' | 'scheduled' | 'published' | 'archived';
   published_at: string | null;
@@ -107,6 +111,13 @@ export const adminNews = {
   create: (row: Partial<NewsRow>) => pg<NewsRow[]>('POST', '/news', row),
   update: (id: string, row: Partial<NewsRow>) => pg<NewsRow[]>('PATCH', `/news?id=eq.${encodeURIComponent(id)}`, row),
   remove: (id: string) => pg<null>('DELETE', `/news?id=eq.${encodeURIComponent(id)}`),
+  reorder: (ids: string[]) =>
+    api<{ ok: boolean }>('/api/admin/news/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    }),
+  flush: () => api<{ ok: boolean }>('/api/admin/news/flush', { method: 'POST' }),
 };
 
 // ---------- screenings ----------

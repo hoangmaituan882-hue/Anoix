@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   UserCheck,
   Clapperboard,
+  Share2,
   ExternalLink,
   LogOut,
   Command as CmdIcon,
@@ -24,6 +25,7 @@ export type AdminTab =
   | 'news'
   | 'goods'
   | 'channel'
+  | 'social'
   | 'screenings'
   | 'pool'
   | 'stats'
@@ -74,6 +76,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         { key: 'news', label: '动态公告', en: 'NEWS', icon: Newspaper, hotkey: '2', count: newsCount },
         { key: 'goods', label: '周边商品', en: 'GOODS', icon: ShoppingBag, hotkey: '3' },
         { key: 'channel', label: '官方频道', en: 'CHANNEL', icon: Clapperboard, hotkey: '4' },
+        { key: 'social', label: '页脚社交', en: 'SOCIAL', icon: Share2, hotkey: '9' },
       ],
     },
     {

@@ -336,17 +336,17 @@ export const ProfilePage: React.FC<{
                             ) : (
                               <div className="space-y-2">
                                 {activity.votes.map((v) => (
-                                  <div key={`${v.roundId}-${v.filmId}`} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${v.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30'}`}>
+                                  <div key={v.filmId} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${v.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30'}`}>
                                     {v.image ? <img src={v.image} alt="" className="w-9 h-12 rounded-md object-cover shrink-0" /> : <Vote className="w-4 h-4 text-[#ff3650] shrink-0" />}
                                     <div className="min-w-0 flex-1">
                                       <p className="text-sm font-bold text-white truncate flex items-center gap-2">
                                         {v.filmTitle}
                                         {v.planned && <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/40">已通过</Badge>}
                                       </p>
-                                      <p className="text-xs text-white/40 truncate">{v.roundTitle}</p>
+                                      <p className="text-xs text-white/40 truncate">叠票 {v.count} · {v.weeks} 周</p>
                                     </div>
                                     <div className="text-right shrink-0">
-                                      {v.roundStatus === 'revealed' ? <Badge variant="secondary">已揭晓</Badge> : v.roundStatus === 'voting' ? <Badge>投票中</Badge> : <Badge variant="outline">收集中</Badge>}
+                                      {v.gate === 'screened' ? <Badge variant="secondary">已放映</Badge> : v.gate === 'frozen' ? <Badge>已排期</Badge> : <Badge variant="outline">可投</Badge>}
                                     </div>
                                   </div>
                                 ))}
@@ -370,7 +370,7 @@ export const ProfilePage: React.FC<{
                                         {n.filmTitle}
                                         {n.planned && <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/40">已通过</Badge>}
                                       </p>
-                                      <p className="text-xs text-white/40 truncate">{n.note || n.roundTitle}</p>
+                                      <p className="text-xs text-white/40 truncate">{n.note || (n.status === 'promoted' ? '已入库' : '提名中')}</p>
                                     </div>
                                   </div>
                                 ))}

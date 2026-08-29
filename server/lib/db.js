@@ -151,6 +151,7 @@ export function ttlCache(ttlMs) {
       return v.value;
     },
     set(key, value) { store.set(key, { ts: Date.now(), value }); },
+    delete(key) { store.delete(key); },
     clear() { store.clear(); },
   };
 }

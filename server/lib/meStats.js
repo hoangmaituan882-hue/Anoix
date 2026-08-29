@@ -3,6 +3,8 @@
  * watch_log intersection, nomination-pool unique ids, week-vote SUM(count).
  */
 
+import { clubIndexByFilm, filmVoteGate } from './catalog.js';
+
 function filmMinutes(raw) {
   const n = Number(raw);
   return Number.isFinite(n) && n > 0 ? n : 0;
@@ -95,4 +97,82 @@ export function assembleMeStats({
     votes,
     monthly,
   };
+}
+
+function filmLabel(film, fallback) {
+  if (film) return String(film.title_zh || film.title_en || film.title || fallback || '');
+  return String(fallback || '');
+}
+
+/**
+ * Profile / drawer activity: nomination_pool rows + lifetime film_week_votes.
+ * Does not read the old round `votes` / `nomination_options` tables.
+ */
+export function assembleMeActivity({
+  today,
+  pool = [],
+  weekVotes = [],
+  films = [],
+  screenings = [],
+} = {}) {
+  const filmMap = new Map((films || []).filter((f) => f?.id).map((f) => [String(f.id), f]));
+  const index = clubIndexByFilm(screenings);
+  const plannedByFilm = new Set();
+  for (const p of pool || []) {
+    const id = String(p?.film_id || '').trim();
+    if (id && p.planned) plannedByFilm.add(id);
+  }
+
+  const nominations = (pool || []).map((p) => {
+    const filmId = String(p?.film_id || '').trim();
+    const film = filmId ? filmMap.get(filmId) : null;
+    return {
+      id: p.id,
+      filmId: filmId || String(p?.tmdb_id || ''),
+      filmTitle: filmLabel(film, p?.title),
+      image: String(film?.image || p?.image || ''),
+      note: String(p?.note || ''),
+      planned: Boolean(p?.planned),
+      status: String(p?.status || 'pending'),
+      source: String(p?.source || 'user'),
+      createdAt: p?.created_at || '',
+    };
+  });
+  nominations.sort((a, b) => {
+    const ta = String(a.createdAt || '');
+    const tb = String(b.createdAt || '');
+    if (ta !== tb) return ta < tb ? 1 : -1;
+    return String(b.id).localeCompare(String(a.id));
+  });
+
+  const voteMap = new Map();
+  for (const row of weekVotes || []) {
+    const filmId = String(row?.film_id || '').trim();
+    const n = Number(row?.count);
+    if (!filmId || !Number.isFinite(n) || n <= 0) continue;
+    const cur = voteMap.get(filmId) || { filmId, count: 0, weeks: 0, lastWeek: '' };
+    cur.count += n;
+    cur.weeks += 1;
+    const ws = String(row?.week_start || '');
+    if (ws > cur.lastWeek) cur.lastWeek = ws;
+    voteMap.set(filmId, cur);
+  }
+
+  const votes = [...voteMap.values()].map((v) => {
+    const film = filmMap.get(v.filmId);
+    const dates = index.get(v.filmId)?.dates || [];
+    return {
+      filmId: v.filmId,
+      filmTitle: filmLabel(film, v.filmId),
+      image: String(film?.image || ''),
+      count: v.count,
+      weeks: v.weeks,
+      planned: plannedByFilm.has(v.filmId),
+      gate: filmVoteGate(dates, today),
+      lastWeek: v.lastWeek,
+    };
+  });
+  votes.sort((a, b) => b.count - a.count || String(b.lastWeek).localeCompare(String(a.lastWeek)));
+
+  return { nominations, votes };
 }

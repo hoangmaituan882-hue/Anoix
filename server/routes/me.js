@@ -9,7 +9,7 @@ import { pgGet } from '../lib/db.js';
 import { callerIdentity } from '../lib/identity.js';
 import { mapUser } from '../lib/users.js';
 import { shanghaiDateString, filmsByIdPath } from '../lib/catalog.js';
-import { assembleMeStats, firstScreenedByFilm, minutesToHours } from '../lib/meStats.js';
+import { assembleMeStats, assembleMeActivity, firstScreenedByFilm, minutesToHours } from '../lib/meStats.js';
 import { tcRequest } from '../tcapi.js';
 
 const pickField = (v, max) => (typeof v === 'string' ? v.slice(0, max) : undefined);
@@ -112,58 +112,25 @@ export function meRoutes(app) {
     });
   }));
 
-  // ---- My activity (nominations + votes, with planned/approved status) ----
+  // ---- My activity (nomination pool + stacked week votes) ----
   app.get('/api/me/activity', asyncHandler(async (req, res) => {
     const authz = req.headers.authorization || '';
     if (!authz.startsWith('Bearer ')) return res.status(401).json({ error: 'unauthorized' });
     const ident = await callerIdentity(authz.slice(7).trim());
     if (!ident) return res.status(401).json({ error: 'unauthorized' });
+    const uid = ident.uid;
+    const today = shanghaiDateString();
 
-    const [myOptions, myVotes, rounds, allOptions, films] = await Promise.all([
-      pgGet(`/nomination_options?nominee_identity_id=eq.${encodeURIComponent(ident.uid)}&select=id,round_id,film_id,note,created_at,planned,source&order=created_at.desc`),
-      pgGet(`/votes?voter_id=eq.${encodeURIComponent(ident.uid)}&select=round_id,option_id,created_at&order=created_at.desc`),
-      pgGet('/nomination_rounds?select=id,title,status'),
-      pgGet('/nomination_options?select=id,film_id,planned'),
-      pgGet('/films?select=id,title,title_zh,title_en,year,image'),
+    const [pool, weekVotes, screenings] = await Promise.all([
+      pgGet(`/nomination_pool?nominee_identity_id=eq.${encodeURIComponent(uid)}&select=id,film_id,tmdb_id,title,image,note,planned,status,source,created_at&order=created_at.desc`),
+      pgGet(`/film_week_votes?identity_id=eq.${encodeURIComponent(uid)}&select=film_id,count,week_start`),
+      pgGet('/screenings?select=screen_date,film_ids'),
     ]);
-    const roundMap = new Map((rounds || []).map((r) => [r.id, r]));
-    const optionMap = new Map((allOptions || []).map((o) => [o.id, o]));
-    const filmMap = new Map((films || []).map((f) => [f.id, f]));
-
-    const nominations = (myOptions || []).map((o) => {
-      const round = roundMap.get(o.round_id);
-      const film = filmMap.get(o.film_id);
-      return {
-        id: o.id,
-        roundId: o.round_id,
-        roundTitle: round?.title || o.round_id,
-        roundStatus: round?.status || 'revealed',
-        filmId: o.film_id,
-        filmTitle: film ? (film.title_zh || film.title_en || film.title) : o.film_id,
-        image: film?.image || '',
-        note: o.note || '',
-        planned: Boolean(o.planned),
-        source: o.source || 'admin',
-        createdAt: o.created_at,
-      };
-    });
-
-    const votes = (myVotes || []).map((v) => {
-      const round = roundMap.get(v.round_id);
-      const option = optionMap.get(v.option_id);
-      const film = option ? filmMap.get(option.film_id) : null;
-      return {
-        roundId: v.round_id,
-        roundTitle: round?.title || v.round_id,
-        roundStatus: round?.status || 'revealed',
-        filmId: option?.film_id,
-        filmTitle: film ? (film.title_zh || film.title_en || film.title) : '—',
-        image: film?.image || '',
-        planned: Boolean(option?.planned),
-        votedAt: v.created_at,
-      };
-    });
-
-    res.json({ nominations, votes });
+    const ids = [];
+    for (const p of pool || []) if (p.film_id) ids.push(p.film_id);
+    for (const v of weekVotes || []) if (v.film_id) ids.push(v.film_id);
+    const filmPath = filmsByIdPath(ids);
+    const films = filmPath ? await pgGet(filmPath) : [];
+    res.json(assembleMeActivity({ today, pool, weekVotes, films, screenings }));
   }));
 }

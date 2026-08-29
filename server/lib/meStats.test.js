@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assembleMeStats, minutesToHours } from './meStats.js';
+import { assembleMeStats, assembleMeActivity, minutesToHours } from './meStats.js';
 
 const TODAY = '2026-08-29';
 
@@ -94,4 +94,45 @@ test('minutesToHours: one decimal, minutes based', () => {
   assert.equal(minutesToHours(90), 1.5);
   assert.equal(minutesToHours(0), 0);
   assert.equal(minutesToHours(61), 1);
+});
+
+test('assembleMeActivity: nominations from pool rows, not round options', () => {
+  const { nominations, votes } = assembleMeActivity({
+    today: TODAY,
+    pool: [
+      { id: 1, film_id: 'a', title: '池内名', note: '想看', planned: true, status: 'promoted', source: 'user', created_at: '2026-08-01T00:00:00Z' },
+      { id: 2, film_id: null, tmdb_id: 't7', title: '待入库', note: '', planned: false, status: 'pending', image: 'p.jpg', created_at: '2026-08-20T00:00:00Z' },
+    ],
+    films: [{ id: 'a', title: 'A', title_zh: '甲', image: 'a.jpg' }],
+    weekVotes: [],
+    screenings: [],
+  });
+  assert.equal(nominations.length, 2);
+  assert.equal(nominations[0].id, 2);
+  assert.equal(nominations[0].filmTitle, '待入库');
+  assert.equal(nominations[1].filmTitle, '甲');
+  assert.equal(nominations[1].planned, true);
+  assert.deepEqual(votes, []);
+});
+
+test('assembleMeActivity: votes SUM week counts per film; gate from club nights', () => {
+  const { votes } = assembleMeActivity({
+    today: TODAY,
+    pool: [{ id: 1, film_id: 'a', planned: true }],
+    films: [{ id: 'a', title: 'A', title_zh: '甲', image: 'a.jpg' }],
+    weekVotes: [
+      { film_id: 'a', count: 3, week_start: '2026-08-24' },
+      { film_id: 'a', count: 2, week_start: '2026-08-17' },
+      { film_id: 'b', count: 1, week_start: '2026-08-24' },
+    ],
+    screenings: [{ screen_date: '2026-08-20', film_ids: ['a'] }],
+  });
+  assert.equal(votes[0].filmId, 'a');
+  assert.equal(votes[0].count, 5);
+  assert.equal(votes[0].weeks, 2);
+  assert.equal(votes[0].planned, true);
+  assert.equal(votes[0].gate, 'screened');
+  assert.equal(votes[1].filmId, 'b');
+  assert.equal(votes[1].count, 1);
+  assert.equal(votes[1].gate, 'open');
 });

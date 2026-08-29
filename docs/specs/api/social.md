@@ -13,7 +13,7 @@
 | GET | /api/favorites | 可选 | 无 | 收藏列表（join films） |
 | POST | /api/favorites | 必选 | fav 30/min | 收藏（409 幂等） |
 | DELETE | /api/favorites/:filmId | 必选 | fav 30/min | 取消收藏 |
-| GET | /api/calendar | 无 | 无 | 日历事件（放映会 + 已排期影片） |
+| GET | /api/calendar | 无 | 无 | 日历：一场一事件（`assembleCalendarEvents`），含已过场 |
 | GET | /api/watch | 可选 | 无 | 观影记录（join 影片标题/图） |
 | PUT | /api/watch/:filmId | 必选 | watch 30/min | 评分+短评（原子 upsert） |
 | DELETE | /api/watch/:filmId | 必选 | watch 30/min | 删除观影记录 |
@@ -32,6 +32,6 @@
 ## 备注
 
 - **watch 写入用 `pgUpsert`**（PostgREST `resolution=merge-duplicates`），一次原子完成，非 DELETE+POST。
-- **年度回顾**：`personaFor(nominations, votes, watched)` 生成称号；year 边界用 `gte.{y}-01-01&lt.{y+1}-01-01`（上界排他）。
+- **年度回顾**：提名读 `nomination_pool`；票读 `film_week_votes`（`votes`=SUM count，`rounds`=该年叠过票的片数）；year 边界用 `gte.{y}-01-01&lt.{y+1}-01-01`（上界排他）。
 - **票价/评分字段**：rating 0–5 整数；review 截断 200 字。
 - 匿名身份下 notifications/favorites/watch 均返回空数组（只读友好，写操作 401）。

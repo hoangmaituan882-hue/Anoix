@@ -25,3 +25,39 @@ export type ScreeningRoundStatus = 'screened' | 'tonight' | 'upcoming' | 'unsche
 export function screeningRoundStatus(screenDate: string | null | undefined, today: string): ScreeningRoundStatus;
 export function screeningAutoTitle(screenDate: string | null | undefined): string;
 export function displayScreeningTitle(row: { title?: string | null; screen_date?: string | null }): string;
+export function assembleUpcomingNights(opts?: {
+  screenings?: Array<{
+    id?: string;
+    title?: string | null;
+    screen_date?: string | null;
+    film_ids?: string[] | null;
+    venue?: string | null;
+  }>;
+  films?: Array<{
+    id?: string;
+    title?: string | null;
+    title_zh?: string | null;
+    title_en?: string | null;
+    year?: string | null;
+    category?: string | null;
+    image?: string | null;
+  }>;
+  today: string;
+}): {
+  nights: Array<{
+    id: string;
+    screenDate: string;
+    title: string;
+    status: 'tonight' | 'upcoming';
+    venue: string | null;
+    films: Array<{
+      id: string;
+      title: string;
+      titleZh: string | null;
+      titleEn: string | null;
+      year: string;
+      category: string;
+      image: string;
+    }>;
+  }>;
+};

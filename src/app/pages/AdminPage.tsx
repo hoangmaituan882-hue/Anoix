@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
 import { auth } from '../../lib/cloudbase';
 import { repository } from '../../lib/repository';
-import { adminFilms, adminNews, filmToRow, rowToFilm, FilmRow, NewsRow, adminAuth } from '../../lib/pgAdmin';
+import { adminFilms, adminNews, filmToRow, rowToFilm, FilmRow, adminAuth } from '../../lib/pgAdmin';
 import { getSession } from '../../lib/session';
 import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
@@ -14,13 +13,14 @@ import { PoolAdmin } from '../../features/admin/PoolAdmin';
 import { StatsAdmin } from '../../features/admin/StatsAdmin';
 import { GoodsAdmin } from '../../features/admin/GoodsAdmin';
 import { ChannelAdmin } from '../../features/admin/ChannelAdmin';
+import { SocialAdmin } from '../../features/admin/SocialAdmin';
+import { NewsAdmin } from '../../features/admin/NewsAdmin';
 import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
 import { AdminHeader, AdminTab } from '../../features/admin/AdminHeader';
 import { BeianLink } from '../../components/layout/Footer';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
-import { Switch } from '../../components/motion/Switch';
 import { CommandPalette, CommandItem } from '../../components/ui/CommandPalette';
 import { Command as CmdIcon } from 'lucide-react';
 import {
@@ -38,22 +38,16 @@ import {
   Search,
   LayoutGrid,
   List,
-  Sparkles,
-  ExternalLink,
   Edit3,
-  CheckCircle2,
   AlertCircle,
-  Clock,
   Eye,
   Lock,
   User,
-  SlidersHorizontal,
-  Layers,
   Flame,
   Activity,
-  Tv,
   ShoppingBag,
   Clapperboard,
+  Share2,
 } from 'lucide-react';
 
 type AuthState = 'checking' | 'signed-out' | 'signed-in' | 'unauthorized';
@@ -292,13 +286,14 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
     '2': 'news',
     '3': 'goods',
     '4': 'channel',
+    '9': 'social',
     '5': 'screenings',
     '6': 'pool',
     '7': 'stats',
     '8': 'users',
   };
 
-  // Keyboard shortcuts: 1..8 to switch tabs, Cmd/Ctrl+K for command palette
+  // Keyboard shortcuts: 1..9 to switch tabs, Cmd/Ctrl+K for command palette
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // Don't trigger when user is typing in form inputs or textareas
@@ -336,6 +331,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
     { id: 'tab-news', category: 'actions', label: '动态与公告 (NEWS)', hint: '按 2 切换', icon: <Newspaper className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('news') },
     { id: 'tab-goods', category: 'actions', label: '周边商品 (GOODS)', hint: '按 3 切换', icon: <ShoppingBag className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('goods') },
     { id: 'tab-channel', category: 'actions', label: '官方频道 (CHANNEL)', hint: '按 4 切换', icon: <Clapperboard className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('channel') },
+    { id: 'tab-social', category: 'actions', label: '页脚社交 (SOCIAL)', hint: '按 9 切换', icon: <Share2 className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('social') },
     { id: 'tab-screenings', category: 'actions', label: '放映会档案 (SCREENINGS)', hint: '按 5 切换', icon: <Calendar className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('screenings') },
     { id: 'tab-pool', category: 'actions', label: '提名池 (POOL)', hint: '按 6 切换', icon: <Flame className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('pool') },
     { id: 'tab-stats', category: 'actions', label: '统计大屏 (STATS)', hint: '按 7 切换', icon: <Activity className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('stats') },
@@ -369,6 +365,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
         {tab === 'news' && <NewsAdmin onCountChange={setNewsCount} />}
         {tab === 'goods' && <GoodsAdmin />}
         {tab === 'channel' && <ChannelAdmin />}
+        {tab === 'social' && <SocialAdmin />}
         {tab === 'screenings' && <ScreeningsAdmin />}
         {tab === 'pool' && <PoolAdmin />}
         {tab === 'stats' && <StatsAdmin />}
@@ -1022,415 +1019,6 @@ const FilmFormModal: React.FC<{
           </button>
         </div>
       </div>
-    </div>
-  );
-};
-
-// ---------------- Refactored News Admin Component ----------------
-const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCountChange }) => {
-  const [rows, setRows] = useState<NewsRow[] | null>(null);
-  const [error, setError] = useState('');
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ title: '', titleZh: '', date: '', category: 'Info', contentZh: '', image: '', scheduleAt: '' });
-  const [busy, setBusy] = useState(false);
-  const [filterCat, setFilterCat] = useState<'all' | 'Info' | 'Event' | 'Goods' | 'Media'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [confirm, setConfirm] = useState<{ title: string; desc?: string; action: () => void } | null>(null);
-
-  const reload = useCallback(async () => {
-    setError('');
-    try {
-      const data = await adminNews.list();
-      setRows(data ?? []);
-      if (data && onCountChange) onCountChange(data.length);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '加载公告列表失败');
-      setRows([]);
-    }
-  }, [onCountChange]);
-
-  useEffect(() => { void reload(); }, [reload]);
-
-  const publish = async (mode: 'draft' | 'publish' | 'schedule') => {
-    setBusy(true);
-    setError('');
-    try {
-      let status: NewsRow['status'] = 'draft';
-      let publishedAt: string | null = null;
-      if (mode === 'publish') {
-        if (!draft.title.trim()) throw new Error('公告标题必填');
-        status = 'published';
-        publishedAt = new Date().toISOString();
-      } else if (mode === 'schedule') {
-        if (!draft.title.trim()) throw new Error('公告标题必填');
-        if (!draft.scheduleAt) throw new Error('请选择定时发布时间');
-        status = 'scheduled';
-        publishedAt = new Date(draft.scheduleAt).toISOString();
-      }
-      await adminNews.create({
-        id: `news-${Date.now()}`,
-        title: draft.title.trim() || '未命名草稿',
-        title_zh: draft.titleZh || null,
-        date: draft.date || new Date().toISOString().slice(0, 10).replaceAll('-', '.'),
-        category: draft.category,
-        content: draft.contentZh || null,
-        content_zh: draft.contentZh || null,
-        image: draft.image || null,
-        sort_order: 0,
-        status,
-        published_at: publishedAt,
-        pinned: false,
-      });
-      setDraft({ title: '', titleZh: '', date: '', category: 'Info', contentZh: '', image: '', scheduleAt: '' });
-      setAdding(false);
-      await reload();
-      void repository.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '保存失败');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const setStatus = async (id: string, status: NewsRow['status']) => {
-    try {
-      const patch: Partial<NewsRow> = { status };
-      if (status === 'published') patch.published_at = new Date().toISOString();
-      await adminNews.update(id, patch);
-      await reload();
-      void repository.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '状态更新失败');
-    }
-  };
-
-  const togglePinned = async (r: NewsRow) => {
-    try {
-      await adminNews.update(r.id, { pinned: !r.pinned });
-      await reload();
-      void repository.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '置顶更新失败');
-    }
-  };
-
-  const remove = (id: string) => {
-    setConfirm({
-      title: '确认删除这条官方公告?',
-      desc: '此操作不可恢复。',
-      action: async () => {
-        try {
-          await adminNews.remove(id);
-          await reload();
-          void repository.refresh();
-        } catch (e) {
-          setError(e instanceof Error ? e.message : '删除失败');
-        }
-      },
-    });
-  };
-
-  const filteredNews = useMemo(() => {
-    if (!rows) return [];
-    let list = filterCat === 'all' ? rows : rows.filter((r) => r.category.toLowerCase() === filterCat.toLowerCase());
-    const q = searchQuery.trim().toLowerCase();
-    if (q) {
-      list = list.filter((r) =>
-        [r.title, r.title_zh, r.content_zh, r.date].some((v) => v && String(v).toLowerCase().includes(q))
-      );
-    }
-    return list;
-  }, [rows, filterCat, searchQuery]);
-
-  if (rows === null) {
-    return (
-      <div className="py-20 flex justify-center items-center">
-        <Loader variant="comet" size={32} label="加载动态公告..." className="text-[#ff3650]" />
-      </div>
-    );
-  }
-
-  const CATEGORY_COLORS: Record<string, string> = {
-    Info: 'bg-[#ff3650]/20 text-[#ff3650] border-[#ff3650]/40',
-    Event: 'bg-[#e0fe3d]/20 text-[#e0fe3d] border-[#e0fe3d]/40',
-    Goods: 'bg-[#4246ff]/20 text-[#8b8eff] border-[#4246ff]/40',
-    Media: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
-  };
-
-  const STATUS_META: Record<string, { label: string; cls: string }> = {
-    draft: { label: '草稿', cls: 'bg-white/10 text-white/50 border-white/20' },
-    scheduled: { label: '定时', cls: 'bg-blue-500/20 text-blue-400 border-blue-500/40' },
-    published: { label: '已发布', cls: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' },
-    archived: { label: '已归档', cls: 'bg-white/5 text-white/30 border-white/10' },
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 shadow-xl">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest flex items-center gap-1">
-              <Newspaper className="w-3.5 h-3.5" />
-              OFFICIAL NEWS
-            </span>
-            <span className="bg-white/10 text-white/80 px-2 py-0.5 rounded-full text-xs font-mono font-bold">
-              {rows.length} 篇公告
-            </span>
-          </div>
-          <h2 className="text-2xl font-black text-white tracking-tight uppercase">TRIGGER 动态与新闻发布</h2>
-          <p className="text-xs text-white/50">发布展会动态、商品发售、媒体采访与重大制作情报</p>
-        </div>
-
-        <button
-          onClick={() => setAdding(!adding)}
-          className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] active:scale-95 text-white font-black text-sm px-5 py-3 rounded-2xl transition-all cursor-pointer shadow-[0_8px_20px_rgba(255,54,80,0.3)]"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{adding ? '收起发布器' : '发布新公告 (NEW POST)'}</span>
-        </button>
-      </div>
-
-      {error && (
-        <div className="p-4 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/40 text-sm font-bold text-[#ff3650]">
-          {error}
-        </div>
-      )}
-
-      {/* Adding Editor Card */}
-      {adding && (
-        <div className="bg-[#181818] border-2 border-[#ff3650]/40 rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl animate-fade-in">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <h3 className="text-base font-black text-white uppercase flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#ff3650]" />
-              新建官方动态
-            </h3>
-            <span className="text-xs text-white/40 font-mono">ID: AUTO_GENERATED</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className={LABEL}>原文标题 (日文/原版) *</label>
-              <input
-                value={draft.title}
-                onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                className={FIELD}
-                placeholder="如 『ダンジョン飯』POP UP STORE 開催決定！"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className={LABEL}>中文标题 (本地化)</label>
-              <input
-                value={draft.titleZh}
-                onChange={(e) => setDraft({ ...draft, titleZh: e.target.value })}
-                className={FIELD}
-                placeholder="如 《迷宫饭》快闪店举办决定！"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className={LABEL}>发布日期 (Date)</label>
-              <input
-                value={draft.date}
-                onChange={(e) => setDraft({ ...draft, date: e.target.value })}
-                className={FIELD}
-                placeholder="2026.08.22 (留空自动使用今日)"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className={LABEL}>公告分类 (Category)</label>
-              <Select value={draft.category} onValueChange={(v) => setDraft({ ...draft, category: v })}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="选择分类" />
-                </SelectTrigger>
-                <SelectContent>
-                  {['Info', 'Event', 'Goods', 'Media'].map((c) => (
-                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className={LABEL}>正文内容 (Content)</label>
-            <textarea
-              value={draft.contentZh}
-              onChange={(e) => setDraft({ ...draft, contentZh: e.target.value })}
-              rows={4}
-              className={FIELD}
-              placeholder="输入公告正文详情..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className={LABEL}>封面图 URL (Cover)</label>
-              <input
-                value={draft.image}
-                onChange={(e) => setDraft({ ...draft, image: e.target.value })}
-                className={FIELD}
-                placeholder="https://... (留空无封面)"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className={LABEL}>定时发布时间 (Schedule)</label>
-              <input
-                type="datetime-local"
-                value={draft.scheduleAt}
-                onChange={(e) => setDraft({ ...draft, scheduleAt: e.target.value })}
-                className={FIELD}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-end gap-3 pt-2">
-            <button
-              onClick={() => setAdding(false)}
-              className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 cursor-pointer"
-            >
-              取消
-            </button>
-            <button
-              onClick={() => publish('draft')}
-              disabled={busy}
-              className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 cursor-pointer disabled:opacity-50"
-            >
-              存为草稿
-            </button>
-            <button
-              onClick={() => publish('schedule')}
-              disabled={busy}
-              className="inline-flex items-center gap-2 bg-[#4246ff] hover:bg-[#3336e0] disabled:opacity-50 text-white font-black text-xs uppercase px-5 py-2.5 rounded-xl transition-all cursor-pointer"
-            >
-              <Clock className="w-4 h-4" />
-              <span>{busy ? '提交中...' : '定时发布'}</span>
-            </button>
-            <button
-              onClick={() => publish('publish')}
-              disabled={busy}
-              className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] disabled:opacity-50 text-white font-black text-xs uppercase px-6 py-2.5 rounded-xl transition-all shadow-lg cursor-pointer"
-            >
-              <Save className="w-4 h-4" />
-              <span>{busy ? '正在发布...' : '立即发布'}</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Category Filter + Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-white/10">
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-          {(['all', 'Info', 'Event', 'Goods', 'Media'] as const).map((c) => (
-            <button
-              key={c}
-              onClick={() => setFilterCat(c)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-black transition-all whitespace-nowrap cursor-pointer ${
-                filterCat === c
-                  ? 'bg-[#ff3650] text-white shadow-md'
-                  : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              {c === 'all' ? `全部 (${rows.length})` : c}
-            </button>
-          ))}
-        </div>
-        <div className="relative sm:w-64 shrink-0">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="搜索公告..."
-            className="w-full bg-white/5 border border-white/15 rounded-full pl-9 pr-3 py-1.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff3650] transition-colors"
-          />
-        </div>
-      </div>
-
-      {/* News Grid with layout animations */}
-      <AnimatePresence mode="popLayout">
-        {filteredNews.length === 0 ? (
-          <motion.div
-            key="news-empty"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25 }}
-            className="py-16 text-center text-white/40 font-bold"
-          >
-            暂无匹配的动态
-          </motion.div>
-        ) : (
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filteredNews.map((r) => (
-                <motion.div
-                  layout
-                  key={r.id}
-                  initial={{ opacity: 0, scale: 0.92, y: 14 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.92, y: -12 }}
-                  transition={{
-                    duration: 0.3,
-                    ease: [0.16, 1, 0.3, 1],
-                    layout: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
-                  }}
-                  className="group bg-[#1a1a1a] border border-white/10 rounded-2xl p-5 hover:border-[#ff3650]/50 hover:bg-[#1e1e1e] transition-colors shadow-sm"
-                >
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${CATEGORY_COLORS[r.category] || 'bg-white/10 text-white'}`}>
-                      {r.category}
-                    </span>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${STATUS_META[r.status]?.cls || 'bg-white/10 text-white'}`}>
-                      {STATUS_META[r.status]?.label ?? r.status}
-                    </span>
-                    {r.pinned && <span className="text-xs" title="置顶">📌</span>}
-                    <span className="text-xs font-mono text-white/50 ml-auto">{r.date}</span>
-                  </div>
-                  <h4 className="font-black text-white text-base line-clamp-1 mb-1 group-hover:text-[#ff3650] transition-colors">
-                    {r.title_zh ?? r.title}
-                  </h4>
-                  {r.title_zh && <p className="text-xs text-white/40 font-mono line-clamp-1 mb-1">{r.title}</p>}
-                  {r.content_zh && <p className="text-xs text-white/60 line-clamp-2">{r.content_zh}</p>}
-                  <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-                    {r.status === 'draft' && (
-                      <button onClick={() => setStatus(r.id, 'published')} className="px-2.5 py-1 rounded-lg bg-[#ff3650] hover:bg-[#ff203c] text-xs font-bold text-white cursor-pointer">发布</button>
-                    )}
-                    {r.status === 'scheduled' && (
-                      <button onClick={() => setStatus(r.id, 'published')} className="px-2.5 py-1 rounded-lg bg-[#4246ff] hover:bg-[#3336e0] text-xs font-bold text-white cursor-pointer">立即发布</button>
-                    )}
-                    {r.status === 'published' && (
-                      <button onClick={() => setStatus(r.id, 'archived')} className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-white/70 cursor-pointer">归档</button>
-                    )}
-                    {r.status === 'archived' && (
-                      <button onClick={() => setStatus(r.id, 'published')} className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-xs font-bold text-emerald-400 cursor-pointer">重新发布</button>
-                    )}
-                    <span className="inline-flex items-center gap-1.5 px-1.5">
-                      <Switch checked={!!r.pinned} onChange={() => togglePinned(r)} />
-                      <span className="text-xs font-bold text-white/50 whitespace-nowrap">
-                        {r.pinned ? '已置顶' : '置顶'}
-                      </span>
-                    </span>
-                    <button
-                      onClick={() => remove(r.id)}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#ff3650] text-xs font-bold text-white/50 hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1 border border-white/10"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>删除</span>
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <ConfirmDialog
-        open={!!confirm}
-        title={confirm?.title ?? ''}
-        description={confirm?.desc}
-        onConfirm={() => confirm?.action()}
-        onClose={() => setConfirm(null)}
-      />
     </div>
   );
 };

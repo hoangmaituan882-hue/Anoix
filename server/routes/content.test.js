@@ -20,6 +20,17 @@ mock.module('../lib/db.js', {
       if (p.includes('channel_settings')) {
         return [{ id: 'home', hub_url: 'https://space.bilibili.com/1' }];
       }
+      if (p.includes('social_links')) {
+        return [{
+          id: 'x',
+          name: 'X',
+          url: 'https://x.com/trigger_inc',
+          desc_zh: '工作室最新动态与周边商品预告发布于此',
+          desc_en: 'Official news',
+          desc_ja: '最新情報',
+          sort_order: 0,
+        }];
+      }
       if (p.includes('channel_videos')) {
         return [{
           id: 'c1',
@@ -31,6 +42,13 @@ mock.module('../lib/db.js', {
           duration: '1:00',
           sort_order: 0,
         }];
+      }
+      if (p.includes('/news')) {
+        return [
+          { id: 'draft', title: 'Draft', status: 'draft', pinned: false, sort_order: 0, published_at: null },
+          { id: 'live', title: 'Live', status: 'published', pinned: false, sort_order: 2, published_at: null },
+          { id: 'pin', title: 'Pin', status: 'published', pinned: true, sort_order: 9, published_at: null },
+        ];
       }
       if (p.includes('screenings')) {
         if (p.includes('select=*')) {
@@ -44,14 +62,15 @@ mock.module('../lib/db.js', {
           ];
         }
         return [
-          { screen_date: '2020-01-15', film_ids: ['b', 'a'] },
-          { screen_date: '2099-01-01', film_ids: ['soon'] },
+          { id: 'past', title: '', screen_date: '2020-01-15', film_ids: ['b', 'a'] },
+          { id: 'soon-night', title: '今石夜', screen_date: '2099-01-01', film_ids: ['soon', 'a'] },
         ];
       }
       if (p.includes('id=in')) {
         return [
           { id: 'a', title: 'A', year: '2019', category: 'Movie', image: '' },
           { id: 'b', title: 'B', year: '2018', category: 'Movie', image: '' },
+          { id: 'soon', title: 'Soon', title_zh: '未映', year: '2026', category: 'Movie', image: 'soon.jpg' },
         ];
       }
       return [
@@ -73,6 +92,7 @@ mock.module('../lib/db.js', {
     contentCache: {
       get: (k) => cache.get(k),
       set: (k, v) => cache.set(k, v),
+      delete: (k) => cache.delete(k),
       clear: () => cache.clear(),
     },
   },
@@ -159,6 +179,19 @@ test('GET /api/screenings folds generic round slogans into the date title', asyn
   });
 });
 
+test('GET /api/screenings/upcoming: one node per future night, posters in film_ids order', async () => {
+  await withServer(async (base) => {
+    const r = await fetch(`${base}/api/screenings/upcoming`);
+    assert.equal(r.status, 200);
+    const body = await r.json();
+    assert.equal(body.nights.length, 1);
+    assert.equal(body.nights[0].id, 'soon-night');
+    assert.equal(body.nights[0].status, 'upcoming');
+    assert.deepEqual(body.nights[0].films.map((f) => f.id), ['soon', 'a']);
+    assert.equal(body.nights[0].films[0].titleZh, '未映');
+  });
+});
+
 test('GET /api/channel assembles hub url and clip cards', async () => {
   cache.clear();
   await withServer(async (base) => {
@@ -169,5 +202,28 @@ test('GET /api/channel assembles hub url and clip cards', async () => {
     assert.equal(body.items[0].id, 'c1');
     assert.equal(body.items[0].titleZh, '中文稿');
     assert.equal(body.items[0].platform, 'bilibili');
+  });
+});
+
+test('GET /api/social-links assembles https tiles in sort order', async () => {
+  cache.clear();
+  await withServer(async (base) => {
+    const r = await fetch(`${base}/api/social-links`);
+    assert.equal(r.status, 200);
+    const body = await r.json();
+    assert.equal(body.items.length, 1);
+    assert.equal(body.items[0].id, 'x');
+    assert.equal(body.items[0].name, 'X');
+    assert.equal(body.items[0].icon, 'X');
+  });
+});
+
+test('GET /api/news: published only, pinned first then sort_order', async () => {
+  cache.clear();
+  await withServer(async (base) => {
+    const r = await fetch(`${base}/api/news`);
+    assert.equal(r.status, 200);
+    const body = await r.json();
+    assert.deepEqual(body.map((n) => n.id), ['pin', 'live']);
   });
 });

@@ -5,10 +5,9 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { FilmsSection } from '../../features/films/FilmsSection';
 import { NewsSection } from '../../features/news/NewsSection';
-import { RecruitSection } from '../../features/about/RecruitSection';
+import { UpcomingSection } from '../../features/screenings/UpcomingSection';
 import { GoodsSection } from '../../features/goods/GoodsSection';
 import { MediaSection } from '../../features/media/MediaSection';
-import { ArrowUp } from 'lucide-react';
 
 interface HomePageProps {
   lang: Language;
@@ -18,8 +17,6 @@ interface HomePageProps {
   onOpenAllWorks: () => void;
   onSelectNews: (news: NewsItem) => void;
   onSelectGoods: (goods: GoodsItem) => void;
-  onOpenRecruitModal: () => void;
-  onOpenAboutModal: () => void;
   onOpenModal: (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
 }
 
@@ -31,8 +28,6 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenAllWorks,
   onSelectNews,
   onSelectGoods,
-  onOpenRecruitModal,
-  onOpenAboutModal,
   onOpenModal,
 }) => {
   const location = useLocation();
@@ -81,12 +76,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           }}
         />
 
-        {/* 3. RECRUIT Section (Neon Lime Green Accent + Studio Atmosphere) */}
-        <RecruitSection
-          lang={lang}
-          onOpenRecruitModal={onOpenRecruitModal}
-          onOpenAboutModal={onOpenAboutModal}
-        />
+        {/* 3. NEXT Section (Neon Lime + upcoming nights timeline) */}
+        <UpcomingSection lang={lang} />
 
         {/* 4. GOODS Section (Merchandise Carousel & Online Shop) */}
         <GoodsSection
