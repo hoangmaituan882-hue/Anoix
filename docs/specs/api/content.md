@@ -9,8 +9,8 @@
 | 方法 | 路径 | 鉴权 | 限流 | 说明 |
 |---|---|---|---|---|
 | GET | /api/health | 无 | 无 | 健康检查，`{ok,env,db,time}`，db ∈ ok/disabled/degraded |
-| GET | /api/films/featured | 无 | 无 | 首页 reel：已放过最多 12 张，按社内放映日；前两张 `isNew` |
-| GET | /api/films | 无 | 无 | 无查询参数时：全量（15s 缓存）。带 `q\|category\|sort\|limit` 时：分页 `{items,total,offset,limit}`，默认 `sort=screened_desc`，FilmCard 字段 |
+| GET | /api/films/featured | 无 | 无 | 先读场次算出 ≤12 个 id，再 `id=in` 拉卡片；前两张 `isNew` |
+| GET | /api/films | 无 | 无 | 无查询参数时：全量 `select=*`（15s 缓存）。带 `q\|category\|sort\|limit` 时：PostgREST Range 分页 `{items,total,offset,limit}`，默认 `sort=screened_desc`，FilmCard 字段 |
 | GET | /api/films/:id | 无 | 无 | 单作品详情，无则 `null` |
 | GET | /api/news | 无 | 无 | 已发布动态（15s 缓存），按 pinned 置顶 |
 | GET | /api/screenings | 无 | 无 | 放映会列表，`screen_date` 降序 |
@@ -44,5 +44,6 @@
 ## 备注
 
 - 无查询参数的 films/news 走 `contentCache`（15s），admin 改库后最多 15s 延迟（无主动失效）。
-- 分页列表与 featured 每次现算社内放映日，不走 15s 全量缓存。
+- 分页列表用反规范化 `films.screening_date` + `Prefer: count=exact`；`isNew` 仍按场次算出的首页前两 id。
+- featured 不拉全库。
 - 匿名参与以签名 Cookie 身份写入 `rsvps.uid`。

@@ -1,24 +1,4 @@
-import { getAccessToken } from './session';
-
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-
-async function authHeaders(): Promise<Record<string, string>> {
-  const token = await getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const r = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: { ...(await authHeaders()), ...(init.headers || {}) },
-  });
-  if (!r.ok) {
-    let msg = `请求失败 (${r.status})`;
-    try { const b = await r.json(); if (b?.error) msg = b.error; } catch { /* keep */ }
-    throw new Error(msg);
-  }
-  return r.json() as Promise<T>;
-}
+import { api } from './api/client';
 
 export interface NotificationItem {
   id: number;
@@ -79,38 +59,38 @@ export interface YearReviewData {
 }
 
 export const community = {
-  calendar: () => request<{ events: CalendarEvent[] }>('/api/calendar'),
-  notifications: () => request<NotificationItem[]>('/api/notifications'),
+  calendar: () => api<{ events: CalendarEvent[] }>('/api/calendar'),
+  notifications: () => api<NotificationItem[]>('/api/notifications'),
   yearReview: (year?: number) =>
-    request<YearReviewData>(`/api/me/year-review?year=${year ?? new Date().getFullYear()}`),
-  watchList: () => request<WatchItem[]>('/api/watch'),
+    api<YearReviewData>(`/api/me/year-review?year=${year ?? new Date().getFullYear()}`),
+  watchList: () => api<WatchItem[]>('/api/watch'),
   saveWatch: (filmId: string, rating: number, review: string) =>
-    request<{ ok: boolean }>(`/api/watch/${encodeURIComponent(filmId)}`, {
+    api<{ ok: boolean }>(`/api/watch/${encodeURIComponent(filmId)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ rating, review }),
     }),
   removeWatch: (filmId: string) =>
-    request<{ ok: boolean }>(`/api/watch/${encodeURIComponent(filmId)}`, { method: 'DELETE' }),
+    api<{ ok: boolean }>(`/api/watch/${encodeURIComponent(filmId)}`, { method: 'DELETE' }),
   markRead: (id?: number) =>
-    request<{ ok: boolean }>('/api/notifications/read', {
+    api<{ ok: boolean }>('/api/notifications/read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(id != null ? { id } : {}),
     }),
-  favorites: () => request<FavoriteFilm[]>('/api/favorites'),
+  favorites: () => api<FavoriteFilm[]>('/api/favorites'),
   addFavorite: (filmId: string) =>
-    request<{ ok: boolean }>('/api/favorites', {
+    api<{ ok: boolean }>('/api/favorites', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ filmId }),
     }),
   removeFavorite: (filmId: string) =>
-    request<{ ok: boolean }>(`/api/favorites/${encodeURIComponent(filmId)}`, { method: 'DELETE' }),
-  screening: (id: string) => request<ScreeningDetail>(`/api/screenings/${encodeURIComponent(id)}`),
-  rsvp: (id: string) => request<{ rsvped: boolean; count: number }>(`/api/rsvp/${encodeURIComponent(id)}`),
-  joinRsvp: (id: string) => request<{ ok: boolean }>(`/api/rsvp/${encodeURIComponent(id)}`, { method: 'POST' }),
-  cancelRsvp: (id: string) => request<{ ok: boolean }>(`/api/rsvp/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    api<{ ok: boolean }>(`/api/favorites/${encodeURIComponent(filmId)}`, { method: 'DELETE' }),
+  screening: (id: string) => api<ScreeningDetail>(`/api/screenings/${encodeURIComponent(id)}`),
+  rsvp: (id: string) => api<{ rsvped: boolean; count: number }>(`/api/rsvp/${encodeURIComponent(id)}`),
+  joinRsvp: (id: string) => api<{ ok: boolean }>(`/api/rsvp/${encodeURIComponent(id)}`, { method: 'POST' }),
+  cancelRsvp: (id: string) => api<{ ok: boolean }>(`/api/rsvp/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };
 
 export interface ScreeningDetail {

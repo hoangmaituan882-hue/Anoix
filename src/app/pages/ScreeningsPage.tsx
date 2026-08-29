@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Language, WorkItem } from '../../types';
-import { repository } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Screening } from '../../types/screening';
 import { SCREENINGS_DATA } from '../../data/screeningData';
@@ -14,6 +13,8 @@ import {
   FilterCondition,
   evaluateScreeningFilters,
 } from '../../features/screenings/ScreeningFilterPills';
+import { community } from '../../lib/community';
+import { mapFilmCard } from '../../lib/catalog';
 import { PageHero } from '../../components/layout/PageHero';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ScreeningSkeletonGrid } from '../../features/screenings/ScreeningSkeleton';
@@ -89,9 +90,8 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterConditions, setFilterConditions] = useState<FilterCondition[]>([]);
   const [activePosterModal, setActivePosterModal] = useState<Screening | null>(null);
+  const [modalFilms, setModalFilms] = useState<WorkItem[]>([]);
   const [packHoveredKey, setPackHoveredKey] = useState<string | null>(null);
-
-  const films = repository.films();
 
   useEffect(() => {
     let alive = true;
@@ -210,6 +210,17 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
 
   const handleSelectFilm = (filmId: string) => {
     navigate(`/films/${filmId}`, { viewTransition: true });
+  };
+
+  const openPoster = (item: Screening) => {
+    setActivePosterModal(item);
+    setModalFilms([]);
+    community
+      .screening(item.id)
+      .then((detail) => {
+        setModalFilms((detail.films || []).map((row) => mapFilmCard(row as unknown as Record<string, unknown>)));
+      })
+      .catch(() => setModalFilms([]));
   };
 
   // Quick preset filter helper
@@ -435,7 +446,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                     return (
                       <div
                         key={item.id}
-                        onClick={() => setActivePosterModal(item)}
+                        onClick={() => openPoster(item)}
                         className="group flex justify-between items-center p-3.5 rounded-2xl bg-[#181818] border border-white/10 hover:border-[#ff3650]/50 transition-colors cursor-pointer shadow-xs"
                       >
                         <div className="flex gap-3.5 items-center min-w-0 flex-1">
@@ -521,7 +532,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                     return (
                       <div
                         key={item.id}
-                        onClick={() => setActivePosterModal(item)}
+                        onClick={() => openPoster(item)}
                         className="group flex-1 flex flex-col gap-3 w-full p-3.5 rounded-2xl bg-[#181818] border border-white/10 hover:border-[#ff3650]/50 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden t-tilt-card"
                       >
                         <motion.div
@@ -610,7 +621,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                           transition={{
                             duration: 0.3,
                           }}
-                          onClick={() => setActivePosterModal(item)}
+                          onClick={() => openPoster(item)}
                           onMouseEnter={() => setPackHoveredKey(item.id)}
                           onMouseLeave={() => setPackHoveredKey(null)}
                         >
@@ -679,8 +690,11 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
           <ScreeningPosterModal
             screening={activePosterModal}
             lang={lang}
-            films={films}
-            onClose={() => setActivePosterModal(null)}
+            films={modalFilms}
+            onClose={() => {
+              setActivePosterModal(null);
+              setModalFilms([]);
+            }}
             onSelectFilm={handleSelectFilm}
           />
         )}

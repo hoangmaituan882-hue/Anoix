@@ -4,6 +4,7 @@
  */
 import cloudbase from '@cloudbase/js-sdk';
 import { ENV_ID, ADMIN_USERNAME, ADMIN_PASSWORD, PG_BASE, dbEnabled } from './config.js';
+import { parseContentRangeTotal, rangeHeader } from './catalog.js';
 
 const cb = ENV_ID ? cloudbase.init({ env: ENV_ID }) : null;
 let cachedToken = null;
@@ -28,30 +29,65 @@ export async function getAdminToken(force = false) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const GATEWAY_RETRYABLE = new Set([502, 503, 504]);
 
-export async function pgGet(path, _retried = false, _attempt = 0) {
+async function pgFetch(path, extraHeaders = {}, _retried = false, _attempt = 0) {
   if (!dbEnabled) {
     const err = new Error('data APIs disabled: missing admin credentials');
     err.status = 503;
     throw err;
   }
-  const token = await getAdminToken(_retried); // force a fresh login on the retry
+  const token = await getAdminToken(_retried);
   const r = await fetch(`${PG_BASE}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}`, ...extraHeaders },
   });
   if (r.status === 401 && !_retried) {
-    return pgGet(path, true, _attempt); // token expired mid-flight — re-login once
+    return pgFetch(path, extraHeaders, true, _attempt);
   }
   if (GATEWAY_RETRYABLE.has(r.status) && _attempt < 2) {
-    await sleep(200 * (_attempt + 1)); // transient gateway blip — backoff retry
-    return pgGet(path, _retried, _attempt + 1);
+    await sleep(200 * (_attempt + 1));
+    return pgFetch(path, extraHeaders, _retried, _attempt + 1);
   }
-  if (!r.ok) {
-    const body = await r.text();
-    const err = new Error(`PG ${r.status}: ${body.slice(0, 200)}`);
-    err.status = r.status;
-    throw err;
-  }
+  return r;
+}
+
+function throwPg(r, body) {
+  const err = new Error(`PG ${r.status}: ${String(body || '').slice(0, 200)}`);
+  err.status = r.status;
+  throw err;
+}
+
+export async function pgGet(path, _retried = false, _attempt = 0) {
+  const r = await pgFetch(path, {}, _retried, _attempt);
+  if (!r.ok) throwPg(r, await r.text());
   return r.json();
+}
+
+/** Range GET with Prefer: count=exact. 416 (past the end) → empty page + total. */
+export async function pgGetPage(path, offset, limit, _retried = false, _attempt = 0) {
+  const off = Math.max(0, Number(offset) || 0);
+  const lim = Math.max(1, Math.min(48, Number(limit) || 24));
+  const r = await pgFetch(
+    path,
+    { ...rangeHeader(off, lim), Prefer: 'count=exact' },
+    _retried,
+    _attempt,
+  );
+  if (r.status === 416) {
+    return {
+      rows: [],
+      total: parseContentRangeTotal(r.headers.get('content-range')) ?? 0,
+      offset: off,
+      limit: lim,
+    };
+  }
+  if (!r.ok) throwPg(r, await r.text());
+  const rows = await r.json();
+  const list = Array.isArray(rows) ? rows : [];
+  return {
+    rows: list,
+    total: parseContentRangeTotal(r.headers.get('content-range')) ?? list.length + off,
+    offset: off,
+    limit: lim,
+  };
 }
 
 /** Write helper (same auth, returns [status, body]) without throwing on 4xx. */

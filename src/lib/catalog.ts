@@ -1,30 +1,5 @@
-import { getAccessToken } from './session';
+import { api } from './api/client';
 import { WorkItem } from '../types';
-
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-
-async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = await getAccessToken();
-  const headers: Record<string, string> = {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...((init.headers as Record<string, string>) || {}),
-  };
-  const r = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',
-    ...init,
-    headers,
-  });
-  if (!r.ok) {
-    let msg = `请求失败 (${r.status})`;
-    try {
-      const body = await r.json();
-      if (body?.error) msg = body.error;
-    } catch { /* keep */ }
-    throw new Error(msg);
-  }
-  if (r.status === 204) return undefined as T;
-  return r.json() as Promise<T>;
-}
 
 export function mapFilmCard(r: Record<string, unknown>): WorkItem {
   return {
@@ -35,12 +10,19 @@ export function mapFilmCard(r: Record<string, unknown>): WorkItem {
     year: String(r.year ?? ''),
     category: String(r.category ?? ''),
     image: String(r.image ?? ''),
+    landscapeImage: (r.landscape_image as string | null) ?? (r.landscapeImage as string | undefined) ?? undefined,
     director: (r.director as string | null) ?? undefined,
     isNew: Boolean(r.isNew ?? r.is_new),
+    description: '',
+  };
+}
+
+export function mapFilmDetail(r: Record<string, unknown>): WorkItem {
+  return {
+    ...mapFilmCard(r),
     description: String(r.description ?? r.description_zh ?? ''),
     descriptionZh: (r.description_zh as string | null) ?? undefined,
     descriptionEn: (r.description_en as string | null) ?? undefined,
-    landscapeImage: (r.landscape_image as string | null) ?? undefined,
     tagline: (r.tagline as string | null) ?? undefined,
     characterDesign: (r.character_design as string | null) ?? undefined,
     seriesComposition: (r.series_composition as string | null) ?? undefined,
@@ -88,6 +70,6 @@ export const catalog = {
 
   get: async (id: string): Promise<WorkItem | null> => {
     const row = await api<Record<string, unknown> | null>(`/api/films/${encodeURIComponent(id)}`);
-    return row ? mapFilmCard(row) : null;
+    return row ? mapFilmDetail(row) : null;
   },
 };

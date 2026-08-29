@@ -11,8 +11,9 @@
 
 | 模块 | 路径 | 职责 |
 |---|---|---|
-| `repository` | `src/lib/repository.ts` | 核心单例仓储，管理 `films` / `news` / `goods` / `youtube` / `social` 内存缓存（全量 `/api/films` 仍给后台与非片库页兜底） |
-| `catalog` | `src/lib/catalog.ts` | 片库分页 Client：`featured()` / `list()` / `get()`，`credentials: 'include'` |
+| `repository` | `src/lib/repository.ts` | 站点壳：`news` / `goods` / 静态 hero；**启动不拉全量 films** |
+| `catalog` | `src/lib/catalog.ts` | 片库：`featured()` / `list()` / `get()`；卡片 `mapFilmCard`，详情 `mapFilmDetail` |
+| `api` | `src/lib/api/client.ts` | 统一 `/api` fetch：Bearer + `credentials:include` + JSON 错误 |
 | `community` | `src/lib/community.ts` | 社区交互 API Client |
 | `nominations` | `src/lib/nominations.ts` | 配额、提名、广场、片库叠票 `vote` / `unvote` / `myVotes` |
 | `session` / `cloudbase` | `src/lib/session.ts` / `src/lib/cloudbase.ts` | 腾讯云 CloudBase 认证接入，提供用户登录、注册、登出、会话持久化与 AccessToken 获取 |
@@ -29,7 +30,7 @@
 └───────────────────────────▲────────────────────────────┘
                             │ GET /api/films/featured & ?q&limit
 ┌───────────────────────────┴────────────────────────────┐
-│  全量 repository.refresh() 仍走无查询 GET /api/films   │
+│  repository.refresh() 只拉 /api/news + /api/goods      │
 └───────────────────────────▲────────────────────────────┘
                             │
 ┌───────────────────────────┴────────────────────────────┐
@@ -41,8 +42,9 @@
 
 | 模块 | 端点范围 | 说明 |
 |---|---|---|
-| `repository` | `/api/films`（无查询=全量）, `/api/news`, `/api/goods` | 基础公开只读数据，15s 服务端缓存 |
+| `repository` | `/api/news`, `/api/goods` | 站点壳；启动不拉片库 |
 | `catalog` | `/api/films/featured`, `/api/films?…`, `/api/films/:id` | 首页 reel 与分页片库 |
+| `api` | `/api/*` | 统一客户端 |
 | `community` | `/api/calendar`, `/api/notifications`, `/api/watch`, `/api/favorites`, `/api/rsvp`, `/api/me/year-review` | 社区业务与用户自读数据 |
 | `nominations` | `/api/quota`, `/api/nominations`, `/api/nominations/plaza`, `/api/vote`, `/api/vote/mine`, `/api/me/activity` | 选片、叠票与周配额 |
 | `pgAdmin` | `/v1/rdb/rest/v1/*` | 管理员直连 PostgREST（带 Bearer admin token） |
@@ -50,7 +52,7 @@
 ## 错误处理与容灾设计
 
 1. **静态种子极速兜底**：若网络离线或 CloudBase 服务端异常，`repository` 自动保持静态数据状态，全站不会白屏。
-2. **统一请求封装 (`request<T>`)**：自动附加 `Authorization: Bearer <token>` 请求头；响应非 200 时自动提取后端返回的 `{ error: string }` 并转换为规范的 JavaScript `Error`。
+2. **统一请求封装 (`api<T>`)**：`src/lib/api/client.ts` 附加 Bearer 与 `credentials:include`；非 200 时提取 `{ error }`。
 3. **事件总线解耦**：全局弹窗唤起（如 `openFilmPreview`, `openSearch`）通过闭包注册与 `window.dispatchEvent` 实现，避免通过 Context 层层透传 Props。
 
 ## 边界与备注

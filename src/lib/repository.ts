@@ -10,41 +10,12 @@ import {
 import { WorkItem, NewsItem, GoodsItem, YoutubeItem, SocialLink } from '../types';
 
 /**
- * Single data entry point for every UI component.
- *
- * Reads start from the static seed (instant first paint), then
- * `repository.refresh()` pulls live rows from the anoix-api CloudRun service
- * and swaps the caches — subscribed components re-render via useRepo().
- * If the API is unreachable the static fallback keeps the site working.
+ * Site chrome data: news, goods, static hero/social seeds.
+ * Film catalog is `src/lib/catalog.ts` (featured / list / get) — boot does not
+ * download every film row.
  */
 
 // ---------- CloudBase PG row shapes (snake_case) ----------
-interface FilmRow {
-  id: string;
-  title: string;
-  title_zh: string | null;
-  title_en: string | null;
-  year: string | null;
-  release_date: string | null;
-  duration: number | null;
-  category: string | null;
-  image: string | null;
-  landscape_image: string | null;
-  tagline: string | null;
-  description: string | null;
-  description_zh: string | null;
-  description_en: string | null;
-  director: string | null;
-  character_design: string | null;
-  series_composition: string | null;
-  cast_list: string[] | null;
-  streaming_platforms: string[] | null;
-  official_url: string | null;
-  trailer_url: string | null;
-  is_new: boolean | null;
-  sort_order: number;
-}
-
 interface NewsRow {
   id: string;
   date: string | null;
@@ -73,31 +44,6 @@ interface GoodsRow {
   description: string | null;
   sort_order: number;
 }
-
-const mapFilm = (r: FilmRow): WorkItem => ({
-  id: r.id,
-  title: r.title,
-  titleZh: r.title_zh ?? undefined,
-  titleEn: r.title_en ?? undefined,
-  year: r.year ?? '',
-  releaseDate: r.release_date ?? undefined,
-  duration: r.duration ?? undefined,
-  category: r.category ?? '',
-  image: r.image ?? '',
-  landscapeImage: r.landscape_image ?? undefined,
-  tagline: r.tagline ?? undefined,
-  description: r.description ?? '',
-  descriptionZh: r.description_zh ?? undefined,
-  descriptionEn: r.description_en ?? undefined,
-  director: r.director ?? undefined,
-  characterDesign: r.character_design ?? undefined,
-  seriesComposition: r.series_composition ?? undefined,
-  cast: r.cast_list ?? undefined,
-  streamingPlatforms: r.streaming_platforms ?? undefined,
-  officialUrl: r.official_url ?? undefined,
-  trailerUrl: r.trailer_url ?? undefined,
-  isNew: r.is_new ?? false,
-});
 
 const mapNews = (r: NewsRow): NewsItem => ({
   id: r.id,
@@ -147,7 +93,7 @@ export const repository = {
   /** Studio atmosphere image for the recruit/about section. */
   recruitImage: (): string => RECRUIT_IMAGE,
 
-  /** Film catalog (seed first, replaced by live PG rows on refresh). */
+  /** Seed catalog only (homepage / library use catalog.*). */
   films: (): WorkItem[] => filmsCache,
 
   /** Announcements (seed first, replaced by live PG rows on refresh). */
@@ -162,30 +108,24 @@ export const repository = {
   /** External social/profile links for the footer. */
   socialLinks: (): SocialLink[] => SOCIAL_LINKS,
 
-  /** Pull live content from the anoix-api CloudRun service; keeps static data on failure. */
+  /** Pull live news + goods. Films are not part of boot — use catalog.*. */
   async refresh(): Promise<void> {
     const base = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
     const timer = new AbortController();
     const timeout = setTimeout(() => timer.abort(), 8000);
     try {
-      const [filmsRes, newsRes] = await Promise.all([
-        fetch(`${base}/api/films`, { signal: timer.signal }),
-        fetch(`${base}/api/news`, { signal: timer.signal }),
-      ]);
-      if (!filmsRes.ok || !newsRes.ok) throw new Error(`api status ${filmsRes.status}/${newsRes.status}`);
-
-      const films = ((await filmsRes.json()) as FilmRow[]).map(mapFilm);
+      const newsRes = await fetch(`${base}/api/news`, { signal: timer.signal, credentials: 'include' });
+      if (!newsRes.ok) throw new Error(`api status ${newsRes.status}`);
       const news = ((await newsRes.json()) as NewsRow[]).map(mapNews);
-      if (films.length > 0) filmsCache = films;
       if (news.length > 0) newsCache = news;
       notify();
     } catch (err) {
       console.warn('[repository] cloud fetch failed, keeping static fallback:', err);
     }
 
-    // Goods is fetched separately so a failure there never blocks films/news.
+    // Goods is fetched separately so a failure there never blocks news.
     try {
-      const goodsRes = await fetch(`${base}/api/goods`, { signal: timer.signal });
+      const goodsRes = await fetch(`${base}/api/goods`, { signal: timer.signal, credentials: 'include' });
       if (goodsRes.ok) goodsCache = ((await goodsRes.json()) as GoodsRow[]).map(mapGoods);
       notify();
     } catch (err) {
@@ -198,7 +138,7 @@ export const repository = {
 
 /**
  * Subscribe a component to repository caches.
- * `useRepo(repository.films)` re-renders when refresh() swaps the cache.
+ * `useRepo(select)` re-renders when refresh() swaps news/goods caches.
  */
 export function useRepo<T>(select: () => T): T {
   return useSyncExternalStore(subscribeRepo, select, select);

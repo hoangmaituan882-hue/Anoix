@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-route
 import { motion, AnimatePresence } from 'motion/react';
 import { Language, WorkItem, NewsItem, GoodsItem } from '../types';
 import { TRIGGER_EASE } from '../lib/motion';
-import { repository, useRepo } from '../lib/repository';
+import { repository } from '../lib/repository';
 import { registerFilmPreview } from '../lib/filmPreview';
 import { registerWorksModal } from '../lib/worksModal';
 import { DynamicContextMenu } from '../components/ui/DynamicContextMenu';
@@ -62,9 +62,8 @@ const AppShell: React.FC = () => {
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [recruitModalOpen, setRecruitModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
-  const films = useRepo(repository.films);
 
-  // Pull live content from CloudBase PG once; static seed stays as fallback.
+  // Pull live news/goods once; films come from catalog.* per screen.
   useEffect(() => {
     void repository.refresh();
   }, []);
@@ -247,7 +246,6 @@ const AppShell: React.FC = () => {
           <FilmDetailModal
             key="film-detail-modal"
             work={selectedWork}
-            works={films}
             lang={lang}
             onClose={() => setSelectedWork(null)}
             onSelectWork={(w) => setSelectedWork(w)}

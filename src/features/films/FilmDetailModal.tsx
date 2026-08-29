@@ -7,12 +7,11 @@ import { WatchPanel } from './WatchPanel';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { community } from '../../lib/community';
 import { useToast } from '../../components/ui/Toast';
+import { catalog } from '../../lib/catalog';
 import { ArrowRight, X, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 
 interface FilmDetailModalProps {
   work: WorkItem | null;
-  /** Full works list so the modal can offer prev/next browsing. */
-  works: WorkItem[];
   lang: Language;
   onClose: () => void;
   onSelectWork: (work: WorkItem) => void;
@@ -22,7 +21,6 @@ interface FilmDetailModalProps {
 /** Quick-preview modal — full detail content lives in FilmDetailBody. */
 export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
   work,
-  works,
   lang,
   onClose,
   onSelectWork,
@@ -30,6 +28,22 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
 }) => {
   const { success } = useToast();
   const [favorited, setFavorited] = useState(false);
+  const [neighbors, setNeighbors] = useState<WorkItem[]>([]);
+
+  useEffect(() => {
+    let alive = true;
+    catalog
+      .list({ limit: 24, offset: 0 })
+      .then((page) => {
+        if (alive) setNeighbors(page.items);
+      })
+      .catch(() => {
+        if (alive) setNeighbors([]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!work) return;
@@ -49,9 +63,14 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
 
   if (!work) return null;
 
-  const index = works.findIndex((w) => w.id === work.id);
-  const prev = index > 0 ? works[index - 1] : null;
-  const next = index >= 0 && index < works.length - 1 ? works[index + 1] : null;
+  const index = neighbors.findIndex((w) => w.id === work.id);
+  const prev = index > 0 ? neighbors[index - 1] : null;
+  const next = index >= 0 && index < neighbors.length - 1 ? neighbors[index + 1] : null;
+
+  const goNeighbor = async (item: WorkItem) => {
+    const full = await catalog.get(item.id).catch(() => item);
+    onSelectWork(full ?? item);
+  };
 
   const toggleFavorite = async () => {
     try {
@@ -72,7 +91,7 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
       {/* Prev / Next floating arrows */}
       {prev && (
         <button
-          onClick={(e) => { e.stopPropagation(); onSelectWork(prev); }}
+          onClick={(e) => { e.stopPropagation(); void goNeighbor(prev); }}
           className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
           aria-label="上一个作品"
         >
@@ -81,7 +100,7 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
       )}
       {next && (
         <button
-          onClick={(e) => { e.stopPropagation(); onSelectWork(next); }}
+          onClick={(e) => { e.stopPropagation(); void goNeighbor(next); }}
           className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
           aria-label="下一个作品"
         >

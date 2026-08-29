@@ -92,4 +92,4 @@ routes/* ──→ lib/identity.js ──→ lib/users.js ──→ lib/db.js �
 - 周配额：自然周（周一 00:00 Asia/Shanghai），匿名 1提/2投、登录 3提/6投。
 - 写接口限流：`vote 30/min`、`nom 20/min`、`rsvp 20/min`、`notif/fav/watch 30/min`、`tmdb 20/min`、`admin 120/min`。
 - 顺序用户编号：`user_no` 001/002/…，`nextUserNo()` + UNIQUE 约束 + 插入重试。
-- 内容缓存：films/news/goods 15s TTL（服务端内存，admin 写不主动失效）。
+- 内容缓存：无查询的 films/news/goods 15s TTL（服务端内存）；分页列表与 featured 不走该缓存。

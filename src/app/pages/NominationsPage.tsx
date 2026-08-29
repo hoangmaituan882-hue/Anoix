@@ -13,6 +13,7 @@ import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
 import { useToast } from '../../components/ui/Toast';
 import { getSession, SessionUser } from '../../lib/session';
 import { nominations, Quota, PlazaItem } from '../../lib/nominations';
+import { api } from '../../lib/api/client';
 import { NominateDialog } from '../../features/nominations/NominateDialog';
 import { CoverFlowCarousel, CoverFlowItem } from '../../features/nominations/CoverFlowCarousel';
 import { FilmContextMenu } from '../../features/nominations/FilmContextMenu';
@@ -21,8 +22,6 @@ import {
   Crown, Plus, Flame, Trophy, LayoutGrid, ListOrdered,
   Vote, Sparkles, Minus,
 } from 'lucide-react';
-
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
 
 const RANK_STYLES = [
   { ring: 'border-[#ff3650]/60 bg-[#ff3650]/10', chip: 'bg-[#ff3650] text-white shadow-[0_0_16px_rgba(255,54,80,0.5)]', bar: 'bg-[#ff3650]' },
@@ -65,7 +64,7 @@ export const NominationsPage: React.FC<{
   }, []);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/vote/ticket`, { credentials: 'include' }).catch(() => {});
+    api('/api/vote/ticket').catch(() => {});
   }, []);
 
   useEffect(() => { void window.scrollTo(0, 0); }, []);

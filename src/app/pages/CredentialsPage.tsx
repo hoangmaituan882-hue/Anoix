@@ -10,7 +10,8 @@ import { VideoModal } from '../../components/ui/VideoModal';
 import { community, WatchItem } from '../../lib/community';
 import { nominations, VoteActivity, NominationActivity } from '../../lib/nominations';
 import { getSession, SessionUser } from '../../lib/session';
-import { WORKS_LIST } from '../../data/triggerData';
+import { catalog } from '../../lib/catalog';
+import { uniqueFilmIds, buildCoverflowSlides } from '../../lib/credentialsCatalog.js';
 import { Language } from '../../types';
 import {
   Share2,
@@ -126,6 +127,30 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
 
         if (!alive) return;
 
+        const shuffledWatched = [...watchList].sort(() => 0.5 - Math.random());
+        const pickedWatches = shuffledWatched.slice(0, 5);
+        const filmRows = await Promise.all(
+          uniqueFilmIds(pickedWatches).map((id) => catalog.get(id).catch(() => null)),
+        );
+        const films = filmRows.filter((row) => row != null);
+
+        let library = [];
+        try {
+          library = await catalog.featured();
+        } catch {
+          library = [];
+        }
+        if (library.length < 5) {
+          try {
+            const page = await catalog.list({ limit: 24, offset: 0 });
+            library = [...library, ...(page.items || [])];
+          } catch {
+            /* keep featured-only */
+          }
+        }
+
+        if (!alive) return;
+
         // Compute stats
         const totalWatches = Math.max(watchList.length, 12);
         const totalNominations = Math.max(userActivity.nominations?.length || 0, 3);
@@ -143,52 +168,16 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
           level: 'LV.8 资深放映主理人',
         });
 
-        // Populate 3D Coverflow slides
-        const slides: RiffleRecipeSlide[] = [];
-
-        // 1. User watched films
-        if (watchList && watchList.length > 0) {
-          const shuffledWatched = [...watchList].sort(() => 0.5 - Math.random());
-          shuffledWatched.slice(0, 5).forEach((w) => {
-            const matchedWork = WORKS_LIST.find((item) => item.id === w.film_id);
-            slides.push({
-              id: `watch-${w.id || w.film_id}`,
-              title: w.film_title || matchedWork?.titleZh || matchedWork?.title || '已看佳作',
-              author: `★ ${w.rating || 5}.0 · 个人已看履历`,
-              image:
-                matchedWork?.landscapeImage ||
-                matchedWork?.image ||
-                w.image ||
-                '/assets/riffle/image-005.webp',
-              videoUrl: matchedWork?.trailerUrl || 'https://www.youtube.com/watch?v=JtqIas3bYhg',
-              isWatched: true,
-            });
-          });
-        }
-
-        // 2. Fill remaining with random TRIGGER library films
-        if (slides.length < 5) {
-          const availableWorks = WORKS_LIST.filter(
-            (work) => !slides.some((s) => s.id.includes(work.id))
-          );
-          const shuffledWorks = [...availableWorks].sort(() => 0.5 - Math.random());
-          const needed = 5 - slides.length;
-
-          shuffledWorks.slice(0, needed).forEach((w) => {
-            slides.push({
-              id: `work-${w.id}`,
-              title: lang === 'zh' ? w.titleZh || w.title : w.titleEn || w.title,
-              author: w.director
-                ? `${w.director} · ${w.year}`
-                : `${w.year} · Studio TRIGGER`,
-              image: w.landscapeImage || w.image || '/assets/riffle/image-003.webp',
-              videoUrl: w.trailerUrl || 'https://www.youtube.com/watch?v=JtqIas3bYhg',
-              isWatched: false,
-            });
-          });
-        }
-
-        setCoverflowSlides(slides);
+        const libraryShuffled = [...library].sort(() => 0.5 - Math.random());
+        setCoverflowSlides(
+          buildCoverflowSlides({
+            watches: pickedWatches,
+            films,
+            library: libraryShuffled,
+            lang,
+            limit: 5,
+          }),
+        );
       } catch (err) {
         console.error('Failed to load credentials data', err);
       } finally {
@@ -365,23 +354,11 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                   items={coverflowSlides}
                   loading={loading}
                   onPlay={(slide) => {
-                    const matched = WORKS_LIST.find(
-                      (w) =>
-                        slide.title.includes(w.title) ||
-                        (w.titleZh && slide.title.includes(w.titleZh)) ||
-                        (w.titleEn && slide.title.includes(w.titleEn))
-                    );
-                    const url = slide.videoUrl || matched?.trailerUrl || 'https://www.youtube.com/watch?v=JtqIas3bYhg';
+                    const url = slide.videoUrl || 'https://www.youtube.com/watch?v=JtqIas3bYhg';
                     setActiveVideo({ url, title: slide.title });
                   }}
                   onSelect={(slide) => {
-                    const matched = WORKS_LIST.find(
-                      (w) =>
-                        slide.title.includes(w.title) ||
-                        (w.titleZh && slide.title.includes(w.titleZh)) ||
-                        (w.titleEn && slide.title.includes(w.titleEn))
-                    );
-                    const url = slide.videoUrl || matched?.trailerUrl || 'https://www.youtube.com/watch?v=JtqIas3bYhg';
+                    const url = slide.videoUrl || 'https://www.youtube.com/watch?v=JtqIas3bYhg';
                     setActiveVideo({ url, title: slide.title });
                   }}
                 />

@@ -12,7 +12,6 @@
 | 组件 / 页面 | 路径 | 职责 |
 |---|---|---|
 | `NominationsPage` | `src/app/pages/NominationsPage.tsx` | 配额、CoverFlow、广场瀑布流/排行、± 叠票、发起提名 |
-| `PlazaPage` | `src/app/pages/PlazaPage.tsx` | 已停用；`/plaza` 重定向到 `/nominations` |
 | `NominateDialog` | `src/features/nominations/NominateDialog.tsx` | 片库 Tab 走 `catalog.list`（20 条、300ms 防抖）+ TMDB 刮削 + 必填推荐语 |
 | `CoverFlowCarousel` | `src/features/nominations/CoverFlowCarousel.tsx` | 3D 封面流 |
 | `FilmContextMenu` | `src/features/nominations/FilmContextMenu.tsx` | 右键提名 / 详情 |
@@ -52,3 +51,4 @@
 
 - 不 cron 自动把周榜 #1 写进周六。
 - 遗留轮次 API 仍给后台用，公网页不请求 `GET /api/nominations` 轮次列表。
+- `/plaza` 重定向到 `/nominations`（已无独立 Plaza 页）。

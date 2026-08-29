@@ -14,7 +14,7 @@
 | `FilmsSection` | `src/features/films/FilmsSection.tsx` | 首页 reel：`GET /api/films/featured`（≤12，社内放映日）；种子 `WORKS_LIST.slice(0,12)` 兜底 |
 | `FilmsLibraryModal` | `src/features/films/FilmsLibraryModal.tsx` | 全库弹窗：分页 24 + 加载更多；分类映射 `tv\|movie\|original`；默认 `screened_desc`；全选=已加载卡片 |
 | `FilmDetailBody` | `src/features/films/FilmDetailBody.tsx` | 作品详情核心内容（单一真实源） |
-| `FilmDetailModal` | `src/features/films/FilmDetailModal.tsx` | 全局快速详情弹窗 |
+| `FilmDetailModal` | `src/features/films/FilmDetailModal.tsx` | 全局快速详情；prev/next 走 `catalog.list` 首页 24 张，点开再 `get` |
 | `WatchPanel` | `src/features/films/WatchPanel.tsx` | 观影记录面板 |
 | `FilmDetailPage` | `src/app/pages/FilmDetailPage.tsx` | `/films/:id`，`GET /api/films/:id` |
 

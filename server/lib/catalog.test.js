@@ -14,6 +14,14 @@ import {
   moveFilmBetweenNights,
   reorderNight,
   filmScheduleFields,
+  featuredIdsFromScreenings,
+  assembleFeatured,
+  filmListPath,
+  filmsByIdPath,
+  parseContentRangeTotal,
+  rangeHeader,
+  stampIsNew,
+  FILM_CARD_COLUMNS,
 } from './catalog.js';
 
 test('shanghaiDateString: uses Asia/Shanghai calendar date', () => {
@@ -156,6 +164,88 @@ test('reorderNight: replaces film_ids for that date only', () => {
   const next = reorderNight(start, '2026-08-20', ['b', 'a']);
   assert.deepEqual(next[0].film_ids, ['b', 'a']);
   assert.deepEqual(next[1].film_ids, ['c']);
+});
+
+test('featuredIdsFromScreenings: ranks ids from nights only, no film rows', () => {
+  const today = '2026-08-29';
+  const screenings = [
+    { screen_date: '2026-08-20', film_ids: ['b', 'a'] },
+    { screen_date: '2026-09-18', film_ids: ['soon'] },
+    { screen_date: '2026-07-01', film_ids: ['old'] },
+  ];
+  const ranked = featuredIdsFromScreenings(screenings, today);
+  assert.deepEqual(ranked.map((r) => r.id), ['b', 'a', 'old']);
+  assert.equal(ranked[0].past, '2026-08-20');
+  assert.equal(ranked.length, 3);
+});
+
+test('assembleFeatured: NEW on first two, skips missing ids, preserves night order', () => {
+  const ranked = [
+    { id: 'b', past: '2026-08-20', nightOrder: 0 },
+    { id: 'missing', past: '2026-08-20', nightOrder: 1 },
+    { id: 'a', past: '2026-08-20', nightOrder: 2 },
+  ];
+  const byId = new Map([
+    ['a', { id: 'a', title: 'A' }],
+    ['b', { id: 'b', title: 'B' }],
+  ]);
+  const cards = assembleFeatured(byId, ranked);
+  assert.deepEqual(cards.map((c) => c.id), ['b', 'a']);
+  assert.equal(cards[0].isNew, true);
+  assert.equal(cards[1].isNew, true);
+  assert.equal(cards[0].screeningDate, '2026-08-20');
+});
+
+test('filmListPath: paginated cards use denormalized screening_date, not select=*', () => {
+  const path = filmListPath({ q: '', category: 'all', sort: 'screened_desc' });
+  assert.equal(path.startsWith('/films?'), true);
+  assert.equal(path.includes(`select=${FILM_CARD_COLUMNS}`), true);
+  assert.match(path, /order=screening_date\.desc\.nullslast/);
+  assert.equal(path.includes('select=*'), false);
+  assert.equal(path.includes('or='), false);
+});
+
+test('filmListPath: q and category become PostgREST filters', () => {
+  const qPath = filmListPath({ q: 'Promare', category: 'all', sort: 'year_desc' });
+  assert.match(qPath, /title\.ilike\.\*Promare\*/);
+  assert.match(qPath, /order=year\.desc/);
+  const tv = filmListPath({ q: '', category: 'tv', sort: 'screened_desc' });
+  assert.match(tv, /category\.ilike\.\*tv\*/);
+  const original = filmListPath({ q: '今石', category: 'original', sort: 'year_asc' });
+  assert.match(original, /and=\(or=/);
+  assert.match(original, /category\.ilike\.\*original\*/);
+  assert.match(original, /category\.ilike\.\*netflix\*/);
+  assert.match(original, /order=year\.asc/);
+});
+
+test('filmListPath: strips PostgREST filter metacharacters from q', () => {
+  const path = filmListPath({ q: 'foo*bar,(x)', category: 'all', sort: 'screened_desc' });
+  assert.equal(path.includes('foo*bar'), false);
+  assert.equal(path.includes('(x)'), false);
+  assert.match(path, /title\.ilike\.\*foo bar x\*/);
+});
+
+test('filmsByIdPath: in-filter for ranked ids only', () => {
+  assert.equal(filmsByIdPath([]), null);
+  assert.equal(
+    filmsByIdPath(['b', 'a']),
+    `/films?select=${FILM_CARD_COLUMNS}&id=in.(b,a)`,
+  );
+});
+
+test('parseContentRangeTotal + rangeHeader', () => {
+  assert.equal(parseContentRangeTotal('0-23/200'), 200);
+  assert.equal(parseContentRangeTotal('*/0'), 0);
+  assert.equal(parseContentRangeTotal('0-0/1'), 1);
+  assert.equal(parseContentRangeTotal('2-2/*'), null);
+  assert.equal(parseContentRangeTotal(null), null);
+  assert.deepEqual(rangeHeader(24, 24), { Range: '24-47' });
+  assert.deepEqual(rangeHeader(0, 8), { Range: '0-7' });
+});
+
+test('stampIsNew: only the homepage pair', () => {
+  const cards = stampIsNew([{ id: 'a' }, { id: 'b' }, { id: 'c' }], ['b', 'c']);
+  assert.deepEqual(cards.map((c) => c.isNew), [false, true, true]);
 });
 
 test('filmScheduleFields: past / future-only / none', () => {

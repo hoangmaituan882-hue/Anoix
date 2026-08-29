@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export interface RiffleRecipeSlide {
   id: string;
+  filmId?: string;
   title: string;
   author: string;
   image: string;

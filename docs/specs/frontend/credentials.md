@@ -21,6 +21,7 @@
 
 ### 依赖数据层
 - `src/lib/community.ts`（观影记录、收藏夹）
+- `src/lib/catalog.ts` / `src/lib/credentialsCatalog.js`（按 id 解析片库卡片，不读种子 WORKS_LIST）
 - `src/lib/nominations.ts`（提名与投票活动流水）
 - `src/lib/session.ts`（用户信息与登录态）
 
@@ -30,7 +31,9 @@
 |---|---|---|---|
 | `/api/watch` | GET | 必选 | 获取观影明细，计算总时长与评分分布 |
 | `/api/me/activity` | GET | 必选 | 获取个人提名与投票历史记录 |
-| `/api/me/year-review` | GET | 必选 | 获取影迷年度称号与成就数据 |
+| `/api/films/featured` | GET | 无 | Coverflow 空档用最近放过的卡片填充 |
+| `/api/films?limit=` | GET | 无 | featured 不足 5 张时再拉一页列表 |
+| `/api/films/:id` | GET | 无 | 观影记录按 id 取海报/预告 |
 
 ### 关键状态
 - `topTab: 'boards' | 'drops'`: 展板与精选合集切换。
@@ -46,4 +49,4 @@
 
 ## 边界与备注
 
-- **等级与百分比计算**：基于用户的真实观影数、评分数、提名采纳数综合加权，未登录时展示示例档案。
+- **Coverflow 片源**：已看条目用 `catalog.get(film_id)`；不足 5 张用 `featured` / `list`，不再扫 `WORKS_LIST`。

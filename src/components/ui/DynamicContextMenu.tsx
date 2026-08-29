@@ -17,7 +17,7 @@ import {
   Check,
 } from 'lucide-react';
 import { WorkItem } from '../../types';
-import { repository } from '../../lib/repository';
+import { catalog } from '../../lib/catalog';
 import { community } from '../../lib/community';
 import { openFilmPreview } from '../../lib/filmPreview';
 import { openAllWorksModal } from '../../lib/worksModal';
@@ -73,8 +73,7 @@ export const DynamicContextMenu: React.FC = () => {
       let isFavorite = false;
 
       if (filmId) {
-        const films = repository.films();
-        currentFilm = films.find((f) => f.id === filmId) || null;
+        currentFilm = await catalog.get(filmId).catch(() => null);
 
         if (currentFilm) {
           try {

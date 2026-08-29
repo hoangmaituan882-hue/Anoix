@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language } from '../../types';
-import { repository } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
@@ -38,8 +37,6 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
   const navigate = useNavigate();
   const [selectedEraId, setSelectedEraId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-
-  const films = repository.films();
 
   const filteredEras = useMemo(() => {
     return STUDIO_HISTORY_ERAS.filter((era) => {
@@ -158,7 +155,6 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
           <HistoryEraTimeline
             eras={filteredEras}
             lang={lang}
-            films={films}
             onSelectFilm={handleSelectFilm}
           />
         </div>

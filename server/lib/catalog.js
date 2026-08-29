@@ -56,16 +56,18 @@ export function clubIndexByFilm(screenings) {
   return map;
 }
 
-export function rankFeatured(films, screenings, today) {
+export const FILM_CARD_COLUMNS =
+  'id,title,title_zh,title_en,year,category,image,landscape_image,director,screening_date,screening_status';
+
+/** Rank past club nights to at most 12 ids — no film table required. */
+export function featuredIdsFromScreenings(screenings, today) {
   const index = clubIndexByFilm(screenings);
   const ranked = [];
-  for (const film of films || []) {
-    const rec = index.get(film.id);
-    if (!rec) continue;
+  for (const [id, rec] of index) {
     const past = latestPastClubDate(rec.dates, today);
     if (!past) continue;
     ranked.push({
-      film,
+      id,
       past,
       nightOrder: rec.order.get(past) ?? 0,
     });
@@ -74,11 +76,27 @@ export function rankFeatured(films, screenings, today) {
     if (a.past !== b.past) return a.past < b.past ? 1 : -1;
     return a.nightOrder - b.nightOrder;
   });
-  return ranked.slice(0, 12).map((row, i) => ({
-    ...row.film,
-    isNew: i < 2,
-    screeningDate: row.past,
-  }));
+  return ranked.slice(0, 12);
+}
+
+export function assembleFeatured(filmsById, ranked) {
+  const cards = [];
+  for (const row of ranked || []) {
+    const film = filmsById instanceof Map ? filmsById.get(row.id) : filmsById?.[row.id];
+    if (!film) continue;
+    cards.push({
+      ...film,
+      isNew: cards.length < 2,
+      screeningDate: row.past,
+    });
+  }
+  return cards;
+}
+
+export function rankFeatured(films, screenings, today) {
+  const ranked = featuredIdsFromScreenings(screenings, today);
+  const byId = new Map((films || []).map((f) => [f.id, f]));
+  return assembleFeatured(byId, ranked);
 }
 
 export function yearNum(str) {
@@ -120,6 +138,62 @@ export function matchFilmCategory(film, category) {
   if (cat === 'movie') return raw.includes('movie');
   if (cat === 'original') return raw.includes('original') || raw.includes('netflix');
   return raw.includes(cat);
+}
+
+function ilikeTerm(q) {
+  return String(q || '')
+    .replace(/[%*,()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function ilikeOr(fields, term) {
+  return `or=(${fields.map((f) => `${f}.ilike.*${term}*`).join(',')})`;
+}
+
+export function filmListPath({ q = '', category = 'all', sort = 'screened_desc', select = FILM_CARD_COLUMNS } = {}) {
+  const parts = [`select=${select}`];
+  const term = ilikeTerm(q);
+  const cat = String(category || 'all').toLowerCase();
+  const qFilter = term
+    ? ilikeOr(['title', 'title_zh', 'title_en', 'director', 'year'], term)
+    : '';
+  let catFilter = '';
+  if (cat === 'tv' || cat === 'movie') catFilter = `category.ilike.*${cat}*`;
+  else if (cat === 'original') catFilter = 'or=(category.ilike.*original*,category.ilike.*netflix*)';
+
+  if (qFilter && catFilter) parts.push(`and=(${qFilter},${catFilter})`);
+  else if (qFilter) parts.push(qFilter);
+  else if (catFilter) parts.push(catFilter);
+
+  if (sort === 'year_asc') parts.push('order=year.asc.nullslast');
+  else if (sort === 'year_desc') parts.push('order=year.desc.nullslast');
+  else parts.push('order=screening_date.desc.nullslast,year.desc.nullslast');
+  return `/films?${parts.join('&')}`;
+}
+
+export function filmsByIdPath(ids, select = FILM_CARD_COLUMNS) {
+  const clean = [...new Set((ids || []).filter(Boolean).map((id) => String(id)))];
+  if (!clean.length) return null;
+  return `/films?select=${select}&id=in.(${clean.map(encodeURIComponent).join(',')})`;
+}
+
+export function parseContentRangeTotal(header) {
+  if (!header) return null;
+  const m = String(header).trim().match(/\/(\d+|\*)\s*$/);
+  if (!m || m[1] === '*') return null;
+  return Number(m[1]);
+}
+
+export function rangeHeader(offset, limit) {
+  const off = Math.max(0, Number(offset) || 0);
+  const lim = Math.max(1, Number(limit) || 24);
+  return { Range: `${off}-${off + lim - 1}` };
+}
+
+export function stampIsNew(cards, newIds) {
+  const set = new Set(newIds || []);
+  return (cards || []).map((c) => ({ ...c, isNew: set.has(c.id) }));
 }
 
 export function paginate(items, offset, limit) {

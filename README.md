@@ -19,10 +19,17 @@
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+npm run dev        # Vite http://localhost:3000 ，/api 代理到 3001
 npm run lint       # tsc 类型检查
 npm run build      # 生产构建 → dist/
 ```
+
+本地要打 API 时，Express 默认监听 **8080**（`process.env.PORT`，云托管也用这个），Vite 开发代理默认指向 **3001**。二选一对齐：
+
+- 起 API：`PORT=3001 node server/index.js`（Windows PowerShell：`$env:PORT=3001; node server/index.js`）
+- 或改代理：`API_PROXY_TARGET=http://127.0.0.1:8080 npm run dev`
+
+生产容器里只有一个进程，前后端同端口（CloudRun `PORT`）。
 
 ## 部署(GitHub Actions 自动部署)
 

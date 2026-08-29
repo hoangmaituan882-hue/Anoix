@@ -10,7 +10,7 @@
 | ENV_ID | `CLOUDBASE_ENV_ID` |
 | ADMIN_USERNAME / ADMIN_PASSWORD | 服务端 PG 会话凭据 |
 | PG_BASE | `https://<env>.api.tcloudbasegateway.com/v1/rdb/rest/v1` |
-| PORT | `process.env.PORT` 或 8080 |
+| PORT | `process.env.PORT` 或 8080（云托管）。本地 Vite 把 `/api` 代理到 **3001**，需 `PORT=3001` 起 Express，或设 `API_PROXY_TARGET` |
 | DIST_DIR | `../../dist`（静态前端） |
 | dbEnabled | `Boolean(ENV_ID && ADMIN_USERNAME && ADMIN_PASSWORD)` |
 
@@ -20,6 +20,7 @@
 |---|---|---|
 | getAdminToken | `(force=false)` | 登录拿 admin session token，缓存到过期前 60s |
 | pgGet | `(path, _retried, _attempt)` | GET，`!ok` 抛错（带 `.status`）；401→重登一次；5xx→退避重试 2 次 |
+| pgGetPage | `(path, offset, limit)` | Range GET + `Prefer: count=exact`；416 → 空页 + total；返回 `{rows,total,offset,limit}` |
 | pgWrite | `(method, path, body, ...)` | 写，返回 `[status, json]`，不抛 4xx |
 | pgUpsert | `(path, body, ...)` | POST + `resolution=merge-duplicates`（原子 upsert） |
 | ttlCache | `(ttlMs)` | 内存 TTL 缓存（get/set/clear） |

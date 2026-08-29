@@ -1,22 +1,4 @@
-import { getAccessToken } from './session';
-
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-
-async function api<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const token = await getAccessToken();
-  const r = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  if (!r.ok) {
-    throw new Error(`API ${r.status}: ${(await r.text()).slice(0, 160)}`);
-  }
-  return r.json() as Promise<T>;
-}
+import { api } from './api/client';
 
 export interface PoolItem {
   id: number;
@@ -36,17 +18,25 @@ export interface PoolItem {
   created_at: string;
 }
 
+function write<T>(method: string, path: string, body?: unknown): Promise<T> {
+  return api<T>(path, {
+    method,
+    headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+}
+
 export const poolAdmin = {
-  list: () => api<PoolItem[]>('GET', '/api/admin/pool'),
-  promote: (id: number) => api<{ ok: boolean; filmId: string }>('POST', `/api/admin/pool/${id}/promote`),
-  demote: (id: number) => api<{ ok: boolean }>('POST', `/api/admin/pool/${id}/demote`),
+  list: () => api<PoolItem[]>('/api/admin/pool'),
+  promote: (id: number) => write<{ ok: boolean; filmId: string }>('POST', `/api/admin/pool/${id}/promote`),
+  demote: (id: number) => write<{ ok: boolean }>('POST', `/api/admin/pool/${id}/demote`),
   schedule: (filmId: string, screeningStatus: string, screeningDate: string | null) =>
-    api<{ ok: boolean }>('POST', `/api/admin/films/${encodeURIComponent(filmId)}/schedule`, {
+    write<{ ok: boolean }>('POST', `/api/admin/films/${encodeURIComponent(filmId)}/schedule`, {
       screening_status: screeningStatus,
       screening_date: screeningDate,
     }),
   setRoundStatus: (roundId: string, status: string) =>
-    api<{ ok: boolean }>('POST', `/api/admin/rounds/${encodeURIComponent(roundId)}/status`, { status }),
+    write<{ ok: boolean }>('POST', `/api/admin/rounds/${encodeURIComponent(roundId)}/status`, { status }),
 };
 
 export interface StatsNomination {
@@ -72,5 +62,5 @@ export interface StatsResponse {
 }
 
 export const statsAdmin = {
-  get: () => api<StatsResponse>('GET', '/api/admin/stats'),
+  get: () => api<StatsResponse>('/api/admin/stats'),
 };

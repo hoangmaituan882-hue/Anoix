@@ -1,28 +1,4 @@
-import { getAccessToken } from './session';
-
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-
-async function authHeaders(): Promise<Record<string, string>> {
-  const token = await getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const r = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    credentials: 'include',
-    headers: { ...(await authHeaders()), ...(init.headers || {}) },
-  });
-  if (!r.ok) {
-    let msg = `请求失败 (${r.status})`;
-    try {
-      const body = await r.json();
-      if (body?.error) msg = body.error;
-    } catch { /* keep generic */ }
-    throw new Error(msg);
-  }
-  return r.json() as Promise<T>;
-}
+import { api } from './api/client';
 
 export interface Quota {
   kind: 'user' | 'anon';
@@ -81,35 +57,35 @@ export interface TmdbNominationPayload {
 }
 
 export const nominations = {
-  quota: () => request<Quota>('/api/quota'),
+  quota: () => api<Quota>('/api/quota'),
 
   nominate: (payload: { filmId?: string; tmdb?: TmdbNominationPayload; note: string }) =>
-    request<{ ok: boolean }>(`/api/nominations`, {
+    api<{ ok: boolean }>(`/api/nominations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }),
 
   plaza: (scope: 'week' | 'all' = 'week') =>
-    request<{ items: PlazaItem[] }>(`/api/nominations/plaza?scope=${scope}`),
+    api<{ items: PlazaItem[] }>(`/api/nominations/plaza?scope=${scope}`),
 
   myVotes: () =>
-    request<{ items: { filmId: string; count: number }[] }>('/api/vote/mine'),
+    api<{ items: { filmId: string; count: number }[] }>('/api/vote/mine'),
 
   vote: (filmId: string, count?: number) =>
-    request<{ ok: boolean; count: number }>('/api/vote', {
+    api<{ ok: boolean; count: number }>('/api/vote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(count != null ? { filmId, count } : { filmId }),
     }),
 
   unvote: (filmId: string) =>
-    request<{ ok: boolean; count: number }>('/api/vote', {
+    api<{ ok: boolean; count: number }>('/api/vote', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ filmId }),
     }),
 
   activity: () =>
-    request<{ nominations: NominationActivity[]; votes: VoteActivity[] }>('/api/me/activity'),
+    api<{ nominations: NominationActivity[]; votes: VoteActivity[] }>('/api/me/activity'),
 };
