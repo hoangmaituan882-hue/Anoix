@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Language, WorkItem, NewsItem, GoodsItem, YoutubeItem } from '../../types';
+import { Language, WorkItem, NewsItem, GoodsItem } from '../../types';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { FilmsSection } from '../../features/films/FilmsSection';
@@ -18,7 +18,6 @@ interface HomePageProps {
   onOpenAllWorks: () => void;
   onSelectNews: (news: NewsItem) => void;
   onSelectGoods: (goods: GoodsItem) => void;
-  onSelectVideo: (video: YoutubeItem) => void;
   onOpenRecruitModal: () => void;
   onOpenAboutModal: () => void;
   onOpenModal: (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
@@ -32,7 +31,6 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenAllWorks,
   onSelectNews,
   onSelectGoods,
-  onSelectVideo,
   onOpenRecruitModal,
   onOpenAboutModal,
   onOpenModal,
@@ -96,11 +94,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           onSelectGoods={onSelectGoods}
         />
 
-        {/* 5. MEDIA Section (Video Feed & Popup Player) */}
-        <MediaSection
-          lang={lang}
-          onSelectVideo={onSelectVideo}
-        />
+        {/* 5. MEDIA Section (official channel cards → external links) */}
+        <MediaSection lang={lang} />
       </main>
 
       <Footer lang={lang} />

@@ -29,6 +29,7 @@
 | 端点 | 方法 | 鉴权 | 说明 |
 |---|---|---|---|
 | `/api/me` | GET | 必选 | 读取个人资料与角色权限 |
+| `/api/me/stats` | GET | 必选 | 放映账：已看/未看时长、提名、周票 |
 | `/api/me` | PATCH | 必选 | 更新昵称与头像 URL |
 | `/api/me/password` | POST | 必选 | 修改密码（需校验原密码） |
 | `/api/me/activity` | GET | 必选 | 获取本人所有提名与投票明细列表 |
@@ -37,6 +38,7 @@
 | `/api/watch` | GET | 必选 | 获取全部观影记录 |
 | `/api/watch/:filmId` | PUT / DELETE | 必选 | 保存 / 删除观影评分与短评 |
 | `/api/me/year-review?year=` | GET | 必选 | 获取年度观影与社区活跃度汇总数据 |
+| `/api/ranking` | GET | 可选 | 个人中心位次卡；登录后填 `me` |
 
 ### 关键状态
 - `profile: AdminUser | null`: 用户信息。

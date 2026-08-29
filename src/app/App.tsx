@@ -141,7 +141,6 @@ const AppShell: React.FC = () => {
                 onOpenAllWorks={() => setAllWorksOpen(true)}
                 onSelectNews={(news) => setSelectedNews(news)}
                 onSelectGoods={(goods) => setSelectedGoods(goods)}
-                onSelectVideo={(video) => setActiveVideo({ url: video.url, title: lang === 'zh' && video.titleZh ? video.titleZh : video.title })}
                 onOpenRecruitModal={() => setRecruitModalOpen(true)}
                 onOpenAboutModal={() => setAboutModalOpen(true)}
                 onOpenModal={handleOpenModal}

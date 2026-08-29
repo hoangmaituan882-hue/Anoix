@@ -13,8 +13,9 @@
 | GET | /api/films | 无 | 无 | 无查询参数时：全量 `select=*`（15s 缓存）。带 `q\|category\|sort\|limit` 时：PostgREST Range 分页 `{items,total,offset,limit}`，默认 `sort=screened_desc`，FilmCard 字段 |
 | GET | /api/films/:id | 无 | 无 | 单作品详情，无则 `null` |
 | GET | /api/news | 无 | 无 | 已发布动态（15s 缓存），按 pinned 置顶 |
-| GET | /api/screenings | 无 | 无 | 放映会列表，`screen_date` 降序 |
-| GET | /api/screenings/:id | 无 | 无 | 单场详情 + 关联 `films` |
+| GET | /api/channel | 无 | 无 | 首页官方频道 `{ hubUrl, items[] }`，15s 缓存；点卡片跳外站 |
+| GET | /api/screenings | 无 | 无 | 放映会列表，`screen_date` 降序；口号标题折叠为日期名，并带 `round_status` |
+| GET | /api/screenings/:id | 无 | 无 | 单场详情 + 关联 `films`；标题与 `round_status` 同上 |
 | GET | /api/rsvp/:screeningId | 可选 | 无 | `{rsvped, count}`（有身份时给出本人是否参与） |
 | POST | /api/rsvp/:screeningId | 必选 | rsvp 20/min | 参与（404 无此场次；409 幂等返回 ok） |
 | DELETE | /api/rsvp/:screeningId | 必选 | rsvp 20/min | 取消参与 |

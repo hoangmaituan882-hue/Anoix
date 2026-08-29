@@ -50,5 +50,5 @@
 ## 边界与备注
 
 - 不 cron 自动把周榜 #1 写进周六。
-- 遗留轮次 API 仍给后台用，公网页不请求 `GET /api/nominations` 轮次列表。
+- 后台不再维护命名投票轮次；一场 `screenings` 即一轮。遗留 `nomination_rounds` 接口仍在库里，前后台 UI 都不走。
 - `/plaza` 重定向到 `/nominations`（已无独立 Plaza 页）。

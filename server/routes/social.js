@@ -3,6 +3,7 @@ import { personaFor } from '../lib/pure.js';
 import { pgGet, pgWrite, pgUpsert, contentCache } from '../lib/db.js';
 import { resolveIdentity } from '../lib/identity.js';
 import { allowRate, clientIp } from '../auth.js';
+import { displayScreeningTitle } from '../lib/catalog.js';
 
 /**
  * Social / community endpoints: notifications, favorites, calendar, watch log,
@@ -78,7 +79,7 @@ export function socialRoutes(app) {
         date: s.screen_date,
         type: 'screening',
         id: s.id,
-        title: s.title,
+        title: displayScreeningTitle(s) || s.title,
         venue: s.venue || '',
         theme: s.theme || '',
         films: (s.film_ids || []).map((id) => {

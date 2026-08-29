@@ -4,6 +4,7 @@ import { pgGet, pgWrite } from '../lib/db.js';
 import { mapUser, insertUserRole } from '../lib/users.js';
 import { adminGate } from '../lib/identity.js';
 import { tcRequest, tcEnabled } from '../tcapi.js';
+import { resolveVideoMeta } from '../lib/channel.js';
 
 /**
  * Admin endpoints (user management, nomination pool, scheduling, rounds, stats).
@@ -190,5 +191,12 @@ export function adminRoutes(app) {
     });
 
     res.json({ nominations, votes: votesList });
+  }));
+
+  app.post('/api/admin/channel/resolve', adminGate, asyncHandler(async (req, res) => {
+    const url = typeof req.body?.url === 'string' ? req.body.url.trim() : '';
+    const meta = await resolveVideoMeta(url);
+    if (!meta.ok) return res.status(400).json({ error: meta.error || 'bad_url' });
+    res.json(meta);
   }));
 }

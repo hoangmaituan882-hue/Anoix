@@ -10,11 +10,22 @@ import {
   filmsByIdPath,
   filmListPath,
   stampIsNew,
+  displayScreeningTitle,
+  screeningRoundStatus,
 } from '../lib/catalog.js';
+import { assembleChannel } from '../lib/channel.js';
 
 /**
  * Public content + screening participation: health, films, news, screenings, rsvp.
  */
+function presentScreening(row, today) {
+  return {
+    ...row,
+    title: displayScreeningTitle(row) || row.title,
+    round_status: screeningRoundStatus(row.screen_date, today),
+  };
+}
+
 export function contentRoutes(app) {
 
   app.get('/api/health', async (_req, res) => {
@@ -87,10 +98,11 @@ export function contentRoutes(app) {
     res.json(visible);
   }));
 
-  // ---- Screenings (archive) ----
+  // ---- Screenings (archive): one night = one round; title/status derived from date ----
   app.get('/api/screenings', asyncHandler(async (_req, res) => {
     const rows = await pgGet('/screenings?select=*&order=screen_date.desc');
-    res.json(rows);
+    const today = shanghaiDateString();
+    res.json((rows ?? []).map((r) => presentScreening(r, today)));
   }));
 
   app.get('/api/screenings/:id', asyncHandler(async (req, res) => {
@@ -101,7 +113,19 @@ export function contentRoutes(app) {
     const films = ids.length
       ? await pgGet(`/films?id=in.(${ids.map(encodeURIComponent).join(',')})&select=id,title,title_zh,title_en,year,category,image`)
       : [];
-    res.json({ ...s, films: films ?? [] });
+    res.json({ ...presentScreening(s, shanghaiDateString()), films: films ?? [] });
+  }));
+
+  app.get('/api/channel', asyncHandler(async (_req, res) => {
+    const cached = contentCache.get('channel');
+    if (cached) return res.json(cached);
+    const [settings, videos] = await Promise.all([
+      pgGet('/channel_settings?id=eq.home&select=*'),
+      pgGet('/channel_videos?select=*&order=sort_order.asc'),
+    ]);
+    const body = assembleChannel(settings?.[0], videos);
+    contentCache.set('channel', body);
+    res.json(body);
   }));
 
   // ---- Participation (rsvp) ----

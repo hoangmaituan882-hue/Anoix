@@ -27,13 +27,17 @@ server/
 │   ├── users.js      ← mapUser / nextUserNo / insertUserRole
 │   ├── pure.js       ← 纯函数：weekStartDateString / personaFor / nextUserNoFromList
 │   ├── catalog.js    ← 纯函数：featured 排序 / 片库检索 / 周票 clamp
+│   ├── meStats.js    ← 纯函数：个人放映账口径
+│   ├── channel.js    ← 纯函数：Bilibili/YouTube 链接解析与频道卡片组装
+│   ├── ranking.js    ← 纯函数：社内已看时长榜
 │   └── middleware.js ← corsMiddleware / securityHeaders / errorHandler
 └── routes/           ← HTTP 端点（直接 import lib，无依赖注入）
-    ├── content.js    ← /api/health /films /news /screenings /rsvp
+    ├── content.js    ← /api/health /films /news /screenings /channel /rsvp
     ├── voting.js     ← /api/vote /quota /nominations /plaza
-    ├── admin.js      ← /api/admin/*（用户/提名池/排期/轮次/统计）
+    ├── admin.js      ← /api/admin/*（用户/提名池/排期/统计）
     ├── social.js     ← /api/notifications /favorites /calendar /watch /me/year-review /goods
-    └── me.js         ← /api/me /me/password /me/activity
+    ├── me.js         ← /api/me /me/stats /me/password /me/activity
+    └── ranking.js    ← /api/ranking
 ```
 
 ## 3. 模块依赖图

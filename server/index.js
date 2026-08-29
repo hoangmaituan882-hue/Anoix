@@ -1,4 +1,5 @@
-﻿import express from 'express';
+﻿import 'dotenv/config';
+import express from 'express';
 import path from 'node:path';
 import { tmdbRouter } from './tmdb.js';
 import { allowRate, clientIp } from './auth.js';
@@ -9,6 +10,7 @@ import { votingRoutes } from './routes/voting.js';
 import { adminRoutes } from './routes/admin.js';
 import { socialRoutes } from './routes/social.js';
 import { meRoutes } from './routes/me.js';
+import { rankingRoutes } from './routes/ranking.js';
 
 const app = express();
 app.use(express.json());
@@ -20,6 +22,7 @@ votingRoutes(app);
 adminRoutes(app);
 socialRoutes(app);
 meRoutes(app);
+rankingRoutes(app);
 
 // ---- TMDB proxy (open to all for nomination scraping; rate-limited) ----
 function tmdbGate(req, res, next) {

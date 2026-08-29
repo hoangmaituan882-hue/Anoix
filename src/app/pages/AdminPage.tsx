@@ -9,13 +9,14 @@ import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../../components/motion/select';
 import { ScreeningsAdmin } from '../../features/admin/ScreeningsAdmin';
-import { RoundsAdmin } from '../../features/admin/RoundsAdmin';
 import { UsersAdmin } from '../../features/admin/UsersAdmin';
 import { PoolAdmin } from '../../features/admin/PoolAdmin';
 import { StatsAdmin } from '../../features/admin/StatsAdmin';
 import { GoodsAdmin } from '../../features/admin/GoodsAdmin';
+import { ChannelAdmin } from '../../features/admin/ChannelAdmin';
 import { TmdbImportModal } from '../../features/admin/TmdbImportModal';
 import { AdminHeader, AdminTab } from '../../features/admin/AdminHeader';
+import { BeianLink } from '../../components/layout/Footer';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
@@ -34,7 +35,6 @@ import {
   Film,
   Newspaper,
   Calendar,
-  Vote,
   Search,
   LayoutGrid,
   List,
@@ -53,6 +53,7 @@ import {
   Activity,
   Tv,
   ShoppingBag,
+  Clapperboard,
 } from 'lucide-react';
 
 type AuthState = 'checking' | 'signed-out' | 'signed-in' | 'unauthorized';
@@ -290,8 +291,8 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
     '1': 'films',
     '2': 'news',
     '3': 'goods',
-    '4': 'screenings',
-    '5': 'rounds',
+    '4': 'channel',
+    '5': 'screenings',
     '6': 'pool',
     '7': 'stats',
     '8': 'users',
@@ -334,8 +335,8 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
     { id: 'tab-films', category: 'actions', label: '作品资料库 (WORKS)', hint: '按 1 切换', icon: <Film className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('films') },
     { id: 'tab-news', category: 'actions', label: '动态与公告 (NEWS)', hint: '按 2 切换', icon: <Newspaper className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('news') },
     { id: 'tab-goods', category: 'actions', label: '周边商品 (GOODS)', hint: '按 3 切换', icon: <ShoppingBag className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('goods') },
-    { id: 'tab-screenings', category: 'actions', label: '放映会档案 (SCREENINGS)', hint: '按 4 切换', icon: <Calendar className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('screenings') },
-    { id: 'tab-rounds', category: 'actions', label: '选片与投票 (ROUNDS)', hint: '按 5 切换', icon: <Vote className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('rounds') },
+    { id: 'tab-channel', category: 'actions', label: '官方频道 (CHANNEL)', hint: '按 4 切换', icon: <Clapperboard className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('channel') },
+    { id: 'tab-screenings', category: 'actions', label: '放映会档案 (SCREENINGS)', hint: '按 5 切换', icon: <Calendar className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('screenings') },
     { id: 'tab-pool', category: 'actions', label: '提名池 (POOL)', hint: '按 6 切换', icon: <Flame className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('pool') },
     { id: 'tab-stats', category: 'actions', label: '统计大屏 (STATS)', hint: '按 7 切换', icon: <Activity className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('stats') },
     { id: 'tab-users', category: 'actions', label: '用户管理 (USERS)', hint: '按 8 切换', icon: <UserCheck className="w-4 h-4 text-[#ff3650]" />, action: () => setTab('users') },
@@ -366,18 +367,21 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
       <main className="max-w-7xl w-full mx-auto px-4 sm:px-8 py-8 flex-1">
         {tab === 'films' && <FilmsAdmin onCountChange={setFilmsCount} />}
         {tab === 'news' && <NewsAdmin onCountChange={setNewsCount} />}
+        {tab === 'goods' && <GoodsAdmin />}
+        {tab === 'channel' && <ChannelAdmin />}
         {tab === 'screenings' && <ScreeningsAdmin />}
-        {tab === 'rounds' && <RoundsAdmin />}
         {tab === 'pool' && <PoolAdmin />}
         {tab === 'stats' && <StatsAdmin />}
-        {tab === 'goods' && <GoodsAdmin />}
         {tab === 'users' && <UsersAdmin />}
       </main>
 
       {/* Footer System Status */}
       <footer className="border-t border-white/10 bg-[#141414] py-4 px-4 sm:px-8 text-center text-xs text-white/40">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 font-mono">
-          <p>© 2026 TRIGGER INC. ALL RIGHTS RESERVED. / ANOIX CONSOLE</p>
+          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <span>© 2026 TRIGGER INC. ALL RIGHTS RESERVED. / ANOIX CONSOLE</span>
+            <BeianLink className="text-white/40 hover:text-white/70 transition-colors" />
+          </p>
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-[#e0fe3d]" />

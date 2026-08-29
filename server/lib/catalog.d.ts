@@ -21,3 +21,7 @@ export function placeFilmOnNight<T extends { screen_date?: string; film_ids?: st
 export function moveFilmBetweenNights<T extends { screen_date?: string; film_ids?: string[] | null }>(screenings: T[], filmId: string, fromDate: string | null, toDate: string, insertIndex?: number): T[];
 export function reorderNight<T extends { screen_date?: string; film_ids?: string[] | null }>(screenings: T[], date: string, orderedIds: string[]): T[];
 export function filmScheduleFields(dates: string[] | null | undefined, today: string): { screening_date: string | null; screening_status: 'screened' | 'scheduled' | 'unscheduled' };
+export type ScreeningRoundStatus = 'screened' | 'tonight' | 'upcoming' | 'unscheduled';
+export function screeningRoundStatus(screenDate: string | null | undefined, today: string): ScreeningRoundStatus;
+export function screeningAutoTitle(screenDate: string | null | undefined): string;
+export function displayScreeningTitle(row: { title?: string | null; screen_date?: string | null }): string;

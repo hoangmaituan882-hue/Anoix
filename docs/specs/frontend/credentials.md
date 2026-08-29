@@ -20,6 +20,7 @@
 ## 数据 / 状态
 
 ### 依赖数据层
+- `src/lib/me.ts`（`/api/me/stats` 放映账）
 - `src/lib/community.ts`（观影记录、收藏夹）
 - `src/lib/catalog.ts` / `src/lib/credentialsCatalog.js`（按 id 解析片库卡片，不读种子 WORKS_LIST）
 - `src/lib/nominations.ts`（提名与投票活动流水）
@@ -29,7 +30,7 @@
 
 | 端点 | 方法 | 鉴权 | 说明 |
 |---|---|---|---|
-| `/api/watch` | GET | 必选 | 获取观影明细，计算总时长与评分分布 |
+| `/api/me/stats` | GET | 必选 | 已看/未看/总放映时长与片数、按月已放映、提名数、周票数 |
 | `/api/me/activity` | GET | 必选 | 获取个人提名与投票历史记录 |
 | `/api/films/featured` | GET | 无 | Coverflow 空档用最近放过的卡片填充 |
 | `/api/films?limit=` | GET | 无 | featured 不足 5 张时再拉一页列表 |
@@ -38,7 +39,7 @@
 ### 关键状态
 - `topTab: 'boards' | 'drops'`: 展板与精选合集切换。
 - `coverflowSlides: RiffleRecipeSlide[]`: 3D Coverflow 幻灯片数据集合。
-- `statsData: { totalScreenings, totalWatches, avgRating, joinDays, level, percentile, totalHours }`: 资历汇总统计。
+- `statsData` / `clubStats`: 来自 `/api/me/stats`，不再用占位数字。
 - `shareModalOpen: boolean`: 护照分享弹窗状态。
 
 ## 交互

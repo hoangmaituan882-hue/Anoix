@@ -5,6 +5,7 @@ import { Language } from '../../types';
 import { useToast } from '../../components/ui/Toast';
 import { getSession } from '../../lib/session';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
+import { BeianLink } from '../../components/layout/Footer';
 import {
   X,
   Clock,
@@ -842,10 +843,11 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({ lang, setLang, onOpe
       </AnimatePresence>
 
       {/* Minimal Brand Footer */}
-      <div className="text-center py-4 select-none">
+      <div className="text-center py-4 select-none flex flex-col items-center gap-2">
         <span className="text-xs font-bold text-neutral-400 hover:text-black dark:text-[#737373] dark:hover:text-white tracking-tight transition-colors cursor-pointer">
           Cal.com
         </span>
+        <BeianLink className="text-xs text-neutral-400 hover:text-black dark:text-[#737373] dark:hover:text-white transition-colors" />
       </div>
     </div>
   );

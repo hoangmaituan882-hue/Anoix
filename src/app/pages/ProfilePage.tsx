@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language } from '../../types';
 import { AdminUser } from '../../types/user';
-import { me } from '../../lib/me';
+import { me, EMPTY_ME_STATS, MeStats } from '../../lib/me';
+import { UserClubStats } from '../../features/credentials/UserClubStats';
 import { nominations, VoteActivity, NominationActivity } from '../../lib/nominations';
 import { community, FavoriteFilm, WatchItem } from '../../lib/community';
 import { Rating } from '../../components/ui/rating';
@@ -25,7 +26,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar'
 import { PageHero } from '../../components/layout/PageHero';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ScreeningStandingCard } from '../../features/ranking/ScreeningStandingCard';
-import { LeaderboardModal } from '../../features/ranking/LeaderboardModal';
 import {
   ArrowLeft,
   Mail,
@@ -63,6 +63,7 @@ export const ProfilePage: React.FC<{
   const [favorites, setFavorites] = useState<FavoriteFilm[] | null>(null);
   const [watchLog, setWatchLog] = useState<WatchItem[] | null>(null);
   const [yearReviewOpen, setYearReviewOpen] = useState(false);
+  const [clubStats, setClubStats] = useState<MeStats>(EMPTY_ME_STATS);
 
   const [form, setForm] = useState({ nickname: '', avatarUrl: '' });
   const [saving, setSaving] = useState(false);
@@ -110,6 +111,11 @@ export const ProfilePage: React.FC<{
       const p = await me.get();
       setProfile(p);
       setForm({ nickname: p.nickname || '', avatarUrl: p.avatarUrl || '' });
+      try {
+        setClubStats(await me.stats());
+      } catch {
+        setClubStats(EMPTY_ME_STATS);
+      }
     } catch (e) {
       toastError(e instanceof Error ? e.message : '加载资料失败');
       setProfile(null);
@@ -228,6 +234,8 @@ export const ProfilePage: React.FC<{
                       <span className="text-white/40">UID</span>
                       <span className="ml-auto font-mono text-xs text-white/40 truncate max-w-[140px]">{profile.uid}</span>
                     </div>
+                    <Separator />
+                    <UserClubStats stats={clubStats} tone="dark" signedIn />
                     <Separator />
                     <button
                       onClick={doLogout}
@@ -476,7 +484,6 @@ export const ProfilePage: React.FC<{
       <Footer lang={lang} />
 
       <YearReview open={yearReviewOpen} onClose={() => setYearReviewOpen(false)} userName={profile?.nickname || profile?.username || '影迷'} />
-      <LeaderboardModal />
     </>
   );
 };

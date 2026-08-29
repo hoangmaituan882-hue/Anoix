@@ -17,7 +17,32 @@ mock.module('../lib/db.js', {
     pgGet: mock.fn(async (path) => {
       pgCalls.push(String(path));
       const p = String(path);
+      if (p.includes('channel_settings')) {
+        return [{ id: 'home', hub_url: 'https://space.bilibili.com/1' }];
+      }
+      if (p.includes('channel_videos')) {
+        return [{
+          id: 'c1',
+          title: '稿件',
+          title_zh: '中文稿',
+          url: 'https://www.bilibili.com/video/BV1xx411c7mD',
+          thumbnail: 'http://cover',
+          platform: 'bilibili',
+          duration: '1:00',
+          sort_order: 0,
+        }];
+      }
       if (p.includes('screenings')) {
+        if (p.includes('select=*')) {
+          return [
+            {
+              id: 'n1',
+              title: 'TRIGGER 社区选片与投票轮次',
+              screen_date: '2026-08-23',
+              film_ids: ['b'],
+            },
+          ];
+        }
         return [
           { screen_date: '2020-01-15', film_ids: ['b', 'a'] },
           { screen_date: '2099-01-01', film_ids: ['soon'] },
@@ -122,4 +147,27 @@ test('GET /api/films?limit= pages via pgGetPage on screening_date', async () => 
   assert.equal(pageCalls[0].path.includes('title.ilike.*promare*'), true);
   const fullCatalog = pgCalls.filter((p) => p.startsWith('/films') && !p.includes('id=in'));
   assert.equal(fullCatalog.length, 0);
+});
+
+test('GET /api/screenings folds generic round slogans into the date title', async () => {
+  await withServer(async (base) => {
+    const r = await fetch(`${base}/api/screenings`);
+    assert.equal(r.status, 200);
+    const body = await r.json();
+    assert.equal(body[0].title, '2026年8月23日放映');
+    assert.ok(body[0].round_status);
+  });
+});
+
+test('GET /api/channel assembles hub url and clip cards', async () => {
+  cache.clear();
+  await withServer(async (base) => {
+    const r = await fetch(`${base}/api/channel`);
+    assert.equal(r.status, 200);
+    const body = await r.json();
+    assert.equal(body.hubUrl, 'https://space.bilibili.com/1');
+    assert.equal(body.items[0].id, 'c1');
+    assert.equal(body.items[0].titleZh, '中文稿');
+    assert.equal(body.items[0].platform, 'bilibili');
+  });
 });

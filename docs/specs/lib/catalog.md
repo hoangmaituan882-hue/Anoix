@@ -25,6 +25,9 @@
 | moveFilmBetweenNights | `(screenings, filmId, fromDate, toDate, insertIndex?)` | 从一天挪到另一天（fromDate 空则等于 place） |
 | reorderNight | `(screenings, date, orderedIds)` | 同晚改 `film_ids` 顺序 |
 | filmScheduleFields | `(dates, today)` | `{ screening_date: 最近已放过日\|null, screening_status }` |
+| screeningRoundStatus | `(screenDate, today)` | 一场即一轮：`screened` / `tonight` / `upcoming` / `unscheduled` |
+| screeningAutoTitle | `(screenDate)` | `YYYY年M月D日放映`；无日期则空串 |
+| displayScreeningTitle | `(row)` | 自定义备注名保留；空标题、ISO 日期、或含「社区选片/投票轮次」的口号改为自动标题 |
 | sortScreenedDesc | `(films, latestById)` | 已放过按社内日新→旧；从未放过垫底再按年份降序 |
 | matchFilmQuery | `(film, q)` | 匹配 title / title_zh / title_en / director / year（不含 tagline） |
 | matchFilmCategory | `(film, category)` | `all\|tv\|movie\|original`（Netflix/Original → original） |

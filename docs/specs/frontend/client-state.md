@@ -18,7 +18,9 @@
 | `nominations` | `src/lib/nominations.ts` | 配额、提名、广场、片库叠票 `vote` / `unvote` / `myVotes` |
 | `session` / `cloudbase` | `src/lib/session.ts` / `src/lib/cloudbase.ts` | 腾讯云 CloudBase 认证接入，提供用户登录、注册、登出、会话持久化与 AccessToken 获取 |
 | `pgAdmin` / `poolAdmin` / `adminUsers` | `src/lib/pgAdmin.ts` 等 | 管理后台直连 PostgREST 与管理员业务 API 的数据访问模块 |
-| `me` | `src/lib/me.ts` | 个人资料维护与改密 API |
+| `channel` | `src/lib/channel.ts` | 首页官方频道：`GET /api/channel`、后台 `POST /api/admin/channel/resolve` |
+| `me` | `src/lib/me.ts` | 个人资料、改密、`/api/me/stats` |
+| `ranking` | `src/lib/ranking.ts` | 全站已看时长榜 `GET /api/ranking` |
 | `filmPreview` / `worksModal` | `src/lib/filmPreview.ts` / `src/lib/worksModal.ts` | 跨页面/跨组件的轻量级事件总线订阅器 |
 
 ## 数据流与响应式机制
@@ -47,6 +49,7 @@
 | `api` | `/api/*` | 统一客户端 |
 | `community` | `/api/calendar`, `/api/notifications`, `/api/watch`, `/api/favorites`, `/api/rsvp`, `/api/me/year-review` | 社区业务与用户自读数据 |
 | `nominations` | `/api/quota`, `/api/nominations`, `/api/nominations/plaza`, `/api/vote`, `/api/vote/mine`, `/api/me/activity` | 选片、叠票与周配额 |
+| `ranking` | `/api/ranking` | 全站社内已看时长榜；可选 Bearer 填 `me` |
 | `pgAdmin` | `/v1/rdb/rest/v1/*` | 管理员直连 PostgREST（带 Bearer admin token） |
 
 ## 错误处理与容灾设计

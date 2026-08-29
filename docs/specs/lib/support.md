@@ -31,4 +31,4 @@
 | tmdbRouter | `express.Router()`，挂载于 `/api/tmdb`（前置 `tmdbGate` 限流 20/min） |
 
 - 用途：提名时按 `tmdbId` 刮削影片元数据（标题/海报/简介/导演/年份）。
-- ⚠️ 依赖 `TMDB_API_KEY`（当前**未配置**，代理 503）。
+- 依赖 `TMDB_API_KEY`（云托管 EnvParams / 本地 `.env`，不进 git）。

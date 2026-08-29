@@ -8,10 +8,11 @@ import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { VideoModal } from '../../components/ui/VideoModal';
 import { community, WatchItem } from '../../lib/community';
-import { nominations, VoteActivity, NominationActivity } from '../../lib/nominations';
 import { getSession, SessionUser } from '../../lib/session';
 import { catalog } from '../../lib/catalog';
+import { me, EMPTY_ME_STATS, MeStats } from '../../lib/me';
 import { uniqueFilmIds, buildCoverflowSlides } from '../../lib/credentialsCatalog.js';
+import { UserClubStats } from '../../features/credentials/UserClubStats';
 import { Language } from '../../types';
 import {
   Share2,
@@ -86,32 +87,30 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
 
   // Stats for passport export
   const [statsData, setStatsData] = useState({
-    totalScreenings: 4,
-    totalNominations: 3,
-    totalWatches: 12,
-    avgRating: 4.8,
-    joinDays: 186,
-    level: 'LV.8 资深放映主理人',
-    rank: 42,
-    percentile: 'TOP 3.8%',
-    totalHours: 186.5,
+    totalScreenings: 0,
+    totalNominations: 0,
+    totalWatches: 0,
+    avgRating: 0,
+    joinDays: 0,
+    level: '放映会成员',
+    totalHours: 0,
+    unwatchedHours: 0,
+    votes: 0,
   });
+  const [clubStats, setClubStats] = useState<MeStats>(EMPTY_ME_STATS);
+  const [statsSignedIn, setStatsSignedIn] = useState(false);
 
   useEffect(() => {
     let alive = true;
     setLoading(true);
 
-    getSession().then((u) => {
-      if (alive) setUser(u);
-    });
-
     const loadData = async () => {
       try {
         let watchList: WatchItem[] = [];
-        let userActivity: { votes: VoteActivity[]; nominations: NominationActivity[] } = {
-          votes: [],
-          nominations: [],
-        };
+        let club: MeStats = EMPTY_ME_STATS;
+        const session = await getSession();
+        if (alive) setUser(session);
+        let signedIn = Boolean(session);
 
         try {
           watchList = (await community.watchList()) || [];
@@ -119,10 +118,12 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
           // fallback
         }
 
-        try {
-          userActivity = await nominations.activity();
-        } catch {
-          // fallback
+        if (session) {
+          try {
+            club = await me.stats();
+          } catch {
+            club = EMPTY_ME_STATS;
+          }
         }
 
         if (!alive) return;
@@ -151,21 +152,23 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
 
         if (!alive) return;
 
-        // Compute stats
-        const totalWatches = Math.max(watchList.length, 12);
-        const totalNominations = Math.max(userActivity.nominations?.length || 0, 3);
         const avgRating =
           watchList.length > 0
             ? watchList.reduce((acc, cur) => acc + (cur.rating || 5), 0) / watchList.length
-            : 4.9;
+            : 0;
 
+        setClubStats(club);
+        setStatsSignedIn(signedIn);
         setStatsData({
-          totalScreenings: 4,
-          totalNominations,
-          totalWatches,
+          totalScreenings: club.totalScreenedCount,
+          totalNominations: club.nominations,
+          totalWatches: club.watchedCount,
           avgRating,
-          joinDays: 186,
-          level: 'LV.8 资深放映主理人',
+          joinDays: 0,
+          level: signedIn ? '放映会成员' : '访客',
+          totalHours: club.watchedHours,
+          unwatchedHours: club.unwatchedHours,
+          votes: club.votes,
         });
 
         const libraryShuffled = [...library].sort(() => 0.5 - Math.random());
@@ -417,6 +420,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                       {subTab === 'recents' ? (
                         /* Recents: Flame Graph Data Visualization Component */
                         <div className="space-y-8">
+                          <UserClubStats stats={clubStats} tone="light" signedIn={statsSignedIn} />
                           <FlameGraphCard />
 
                           {/* If user created custom boards, display them below */}

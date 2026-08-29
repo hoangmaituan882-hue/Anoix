@@ -22,6 +22,9 @@ import {
   rangeHeader,
   stampIsNew,
   FILM_CARD_COLUMNS,
+  screeningRoundStatus,
+  screeningAutoTitle,
+  displayScreeningTitle,
 } from './catalog.js';
 
 test('shanghaiDateString: uses Asia/Shanghai calendar date', () => {
@@ -135,6 +138,7 @@ test('placeFilmOnNight: creates a night when the date is empty', () => {
   const next = placeFilmOnNight([], 'promare', '2026-08-20');
   assert.equal(next.length, 1);
   assert.equal(next[0].screen_date, '2026-08-20');
+  assert.equal(next[0].title, '2026年8月20日放映');
   assert.deepEqual(next[0].film_ids, ['promare']);
 });
 
@@ -262,4 +266,36 @@ test('filmScheduleFields: past / future-only / none', () => {
     screening_date: null,
     screening_status: 'unscheduled',
   });
+});
+
+test('screeningRoundStatus: past / tonight / upcoming from calendar date', () => {
+  const today = '2026-08-29';
+  assert.equal(screeningRoundStatus('2026-08-20', today), 'screened');
+  assert.equal(screeningRoundStatus('2026-08-29', today), 'tonight');
+  assert.equal(screeningRoundStatus('2026-09-06', today), 'upcoming');
+  assert.equal(screeningRoundStatus('', today), 'unscheduled');
+});
+
+test('screeningAutoTitle: date-only night name, no club slogan', () => {
+  assert.equal(screeningAutoTitle('2026-08-23'), '2026年8月23日放映');
+  assert.equal(screeningAutoTitle(''), '');
+});
+
+test('displayScreeningTitle: generic round slogans collapse to the date title', () => {
+  assert.equal(
+    displayScreeningTitle({ title: 'TRIGGER 社区选片与投票轮次', screen_date: '2026-08-23' }),
+    '2026年8月23日放映',
+  );
+  assert.equal(
+    displayScreeningTitle({ title: '今石洋之夜', screen_date: '2026-08-23' }),
+    '今石洋之夜',
+  );
+  assert.equal(
+    displayScreeningTitle({ title: '  ', screen_date: '2026-08-23' }),
+    '2026年8月23日放映',
+  );
+  assert.equal(
+    displayScreeningTitle({ title: '2026-08-23', screen_date: '2026-08-23' }),
+    '2026年8月23日放映',
+  );
 });

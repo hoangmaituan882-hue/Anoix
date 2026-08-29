@@ -1,6 +1,6 @@
 # Specs 索引
 
-> Anoix 的逐模块规格说明（spec）。本文档是**导航入口**：共 27 个 spec，覆盖架构、数据表、API、lib 模块、前端功能。
+> Anoix 的逐模块规格说明（spec）。本文档是**导航入口**：共 31 个 spec，覆盖架构、数据表、API、lib 模块、前端功能。
 
 ## 统一模板（每个 spec 遵循）
 
@@ -25,17 +25,18 @@
 
 | 文件 | 说明 |
 |---|---|
-| [data/schema.md](data/schema.md) | 15 张表完整 schema（列/约束/RLS/用途） |
+| [data/schema.md](data/schema.md) | 17 张表完整 schema（列/约束/RLS/用途） |
 
-### api/ — 后端路由（46 端点）
+### api/ — 后端路由（47 端点）
 
 | 文件 | 端点数 | 说明 |
 |---|---|---|
-| [api/content.md](api/content.md) | 10 | 健康检查 / 作品（featured + 分页列表） / 新闻 / 放映会 / 参与 rsvp |
+| [api/content.md](api/content.md) | 11 | 健康检查 / 作品（featured + 分页列表） / 新闻 / 放映会 / 官方频道 / 参与 rsvp |
 | [api/voting.md](api/voting.md) | 10 | 片库叠票 / 配额 / 提名 / 提名广场（轮次票保留给后台） |
-| [api/admin.md](api/admin.md) | 11 | 用户管理 / 提名池 / 排期 / 轮次 / 统计 |
+| [api/admin.md](api/admin.md) | 12 | 用户管理 / 提名池 / 排期 / 频道解析 / 统计 |
 | [api/social.md](api/social.md) | 11 | 通知 / 收藏 / 日历 / 观影评分 / 年度回顾 / 商品 |
 | [api/me.md](api/me.md) | 4 | 个人资料 / 改密 / 我的活动 |
+| [api/ranking.md](api/ranking.md) | 1 | 全站社内已看时长榜（可选登录填 `me`） |
 
 ### lib/ — 后端库层
 
@@ -47,6 +48,9 @@
 | [lib/users.md](lib/users.md) | mapUser / nextUserNo / insertUserRole |
 | [lib/pure.md](lib/pure.md) | 纯函数：周起始 / 年度称号 / 编号推导（有单测） |
 | [lib/catalog.md](lib/catalog.md) | 纯函数：首页 reel / 片库检索 / 周票 clamp（有单测） |
+| [lib/meStats.md](lib/meStats.md) | 纯函数：个人放映账口径（有单测） |
+| [lib/channel.md](lib/channel.md) | 纯函数：Bilibili/YouTube 链接解析与频道卡片组装（有单测） |
+| [lib/ranking.md](lib/ranking.md) | 纯函数：社内已看时长榜组装（有单测） |
 | [lib/middleware.md](lib/middleware.md) | CORS / 安全头 / 统一错误处理 |
 | [lib/support.md](lib/support.md) | 支撑模块：auth（匿名身份+限流）/ tcapi / tmdb |
 
@@ -59,7 +63,7 @@
 | [frontend/screenings.md](frontend/screenings.md) | 放映会：列表 / 详情 / 参与 / 筛选 / 海报弹窗 |
 | [frontend/credentials.md](frontend/credentials.md) | 资历档案：3D Coverflow / 护照分享 / 活跃度火焰图 |
 | [frontend/credits.md](frontend/credits.md) | 片尾名单：CreditsDropdown / CreditsSheetModal |
-| [frontend/ranking.md](frontend/ranking.md) | 达人榜：LeaderboardModal / RankingDropdown |
+| [frontend/ranking.md](frontend/ranking.md) | 时长榜：LeaderboardModal / RankingDropdown / 真实 `/api/ranking` |
 | [frontend/profile.md](frontend/profile.md) | 个人中心：资料 / 观影评分 / 年度回顾 / 我的活动 |
 | [frontend/calendar.md](frontend/calendar.md) | 放映日历（Cal.com 风格） |
 | [frontend/search.md](frontend/search.md) | 全站搜索 ⌘K + 作品统一弹窗 |

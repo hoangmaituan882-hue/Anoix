@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSession, signIn, signUpEmail, signOut, SessionUser } from '../../lib/session';
 import { KeyRound, LogIn, Mail, UserPlus } from 'lucide-react';
+import { BeianLink } from '../../components/layout/Footer';
 
 /**
  * Account page — login + email self-registration.
@@ -85,7 +86,7 @@ export const AuthPage: React.FC<{ onAuthed?: (u: SessionUser) => void }> = ({ on
   const label = 'text-xs font-bold text-white/50 uppercase tracking-wider';
 
   return (
-    <div className="min-h-screen bg-[#121212] flex items-center justify-center px-4 selection:bg-[#ff3650] selection:text-white">
+    <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center px-4 selection:bg-[#ff3650] selection:text-white">
       <div className="w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-3xl p-8 space-y-6 shadow-2xl">
         <div className="text-center">
           <p className="text-xs font-black text-[#ff3650] uppercase tracking-widest mb-1">Anoix Account</p>
@@ -157,6 +158,7 @@ export const AuthPage: React.FC<{ onAuthed?: (u: SessionUser) => void }> = ({ on
           退出当前账号
         </button>
       </div>
+      <BeianLink className="mt-8 text-xs text-white/40 hover:text-white/70 transition-colors" />
     </div>
   );
 };

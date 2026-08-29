@@ -151,6 +151,38 @@ export const adminGoods = {
   remove: (id: string) => pg<null>('DELETE', `/goods?id=eq.${encodeURIComponent(id)}`),
 };
 
+// ---------- homepage official channel ----------
+export interface ChannelSettingsRow {
+  id: string;
+  hub_url: string;
+}
+
+export interface ChannelVideoRow {
+  id: string;
+  url: string;
+  platform: string;
+  video_key: string | null;
+  title: string;
+  title_zh: string | null;
+  thumbnail: string | null;
+  duration: string | null;
+  sort_order: number;
+}
+
+export const adminChannel = {
+  settings: () => pg<ChannelSettingsRow[]>('GET', '/channel_settings?id=eq.home&select=*'),
+  saveHub: (hub_url: string) =>
+    pg<ChannelSettingsRow[]>('PATCH', '/channel_settings?id=eq.home', {
+      hub_url,
+      updated_at: new Date().toISOString(),
+    }),
+  list: () => pg<ChannelVideoRow[]>('GET', '/channel_videos?select=*&order=sort_order.asc'),
+  create: (row: Partial<ChannelVideoRow>) => pg<ChannelVideoRow[]>('POST', '/channel_videos', row),
+  update: (id: string, row: Partial<ChannelVideoRow>) =>
+    pg<ChannelVideoRow[]>('PATCH', `/channel_videos?id=eq.${encodeURIComponent(id)}`, row),
+  remove: (id: string) => pg<null>('DELETE', `/channel_videos?id=eq.${encodeURIComponent(id)}`),
+};
+
 // ---------- nomination rounds ----------
 export interface RoundRow {
   id: string;

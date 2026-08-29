@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Home, SearchX } from 'lucide-react';
 import { TRIGGER_EASE } from '../../lib/motion';
+import { BeianLink } from '../layout/Footer';
 
 interface NotFoundProps {
   /** main heading */
@@ -63,6 +64,7 @@ export const NotFound: React.FC<NotFoundProps> = ({
           </button>
         )}
       </motion.div>
+      <BeianLink className="mt-16 text-xs text-white/40 hover:text-white/70 transition-colors" />
     </div>
   );
 };

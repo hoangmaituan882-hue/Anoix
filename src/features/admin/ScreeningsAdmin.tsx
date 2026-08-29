@@ -1,9 +1,22 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { adminFilms, adminScreenings, ScreeningRow, FilmRow } from '../../lib/pgAdmin';
+import {
+  shanghaiDateString,
+  screeningRoundStatus,
+  screeningAutoTitle,
+  displayScreeningTitle,
+} from '../../lib/scheduleOps';
 import { ScheduleBoard } from './ScheduleBoard';
-import { Plus, Save, Trash2, X, Calendar, MapPin, Film, Sparkles, Search, Edit3, AlertCircle, Video } from 'lucide-react';
+import { Plus, Save, Trash2, X, Calendar, MapPin, Film, Search, Edit3, AlertCircle, Video } from 'lucide-react';
 import { Loader } from '../../components/motion/loader';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+
+const ROUND_BADGE: Record<string, { label: string; cls: string }> = {
+  screened: { label: '已放映', cls: 'bg-white/10 text-white/70 border-white/15' },
+  tonight: { label: '本场', cls: 'bg-[#ff3650]/20 text-[#ff3650] border-[#ff3650]/40' },
+  upcoming: { label: '未放映', cls: 'bg-[#e0fe3d]/15 text-[#e0fe3d] border-[#e0fe3d]/40' },
+  unscheduled: { label: '未排期', cls: 'bg-white/10 text-white/40 border-white/10' },
+};
 
 const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
 const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
@@ -15,8 +28,9 @@ export const ScreeningsAdmin: React.FC = () => {
   const [films, setFilms] = useState<FilmRow[]>([]);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState<ScreeningRow | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [editingIsNew, setEditingIsNew] = useState(false);
   const [search, setSearch] = useState('');
+  const today = shanghaiDateString();
   const [confirm, setConfirm] = useState<{ title: string; desc?: string; action: () => void } | null>(null);
 
   const reload = useCallback(async () => {
@@ -35,7 +49,7 @@ export const ScreeningsAdmin: React.FC = () => {
 
   const remove = (id: string, title: string) => {
     setConfirm({
-      title: `确认删除放映会「${title}」?`,
+      title: `确认删除「${title}」?`,
       desc: '此操作不可恢复。',
       action: async () => {
         try {
@@ -52,13 +66,16 @@ export const ScreeningsAdmin: React.FC = () => {
     if (!rows) return [];
     if (!search.trim()) return rows;
     const q = search.toLowerCase();
-    return rows.filter(
-      (r) =>
+    return rows.filter((r) => {
+      const label = displayScreeningTitle(r).toLowerCase();
+      return (
+        label.includes(q) ||
         r.title.toLowerCase().includes(q) ||
         (r.venue && r.venue.toLowerCase().includes(q)) ||
         (r.theme && r.theme.toLowerCase().includes(q)) ||
         r.screen_date.includes(q)
-    );
+      );
+    });
   }, [rows, search]);
 
   if (rows === null) {
@@ -83,12 +100,15 @@ export const ScreeningsAdmin: React.FC = () => {
               {rows.length} 场放映
             </span>
           </div>
-          <h2 className="text-2xl font-black text-white tracking-tight uppercase">TRIGGER 线下放映会档案</h2>
-          <p className="text-xs text-white/50">沉淀与管理历届粉丝放映活动、播放片单与现场回顾</p>
+          <h2 className="text-2xl font-black text-white tracking-tight uppercase">放映档案</h2>
+          <p className="text-xs text-white/50">每一场放映即一轮。状态按日期自动标记，不必另起轮次名称。</p>
         </div>
 
         <button
-          onClick={() => setEditing({ ...EMPTY, id: `screening-${Date.now().toString().slice(-4)}` })}
+          onClick={() => {
+            setEditingIsNew(true);
+            setEditing({ ...EMPTY });
+          }}
           className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] active:scale-95 text-white font-black text-sm px-5 py-3 rounded-2xl transition-all cursor-pointer shadow-[0_8px_20px_rgba(255,54,80,0.3)]"
         >
           <Plus className="w-4 h-4" />
@@ -129,6 +149,8 @@ export const ScreeningsAdmin: React.FC = () => {
         ) : (
           filteredRows.map((r) => {
             const selectedFilms = films.filter((f) => (r.film_ids ?? []).includes(f.id));
+            const label = displayScreeningTitle(r);
+            const round = ROUND_BADGE[screeningRoundStatus(r.screen_date, today)] ?? ROUND_BADGE.unscheduled;
             return (
               <div
                 key={r.id}
@@ -137,7 +159,10 @@ export const ScreeningsAdmin: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded border font-mono ${round.cls}`}>
+                          {round.label}
+                        </span>
                         <span className="text-[10px] font-black px-2 py-0.5 rounded bg-[#ff3650]/20 text-[#ff3650] border border-[#ff3650]/40 font-mono">
                           {r.screen_date || 'DATE TBD'}
                         </span>
@@ -147,7 +172,7 @@ export const ScreeningsAdmin: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <h3 className="text-lg font-black text-white">{r.title}</h3>
+                      <h3 className="text-lg font-black text-white">{label}</h3>
                     </div>
 
                     <span className="text-[10px] font-mono text-white/30 truncate max-w-[80px]">
@@ -193,14 +218,19 @@ export const ScreeningsAdmin: React.FC = () => {
 
                 <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-2">
                   <button
-                    onClick={() => setEditing(r)}
+                    onClick={() => {
+                      setEditingIsNew(false);
+                      const auto = screeningAutoTitle(r.screen_date);
+                      const shown = displayScreeningTitle(r);
+                      setEditing({ ...r, title: shown === auto ? '' : shown });
+                    }}
                     className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-[#ff3650] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1.5"
                   >
                     <Edit3 className="w-3.5 h-3.5 text-[#e0fe3d]" />
                     <span>编辑档案</span>
                   </button>
                   <button
-                    onClick={() => remove(r.id, r.title)}
+                    onClick={() => remove(r.id, label)}
                     className="p-1.5 rounded-xl bg-white/5 hover:bg-[#ff3650] text-white/40 hover:text-white transition-colors cursor-pointer"
                     title="删除此放映会"
                   >
@@ -217,7 +247,7 @@ export const ScreeningsAdmin: React.FC = () => {
       {editing && (
         <ScreeningForm
           initial={editing}
-          isNew={!editing.id || editing.id.startsWith('screening-')}
+          isNew={editingIsNew}
           films={films}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); void reload(); }}
@@ -257,8 +287,11 @@ const ScreeningForm: React.FC<{
     setBusy(true);
     setError('');
     try {
-      if (!form.id.trim() || !form.title.trim() || !form.screen_date) throw new Error('ID、标题、日期为必填');
-      const row = { ...form, id: form.id.trim() };
+      const date = (form.screen_date || '').slice(0, 10);
+      if (!date) throw new Error('放映日期为必填');
+      const title = displayScreeningTitle({ title: form.title, screen_date: date }) || screeningAutoTitle(date);
+      const id = (form.id.trim() || `screening-${date}`);
+      const row = { ...form, id, title, screen_date: date };
       if (isNew) await adminScreenings.create(row);
       else {
         const { id: _drop, ...patch } = row;
@@ -285,7 +318,7 @@ const ScreeningForm: React.FC<{
                 SCREENING RECORD
               </span>
               <h3 className="text-xl font-black text-white">
-                {isNew ? '创建新放映会档案' : `编辑放映会: ${form.title}`}
+                {isNew ? '创建放映' : `编辑: ${displayScreeningTitle(form)}`}
               </h3>
             </div>
           </div>
@@ -300,35 +333,49 @@ const ScreeningForm: React.FC<{
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className={LABEL}>放映会唯一 ID (Slug) *</label>
+            <label className={LABEL}>放映日期 *</label>
             <input
-              value={form.id}
-              onChange={(e) => setForm({ ...form, id: e.target.value })}
-              disabled={!isNew}
-              placeholder="如 screening-2026-08"
-              className={`${FIELD} disabled:opacity-40 font-mono`}
+              type="date"
+              value={form.screen_date?.slice(0, 10) ?? ''}
+              onChange={(e) => {
+                const date = e.target.value;
+                setForm((f) => ({
+                  ...f,
+                  screen_date: date,
+                  ...(isNew ? { id: date ? `screening-${date}` : '' } : {}),
+                }));
+              }}
+              className={FIELD}
             />
+            {form.screen_date && (
+              <p className="text-[10px] font-mono text-white/40 pt-1">
+                自动标记：{ROUND_BADGE[screeningRoundStatus(form.screen_date, shanghaiDateString())]?.label}
+                {' · '}
+                {displayScreeningTitle({ title: form.title, screen_date: form.screen_date }) || screeningAutoTitle(form.screen_date)}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1">
-            <label className={LABEL}>放映会名称 (Title) *</label>
+            <label className={LABEL}>备注名（可选）</label>
             <input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               className={FIELD}
-              placeholder="如 TRIGGER 2026 夏季特别展映"
+              placeholder="空白则按日期自动标记，如 2026年8月23日放映"
             />
           </div>
 
-          <div className="space-y-1">
-            <label className={LABEL}>放映日期 (Screening Date) *</label>
-            <input
-              type="date"
-              value={form.screen_date?.slice(0, 10) ?? ''}
-              onChange={(e) => setForm({ ...form, screen_date: e.target.value })}
-              className={FIELD}
-            />
-          </div>
+          {!isNew && (
+            <div className="space-y-1">
+              <label className={LABEL}>档案 ID</label>
+              <input
+                value={form.id}
+                disabled
+                className={`${FIELD} disabled:opacity-40 font-mono`}
+              />
+            </div>
+          )}
 
           <div className="space-y-1">
             <label className={LABEL}>场地与地址 (Venue)</label>

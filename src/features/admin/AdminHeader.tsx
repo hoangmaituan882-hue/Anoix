@@ -6,11 +6,11 @@ import {
   Film,
   Newspaper,
   Calendar,
-  Vote,
   Flame,
   Activity,
   ShoppingBag,
   UserCheck,
+  Clapperboard,
   ExternalLink,
   LogOut,
   Command as CmdIcon,
@@ -23,8 +23,8 @@ export type AdminTab =
   | 'films'
   | 'news'
   | 'goods'
+  | 'channel'
   | 'screenings'
-  | 'rounds'
   | 'pool'
   | 'stats'
   | 'users';
@@ -73,15 +73,15 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         { key: 'films', label: '作品资料库', en: 'WORKS', icon: Film, hotkey: '1', count: filmsCount },
         { key: 'news', label: '动态公告', en: 'NEWS', icon: Newspaper, hotkey: '2', count: newsCount },
         { key: 'goods', label: '周边商品', en: 'GOODS', icon: ShoppingBag, hotkey: '3' },
+        { key: 'channel', label: '官方频道', en: 'CHANNEL', icon: Clapperboard, hotkey: '4' },
       ],
     },
     {
       id: 'events',
       name: '放映选片',
-      en: 'EVENTS & VOTING',
+      en: 'EVENTS',
       tabs: [
-        { key: 'screenings', label: '放映档案', en: 'SCREENINGS', icon: Calendar, hotkey: '4' },
-        { key: 'rounds', label: '选片轮次', en: 'ROUNDS', icon: Vote, hotkey: '5' },
+        { key: 'screenings', label: '放映档案', en: 'SCREENINGS', icon: Calendar, hotkey: '5' },
         { key: 'pool', label: '提名池', en: 'POOL', icon: Flame, hotkey: '6' },
       ],
     },

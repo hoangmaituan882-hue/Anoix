@@ -5,6 +5,21 @@ import { I18N } from '../../data/triggerData';
 import { repository } from '../../lib/repository';
 import { ArrowUpRight } from 'lucide-react';
 
+export const ICP_BEIAN_NO = '赣ICP备2026006064号';
+export const ICP_BEIAN_URL = 'https://beian.miit.gov.cn/';
+
+export const BeianLink: React.FC<{ className?: string }> = ({ className }) => (
+  <a
+    data-icp-beian
+    href={ICP_BEIAN_URL}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={className}
+  >
+    {ICP_BEIAN_NO}
+  </a>
+);
+
 interface FooterProps {
   lang: Language;
 }
@@ -52,6 +67,9 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
           <p id="copyright" className="text-xs sm:text-sm text-white/50 font-bold tracking-widest uppercase">
             {t.copyright}
           </p>
+          <BeianLink
+            className="mt-3 text-xs text-white/40 hover:text-white/70 transition-colors"
+          />
         </div>
       </div>
     </footer>

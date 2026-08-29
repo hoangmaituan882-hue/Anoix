@@ -11,7 +11,7 @@
 
 ## 文档导航
 
-- **架构 / 表 / API / lib / 前端** → [docs/specs/README.md](docs/specs/README.md)（26+ 个 spec）。
+- **架构 / 表 / API / lib / 前端** → [docs/specs/README.md](docs/specs/README.md)（31 个 spec）。
 - 改任何模块后**同步更新对应 spec**（见下方「关键约定」）。
 
 ## 部署 & 环境变量
@@ -21,12 +21,12 @@
 | 环境变量 | 状态 |
 |---|---|
 | `CLOUDBASE_ENV_ID` / `ADMIN_USERNAME` / `ADMIN_PASSWORD` / `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` | ✅ 已配 |
-| `TMDB_API_KEY` | ⚠️ **未配**（TMDB 刮削提名 503） |
+| `TMDB_API_KEY` | ✅ 已配（云托管环境变量；勿写入仓库） |
 
 ## 待办
 
 **阻塞**
-- [ ] 补 `TMDB_API_KEY`（themoviedb.org 申请 → 云托管环境变量）。
+- [x] 补 `TMDB_API_KEY`（themoviedb.org 申请 → 云托管环境变量）。
 - [ ] 商品 5 件种子的价格/主图（淘宝加密反爬，后台手动补）。
 - [ ] 未来作品上映日期（新吊带袜 / 迷宫饭S2 / 边缘行者2）。
 
@@ -36,7 +36,7 @@
 
 ## 路线图（候选）
 
-- [ ] 评论区 · 用户主页 · 达人榜接真实数据 · 选片数据洞察（recharts）· 投票竞猜 · 角色/主创库 · 推荐语点赞
+- [ ] 评论区 · 用户主页 · 选片数据洞察（recharts）· 投票竞猜 · 角色/主创库 · 推荐语点赞
 
 ## 关键约定
 

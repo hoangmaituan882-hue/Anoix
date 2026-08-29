@@ -232,7 +232,7 @@ export function placeFilmOnNight(screenings, filmId, date, insertIndex) {
   if (!night) {
     night = {
       id: `night-${day}`,
-      title: day,
+      title: screeningAutoTitle(day) || day,
       screen_date: day,
       venue: null,
       theme: null,
@@ -277,4 +277,37 @@ export function filmScheduleFields(dates, today) {
     screening_date: latestPastClubDate(dates, today),
     screening_status: gate === 'screened' ? 'screened' : gate === 'frozen' ? 'scheduled' : 'unscheduled',
   };
+}
+
+/** One screening night = one round. Status is derived from the calendar date. */
+export function screeningRoundStatus(screenDate, today) {
+  const day = String(screenDate || '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return 'unscheduled';
+  const t = String(today || '').slice(0, 10);
+  if (day < t) return 'screened';
+  if (day === t) return 'tonight';
+  return 'upcoming';
+}
+
+export function screeningAutoTitle(screenDate) {
+  const day = String(screenDate || '').slice(0, 10);
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  if (!m) return '';
+  return `${m[1]}年${Number(m[2])}月${Number(m[3])}日放映`;
+}
+
+function isGenericRoundTitle(title, screenDate) {
+  const t = String(title || '').trim();
+  if (!t) return true;
+  if (/社区选片|投票轮次/.test(t)) return true;
+  const day = String(screenDate || '').slice(0, 10);
+  return Boolean(day) && t === day;
+}
+
+/** Keep a custom nickname; otherwise show the date-derived round label. */
+export function displayScreeningTitle(row) {
+  const date = String(row?.screen_date || '').slice(0, 10);
+  const title = String(row?.title || '').trim();
+  if (!isGenericRoundTitle(title, date)) return title;
+  return screeningAutoTitle(date);
 }

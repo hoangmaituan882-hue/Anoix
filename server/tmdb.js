@@ -10,18 +10,22 @@ import express from 'express';
 
 const TMDB_API_BASE_URL = (process.env.TMDB_API_BASE_URL || 'https://api.themoviedb.org/3').replace(/\/$/, '');
 const TMDB_IMAGE_BASE_URL = (process.env.TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p').replace(/\/$/, '');
-const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
 
 const SEARCH_MEDIA = ['movie', 'tv', 'multi'];
 
+function tmdbApiKey() {
+  return process.env.TMDB_API_KEY || '';
+}
+
 function tmdbFetch(path) {
-  if (!TMDB_API_KEY) {
+  const key = tmdbApiKey();
+  if (!key) {
     const err = new Error('TMDB_API_KEY not configured');
     err.status = 503;
     throw err;
   }
   const sep = path.includes('?') ? '&' : '?';
-  const url = `${TMDB_API_BASE_URL}${path}${sep}api_key=${TMDB_API_KEY}&language=zh-CN`;
+  const url = `${TMDB_API_BASE_URL}${path}${sep}api_key=${key}&language=zh-CN`;
   return fetch(url, {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(12000),

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Film, Calendar, Vote, Share2, Check, Star, Trophy, Clock } from 'lucide-react';
+import { X, Film, Vote, Share2, Check, Star, Clock } from 'lucide-react';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
 import { useToast } from '../../components/ui/Toast';
 
@@ -16,9 +16,9 @@ interface CredentialsShareModalProps {
     avgRating: number;
     joinDays: number;
     level: string;
-    rank?: number;
-    percentile?: string;
     totalHours?: number;
+    unwatchedHours?: number;
+    votes?: number;
   };
 }
 
@@ -34,9 +34,9 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
 
   if (!open) return null;
 
-  const rankNumber = stats.rank ?? 42;
-  const rankPercentile = stats.percentile ?? 'TOP 3.8%';
-  const totalHours = stats.totalHours ?? 186.5;
+  const totalHours = stats.totalHours ?? 0;
+  const unwatchedHours = stats.unwatchedHours ?? 0;
+  const votes = stats.votes ?? 0;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -107,43 +107,29 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
                   <p className="text-xs text-neutral-500 dark:text-[#888888] font-medium mt-0.5">
                     {stats.level}
                   </p>
-                  <p className="text-[10px] text-neutral-400 dark:text-[#666666] font-mono">
-                    已加入社区 {stats.joinDays} 天
-                  </p>
+                  {stats.joinDays > 0 && (
+                    <p className="text-[10px] text-neutral-400 dark:text-[#666666] font-mono">
+                      已加入社区 {stats.joinDays} 天
+                    </p>
+                  )}
                 </div>
               </div>
 
-              {/* Official Rank Stamp Certification Badge */}
-              <div className="shrink-0 flex flex-col items-center justify-center p-2 rounded-xl bg-neutral-100 dark:bg-[#181818] border border-neutral-200 dark:border-[#2a2a2a] text-center">
+              <div className="shrink-0 flex flex-col items-center justify-center p-2 rounded-xl bg-neutral-100 dark:bg-[#181818] border border-neutral-200 dark:border-[#2a2a2a] text-center min-w-[4.5rem]">
                 <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-neutral-900 dark:text-white">
-                  <Trophy className="w-3 h-3 text-amber-500" />
-                  <span>#{rankNumber}</span>
+                  <Vote className="w-3 h-3" />
+                  <span>{votes}</span>
                 </div>
                 <span className="text-[8px] font-mono font-bold text-neutral-500 dark:text-[#888888] uppercase tracking-tighter mt-0.5">
-                  {rankPercentile}
+                  周票
                 </span>
               </div>
             </div>
 
-            {/* 4 Big Data Metrics + Total Hours Tile */}
             <div className="grid grid-cols-2 gap-2.5 mb-4">
               <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
                 <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
-                  全站荣誉榜位
-                </span>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-base font-bold font-mono text-neutral-900 dark:text-white">
-                    #{rankNumber} 席
-                  </span>
-                  <span className="text-[10px] font-mono text-neutral-500 dark:text-[#888888]">
-                    {rankPercentile}
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
-                <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
-                  累计放映时长
+                  已看时长
                 </span>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-base font-bold font-mono text-neutral-900 dark:text-white">
@@ -155,11 +141,23 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
 
               <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
                 <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
-                  履历观影收录
+                  未看时长
+                </span>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-base font-bold font-mono text-neutral-900 dark:text-white">
+                    {unwatchedHours}h
+                  </span>
+                  <Clock className="w-3.5 h-3.5 text-neutral-400 dark:text-[#737373]" />
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
+                <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
+                  已看片数
                 </span>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-base font-bold text-neutral-900 dark:text-white">
-                    {stats.totalWatches} 部
+                    {stats.totalWatches} / {stats.totalScreenings} 部
                   </span>
                   <Film className="w-3.5 h-3.5 text-neutral-400 dark:text-[#737373]" />
                 </div>
@@ -167,21 +165,20 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
 
               <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
                 <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
-                  放映会参会
+                  提名
                 </span>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-base font-bold text-neutral-900 dark:text-white">
-                    {stats.totalScreenings} 场
+                    {stats.totalNominations} 部
                   </span>
-                  <Calendar className="w-3.5 h-3.5 text-neutral-400 dark:text-[#737373]" />
+                  <Star className="w-3.5 h-3.5 text-neutral-400 dark:text-[#737373]" />
                 </div>
               </div>
             </div>
 
-            {/* Certified Stamp */}
             <div className="p-2.5 rounded-lg bg-neutral-100 dark:bg-[#141414] border border-neutral-200 dark:border-[#222222] text-center font-mono text-[10px] text-neutral-600 dark:text-[#888888] flex items-center justify-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>TRIGGER CINEMA CLUB // RANK #{rankNumber} · {rankPercentile} // CERTIFIED</span>
+              <span>ANOIX CINEMA CLUB // {stats.totalNominations} NOM · {votes} VOTES</span>
             </div>
           </div>
 

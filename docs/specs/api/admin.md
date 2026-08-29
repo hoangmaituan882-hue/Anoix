@@ -18,7 +18,8 @@
 | POST | /api/admin/pool/:id/promote | 勾选入库（TMDB 补建 films + 通知提名者） |
 | POST | /api/admin/pool/:id/demote | 退回提名库（可逆） |
 | POST | /api/admin/films/:id/schedule | 排期（screening_status + screening_date） |
-| POST | /api/admin/rounds/:id/status | 轮次状态流转（6 态 + deadline） |
+| POST | /api/admin/channel/resolve | 解析视频链接（Bilibili BV / YouTube），返回标题、封面、canonical URL |
+| POST | /api/admin/rounds/:id/status | 遗留：轮次 6 态流转（后台 UI 已移除） |
 | GET | /api/admin/stats | 统计（谁提名 / 谁投票，含匿名判定） |
 
 ## 鉴权失败码
@@ -44,5 +45,5 @@
 - **promote 幂等**：TMDB 影片已存在则跳过创建，只 PATCH pool（重试安全）；同时给提名者发 `promoted` 通知。
 - **demote 可逆**：只把 pool status 重置回 pending，不删影片。
 - **排期三态**：unscheduled（待定）/ scheduled（已排期）/ screened（已放映）。
-- **轮次 6 态**：draft → collecting → reviewing → voting → revealed → archived。
+- **命名投票轮次已废弃**：后台不再创建 `nomination_rounds`；`POST /api/admin/rounds/:id/status` 仅遗留。一场 `screenings` 即一轮，状态由日期自动标记。
 - 统计：匿名 cookie id（长度 >30）显示为「匿名」。

@@ -1,6 +1,6 @@
 # Spec: 数据库 Schema
 
-> 来源：`migrations/*.sql`（已全部应用）。共 15 张表。RLS 默认启用；服务端写操作走 admin token 绕开 RLS。
+> 来源：`migrations/*.sql`（已全部应用）。共 17 张表。RLS 默认启用；服务端写操作走 admin token 绕开 RLS。
 
 ## 内容类
 
@@ -72,9 +72,29 @@ RLS：公开读 `screenings_public_read`；admin 写。
 
 RLS：公开读 `goods_public_read`；admin 写。种子 5 件淘宝 TOP5 已入库（price/image 空）。
 
+### `channel_settings` — 首页官方频道入口
+
+单行 `id='home'`。`hub_url` 为首页「查看全部」外链（Bilibili 空间/合集等）。公开读；admin 写。
+
+### `channel_videos` — 官方频道卡片
+
+| 列 | 类型 |
+|---|---|
+| id | text PK |
+| url | text（点卡片跳转的外链） |
+| platform | text `bilibili` / `youtube` / `other` |
+| video_key | text（BV 号或 YouTube id） |
+| title / title_zh | text |
+| thumbnail / duration | text |
+| sort_order / created_at / updated_at | — |
+
+RLS：公开读；admin 写。无种子；后台粘贴链接解析封面后写入。
+
 ## 选片类
 
-### `nomination_rounds` — 轮次
+### `nomination_rounds` — 轮次（遗留）
+
+后台 UI 已不再创建命名轮次；一场 `screenings` 即一轮。本表仍在库中，供旧数据与遗留接口读取。
 
 | 列 | 类型 |
 |---|---|

@@ -8,6 +8,8 @@ import { ENV_ID } from '../lib/config.js';
 import { pgGet } from '../lib/db.js';
 import { callerIdentity } from '../lib/identity.js';
 import { mapUser } from '../lib/users.js';
+import { shanghaiDateString, filmsByIdPath } from '../lib/catalog.js';
+import { assembleMeStats, firstScreenedByFilm, minutesToHours } from '../lib/meStats.js';
 import { tcRequest } from '../tcapi.js';
 
 const pickField = (v, max) => (typeof v === 'string' ? v.slice(0, max) : undefined);
@@ -73,6 +75,41 @@ export function meRoutes(app) {
     }
     await tcRequest('ModifyEndUserAccount', { EnvId: ENV_ID, Uuid: ident.uid, Password: newPassword });
     res.json({ ok: true });
+  }));
+
+  app.get('/api/me/stats', asyncHandler(async (req, res) => {
+    const authz = req.headers.authorization || '';
+    if (!authz.startsWith('Bearer ')) return res.status(401).json({ error: 'unauthorized' });
+    const ident = await callerIdentity(authz.slice(7).trim());
+    if (!ident) return res.status(401).json({ error: 'unauthorized' });
+    const uid = ident.uid;
+    const today = shanghaiDateString();
+
+    const [screenings, watches, pool, weekVotes] = await Promise.all([
+      pgGet('/screenings?select=screen_date,film_ids'),
+      pgGet(`/watch_log?uid=eq.${encodeURIComponent(uid)}&select=film_id`),
+      pgGet(`/nomination_pool?nominee_identity_id=eq.${encodeURIComponent(uid)}&select=film_id`),
+      pgGet(`/film_week_votes?identity_id=eq.${encodeURIComponent(uid)}&select=count`),
+    ]);
+
+    const watchIds = (watches || []).map((w) => w.film_id);
+    const poolFilmIds = (pool || []).map((p) => p.film_id);
+    const filmPath = filmsByIdPath([...firstScreenedByFilm(screenings, today).keys()], 'id,duration');
+    const films = filmPath ? (await pgGet(filmPath)) : [];
+    const stats = assembleMeStats({
+      today,
+      screenings,
+      films,
+      watchIds,
+      poolFilmIds,
+      weekVotes,
+    });
+    res.json({
+      ...stats,
+      watchedHours: minutesToHours(stats.watchedMinutes),
+      unwatchedHours: minutesToHours(stats.unwatchedMinutes),
+      totalScreenedHours: minutesToHours(stats.totalScreenedMinutes),
+    });
   }));
 
   // ---- My activity (nominations + votes, with planned/approved status) ----
