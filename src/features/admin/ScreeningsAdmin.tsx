@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { adminFilms, adminScreenings, ScreeningRow, FilmRow } from '../../lib/pgAdmin';
+import { ScheduleBoard } from './ScheduleBoard';
 import { Plus, Save, Trash2, X, Calendar, MapPin, Film, Sparkles, Search, Edit3, AlertCircle, Video } from 'lucide-react';
 import { Loader } from '../../components/motion/loader';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
@@ -101,6 +102,8 @@ export const ScreeningsAdmin: React.FC = () => {
           <span>{error}</span>
         </div>
       )}
+
+      <ScheduleBoard films={films} screenings={rows} onSaved={() => void reload()} />
 
       {/* Search Filter */}
       <div className="flex items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-white/10">

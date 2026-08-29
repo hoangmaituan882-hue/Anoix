@@ -7,6 +7,7 @@ import { nominations, PlazaItem } from '../../lib/nominations';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
+import { PageHero } from '../../components/layout/PageHero';
 import { Loader } from '../../components/motion/loader';
 import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Badge } from '../../components/ui/badge';
@@ -72,36 +73,42 @@ export const PlazaPage: React.FC<{
   return (
     <>
       <Header lang={lang} setLang={setLang} onNavigate={() => navigate('/')} onOpenModal={onOpenModal} />
-      <main className="w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 py-20 lg:py-24 text-[#f5ffe5]">
+      <main className="w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-16 text-[#f5ffe5]">
         <div className="max-w-6xl mx-auto">
-          <button onClick={() => navigate('/')} className="inline-flex items-center gap-1.5 text-white/50 hover:text-[#ff3650] font-bold text-xs uppercase tracking-wider transition-colors mb-6 cursor-pointer">
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>{lang === 'zh' ? '返回首页' : 'BACK TO HOME'}</span>
-          </button>
-
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-            <div>
-              <p className="text-xs font-black text-[#ff3650] uppercase tracking-widest mb-1">Nomination Plaza</p>
-              <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight">提名广场</h1>
-              <p className="text-sm text-white/50 mt-1.5 flex items-center gap-2">
-                影迷提名的影片瀑布流与实时投票排行
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#e0fe3d]"><Radio className="w-3 h-3 animate-pulse" /> 实时</span>
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Tabs value={scope} onValueChange={(v) => setScope(v as 'week' | 'all')}>
-                <TabsList>
-                  <TabsTrigger value="week">本周</TabsTrigger>
-                  <TabsTrigger value="all">总榜</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <div className="flex items-center bg-black/40 border border-white/15 rounded-xl p-0.5">
-                <button onClick={() => setView('masonry')} className={`p-1.5 rounded-lg transition-colors cursor-pointer ${view === 'masonry' ? 'bg-[#ff3650] text-white' : 'text-white/50 hover:text-white'}`} title="瀑布流"><LayoutGrid className="w-4 h-4" /></button>
-                <button onClick={() => setView('ranking')} className={`p-1.5 rounded-lg transition-colors cursor-pointer ${view === 'ranking' ? 'bg-[#ff3650] text-white' : 'text-white/50 hover:text-white'}`} title="排行"><ListOrdered className="w-4 h-4" /></button>
+          <PageHero
+            title="提名广场 · NOMINATION PLAZA"
+            subtitle="影迷提名的全网影片瀑布流与实时投票排行榜"
+            actionSlot={
+              <div className="flex items-center gap-2">
+                <Tabs value={scope} onValueChange={(v) => setScope(v as 'week' | 'all')}>
+                  <TabsList>
+                    <TabsTrigger value="week">本周</TabsTrigger>
+                    <TabsTrigger value="all">总榜</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <div className="flex items-center bg-black/40 border border-white/15 rounded-xl p-0.5">
+                  <button
+                    onClick={() => setView('masonry')}
+                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                      view === 'masonry' ? 'bg-[#ff3650] text-white' : 'text-white/50 hover:text-white'
+                    }`}
+                    title="瀑布流"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setView('ranking')}
+                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                      view === 'ranking' ? 'bg-[#ff3650] text-white' : 'text-white/50 hover:text-white'
+                    }`}
+                    title="排行"
+                  >
+                    <ListOrdered className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
+            }
+          />
 
           {items === null ? (
             <div className="py-20 flex justify-center"><Loader variant="comet" size={36} label="加载提名广场" className="text-[#ff3650]" /></div>

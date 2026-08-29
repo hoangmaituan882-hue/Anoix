@@ -4,7 +4,6 @@ import { motion } from 'motion/react';
 import { Masonry } from 'masonic';
 import { Language } from '../../types';
 import { TRIGGER_EASE } from '../../lib/motion';
-import { NominationRound } from '../../types/screening';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { Loader } from '../../components/motion/loader';
@@ -12,30 +11,32 @@ import { Tabs, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Badge } from '../../components/ui/badge';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
 import { useToast } from '../../components/ui/Toast';
-import { getSession, getAccessToken, SessionUser } from '../../lib/session';
+import { getSession, SessionUser } from '../../lib/session';
 import { nominations, Quota, PlazaItem } from '../../lib/nominations';
 import { NominateDialog } from '../../features/nominations/NominateDialog';
 import { CoverFlowCarousel, CoverFlowItem } from '../../features/nominations/CoverFlowCarousel';
 import { FilmContextMenu } from '../../features/nominations/FilmContextMenu';
 import { PageHero } from '../../components/layout/PageHero';
-import { StatusBadge } from '../../components/ui/StatusBadge';
 import {
-  ArrowLeft, Crown, Hourglass, PencilLine, Vote, Plus,
-  Flame, Trophy, LayoutGrid, ListOrdered, Radio, Check, Undo2, Sparkles,
+  Crown, Plus, Flame, Trophy, LayoutGrid, ListOrdered,
+  Vote, Sparkles, Minus,
 } from 'lucide-react';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-
-const authHeaders = async (): Promise<Record<string, string>> => {
-  const token = await getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
 
 const RANK_STYLES = [
   { ring: 'border-[#ff3650]/60 bg-[#ff3650]/10', chip: 'bg-[#ff3650] text-white shadow-[0_0_16px_rgba(255,54,80,0.5)]', bar: 'bg-[#ff3650]' },
   { ring: 'border-[#e0fe3d]/50 bg-[#e0fe3d]/5', chip: 'bg-[#e0fe3d] text-[#121212]', bar: 'bg-[#e0fe3d]' },
   { ring: 'border-[#ff9900]/50 bg-[#ff9900]/5', chip: 'bg-[#ff9900] text-white', bar: 'bg-[#ff9900]' },
 ];
+
+const voteErrorMessage = (raw: string, lang: Language): string => {
+  if (raw === 'already_screened') return lang === 'zh' ? '这部已经放过，不能再投' : 'Already screened';
+  if (raw === 'frozen') return lang === 'zh' ? '已排入未来场次，暂不可投' : 'Frozen for an upcoming night';
+  if (raw === 'quota_exceeded') return lang === 'zh' ? '本周投票配额已用完' : 'Weekly vote quota reached';
+  if (raw === 'identity_required') return lang === 'zh' ? '需要先取得投票身份' : 'Voter identity required';
+  return lang === 'zh' ? '投票失败,请稍后再试' : 'Vote failed, try again later';
+};
 
 export const NominationsPage: React.FC<{
   lang: Language;
@@ -44,13 +45,9 @@ export const NominationsPage: React.FC<{
 }> = ({ lang, setLang, onOpenModal }) => {
   const navigate = useNavigate();
 
-  const [rounds, setRounds] = useState<NominationRound[] | null>(null);
-  const [myVotes, setMyVotes] = useState<Record<string, number[]>>({});
-  const [votingOption, setVotingOption] = useState<number | null>(null);
-  const [revokingOption, setRevokingOption] = useState<number | null>(null);
+  const [votingFilm, setVotingFilm] = useState<string | null>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
   const [quota, setQuota] = useState<Quota | null>(null);
-  const [now, setNow] = useState(Date.now());
   const { success: toastSuccess, error: toastError, info: toastInfo } = useToast();
 
   const [nominateOpen, setNominateOpen] = useState(false);
@@ -59,6 +56,7 @@ export const NominationsPage: React.FC<{
   const [scope, setScope] = useState<'week' | 'all'>('week');
   const [view, setView] = useState<'masonry' | 'ranking'>('masonry');
   const [plazaItems, setPlazaItems] = useState<PlazaItem[] | null>(null);
+  const [myVotes, setMyVotes] = useState<Record<string, number>>({});
 
   useEffect(() => {
     let alive = true;
@@ -70,44 +68,23 @@ export const NominationsPage: React.FC<{
     fetch(`${API_BASE}/api/vote/ticket`, { credentials: 'include' }).catch(() => {});
   }, []);
 
-  const reload = useCallback(async () => {
-    try {
-      const roundsRes = (await fetch(`${API_BASE}/api/nominations`).then((r) => r.json())) as NominationRound[];
-      setRounds(roundsRes);
-      const votes: Record<string, number[]> = {};
-      await Promise.all(
-        roundsRes
-          .filter((r) => r.status === 'voting')
-          .map(async (r) => {
-            try {
-              const res = await fetch(`${API_BASE}/api/vote?roundId=${encodeURIComponent(r.id)}`, {
-                credentials: 'include',
-                headers: await authHeaders(),
-              });
-              const data = await res.json();
-              votes[r.id] = data.optionIds ?? [];
-            } catch { votes[r.id] = []; }
-          }),
-      );
-      setMyVotes(votes);
-    } catch {
-      setRounds([]);
-    }
-  }, []);
-
-  useEffect(() => { void reload(); }, [reload]);
   useEffect(() => { void window.scrollTo(0, 0); }, []);
 
   const refreshQuota = useCallback(() => { nominations.quota().then(setQuota).catch(() => {}); }, []);
   useEffect(() => { refreshQuota(); }, [refreshQuota]);
 
-  // Live countdown tick
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+  const refreshMine = useCallback(() => {
+    nominations.myVotes()
+      .then((d) => {
+        const map: Record<string, number> = {};
+        for (const row of d.items ?? []) map[row.filmId] = row.count;
+        setMyVotes(map);
+      })
+      .catch(() => setMyVotes({}));
   }, []);
 
-  // Plaza polling (real-time ranking)
+  useEffect(() => { refreshMine(); }, [refreshMine]);
+
   useEffect(() => {
     let alive = true;
     const load = () => {
@@ -131,71 +108,31 @@ export const NominationsPage: React.FC<{
     });
   };
 
-  const castVote = async (roundId: string, optionId: number) => {
-    if (quota && quota.remainingVotes <= 0) {
+  const bumpVote = async (filmId: string, dir: 1 | -1) => {
+    if (dir === 1 && quota && quota.remainingVotes <= 0) {
       triggerQuotaShake();
       toastError(lang === 'zh' ? '本周投票配额已用完' : 'Weekly vote quota reached');
       return;
     }
-    setVotingOption(optionId);
+    if (dir === -1 && (myVotes[filmId] ?? 0) < 1) return;
+    setVotingFilm(filmId);
     try {
-      const res = await fetch(`${API_BASE}/api/vote`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
-        body: JSON.stringify({ roundId, optionId }),
-      });
-      if (res.status === 409) {
-        toastError(lang === 'zh' ? '你已经投过这部了' : 'You already voted for this film');
-      } else if (res.status === 429) {
-        triggerQuotaShake();
-        toastError(lang === 'zh' ? '本周投票配额已用完' : 'Weekly vote quota reached');
-      } else if (!res.ok) {
-        toastError(lang === 'zh' ? '投票失败,请稍后再试' : 'Vote failed, try again later');
-      } else {
-        toastSuccess(lang === 'zh' ? '投票成功,感谢参与!' : 'Vote cast — thank you!');
-      }
-      await reload();
+      if (dir === 1) await nominations.vote(filmId);
+      else await nominations.unvote(filmId);
+      if (dir === 1) toastSuccess(lang === 'zh' ? '已叠一票' : 'Vote stacked');
+      else toastInfo(lang === 'zh' ? '已撤一票' : 'Vote withdrawn');
       refreshQuota();
-    } catch {
-      toastError(lang === 'zh' ? '网络错误,请稍后再试' : 'Network error, try again later');
+      refreshMine();
+      const d = await nominations.plaza(scope);
+      setPlazaItems(d.items ?? []);
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : '';
+      if (raw === 'quota_exceeded') triggerQuotaShake();
+      toastError(voteErrorMessage(raw, lang));
     } finally {
-      setVotingOption(null);
+      setVotingFilm(null);
     }
   };
-
-  const revokeVote = async (roundId: string, optionId: number) => {
-    setRevokingOption(optionId);
-    try {
-      const res = await fetch(`${API_BASE}/api/vote`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
-        body: JSON.stringify({ roundId, optionId }),
-      });
-      if (res.ok) toastInfo(lang === 'zh' ? '已撤回投票' : 'Vote withdrawn');
-      else toastError(lang === 'zh' ? '撤回失败,请稍后再试' : 'Withdraw failed, try again later');
-      await reload();
-      refreshQuota();
-    } catch {
-      toastError(lang === 'zh' ? '网络错误,请稍后再试' : 'Network error');
-    } finally {
-      setRevokingOption(null);
-    }
-  };
-
-  const deadlineText = (deadline: string | null): string => {
-    if (!deadline) return '';
-    const ms = new Date(deadline).getTime() - now;
-    if (ms <= 0) return lang === 'zh' ? '已截止' : 'Closed';
-    const days = Math.floor(ms / 86400000);
-    const hours = Math.floor((ms % 86400000) / 3600000);
-    const mins = Math.floor((ms % 3600000) / 60000);
-    return lang === 'zh' ? `剩 ${days} 天 ${hours} 时 ${mins} 分` : `${days}d ${hours}h ${mins}m left`;
-  };
-
-  const active = rounds?.filter((r) => r.status !== 'revealed') ?? [];
-  const revealed = rounds?.filter((r) => r.status === 'revealed') ?? [];
 
   const openNominate = (filmId?: string) => {
     setPreSelectedFilmId(filmId ?? null);
@@ -205,6 +142,34 @@ export const NominationsPage: React.FC<{
   const ranking = (plazaItems ?? []).slice().sort((a, b) => b.votes - a.votes || b.nominations - a.nominations);
   const maxVotes = ranking.length ? ranking[0].votes : 0;
 
+  const VoteStepper: React.FC<{ filmId: string }> = ({ filmId }) => {
+    const mine = myVotes[filmId] ?? 0;
+    const busy = votingFilm === filmId;
+    return (
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => void bumpVote(filmId, -1)}
+          disabled={busy || mine < 1}
+          className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white inline-flex items-center justify-center cursor-pointer disabled:opacity-30"
+          title={lang === 'zh' ? '撤一票' : 'Remove one vote'}
+        >
+          <Minus className="w-3.5 h-3.5" />
+        </button>
+        <span className="min-w-[1.5rem] text-center text-xs font-black tabular-nums text-[#e0fe3d]">{mine}</span>
+        <button
+          type="button"
+          onClick={() => void bumpVote(filmId, 1)}
+          disabled={busy || (quota !== null && quota.remainingVotes <= 0)}
+          className="w-8 h-8 rounded-full bg-[#ff3650] hover:bg-[#ff203c] text-white inline-flex items-center justify-center cursor-pointer disabled:opacity-30"
+          title={lang === 'zh' ? '叠一票' : 'Add one vote'}
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <>
       <Header lang={lang} setLang={setLang} onNavigate={() => navigate('/')} onOpenModal={onOpenModal} />
@@ -213,15 +178,12 @@ export const NominationsPage: React.FC<{
         className="relative w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#f5ffe5] overflow-hidden"
       >
         <div className="max-w-6xl mx-auto relative z-10">
-          {/* Unified Page Hero: 24px Main Title + 14px Subtitle */}
           <PageHero
             title="选片提名与社区公投"
-            subtitle="浏览广场提案、提报心仪神作、投出属于影迷社区的下一场特设放映现场。"
+            subtitle="把票叠给想看的片；排期以日历为准，不会自动把榜首写进周六。"
           />
 
-          {/* Participatory Quota & Nomination Action Panel */}
           <div className="bg-[#181818] border border-white/10 rounded-2xl p-4 sm:p-5 mb-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            {/* Left: User Identity & Quota Info */}
             <div className="flex flex-col gap-1.5 min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 {user ? (
@@ -242,15 +204,13 @@ export const NominationsPage: React.FC<{
                 )}
               </div>
               <p className="text-[12px] text-white/50">
-                每位社区影迷每周拥有专属提名与投票配额，每周一凌晨自动重置。
+                每位社区影迷每周拥有专属提名与投票配额，每周一凌晨自动重置。同一部片本周可以把票全部叠上去。
               </p>
             </div>
 
-            {/* Middle/Right: Quota Progress Indicators & Action Button */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto shrink-0">
               {quota && (
                 <div className={`flex items-center gap-4 bg-black/40 px-4 py-2.5 rounded-xl border transition-all t-shake ${quotaShake ? 'is-shaking border-[#ff3650] shadow-[0_0_20px_rgba(255,54,80,0.4)]' : 'border-white/10'}`}>
-                  {/* Nominate Quota */}
                   <div className="w-28 space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-white/60 flex items-center gap-1">
@@ -274,7 +234,6 @@ export const NominationsPage: React.FC<{
 
                   <div className="w-px h-6 bg-white/15" />
 
-                  {/* Vote Quota */}
                   <div className="w-28 space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-white/60 flex items-center gap-1">
@@ -298,7 +257,6 @@ export const NominationsPage: React.FC<{
                 </div>
               )}
 
-              {/* Initiate Nomination Button */}
               <button
                 onClick={() => {
                   if (quota !== null && quota.remainingNominations <= 0) {
@@ -308,17 +266,18 @@ export const NominationsPage: React.FC<{
                     openNominate();
                   }
                 }}
-                className={`inline-flex items-center justify-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] active:scale-[0.98] text-white font-bold text-[16px] px-5 py-2.5 rounded-xl transition-all duration-200 cursor-pointer shadow-[0_4px_16px_rgba(255,54,80,0.35)] shrink-0 ${
+                className={`group/btn inline-flex items-center gap-2.5 bg-[#ff3650] hover:bg-[#ff203c] active:scale-[0.98] text-white font-extrabold text-sm px-6 py-2.5 rounded-full transition-all duration-200 cursor-pointer shadow-[0_4px_16px_rgba(255,54,80,0.35)] shrink-0 ${
                   quota !== null && quota.remainingNominations <= 0 ? 'opacity-50' : ''
                 }`}
               >
-                <Plus className="w-4 h-4 stroke-[3]" />
-                <span>发起新提名</span>
+                <span className="tracking-wider">{lang === 'zh' ? '发起新提名' : 'NEW NOMINATION'}</span>
+                <span className="w-6 h-6 rounded-full bg-white text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-0.5">
+                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                </span>
               </button>
             </div>
           </div>
 
-          {/* Cover-flow carousel of the leading nominated films */}
           {ranking.length > 0 && (
             <CoverFlowCarousel
               items={ranking.slice(0, 10).map((p): CoverFlowItem => ({ id: p.filmId, title: p.title, image: p.image }))}
@@ -326,7 +285,6 @@ export const NominationsPage: React.FC<{
             />
           )}
 
-          {/* Plaza */}
           <section className="mb-12">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
@@ -377,13 +335,16 @@ export const NominationsPage: React.FC<{
                     <div className="p-3">
                       <p className="text-sm font-bold text-white truncate">{data.title}</p>
                       <p className="text-xs text-white/40 font-mono mb-2">{data.year}{data.category ? ` · ${data.category}` : ''}</p>
-                      <button
-                        onClick={() => openNominate(data.filmId)}
-                        disabled={quota !== null && quota.remainingNominations <= 0}
-                        className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-black py-1.5 rounded-lg bg-white/5 hover:bg-[#ff3650] hover:text-white text-white/70 transition-colors cursor-pointer disabled:opacity-30"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> {lang === 'zh' ? '提名这部' : 'Nominate'}
-                      </button>
+                      <div className="flex items-center justify-between gap-2">
+                        <VoteStepper filmId={data.filmId} />
+                        <button
+                          onClick={() => openNominate(data.filmId)}
+                          disabled={quota !== null && quota.remainingNominations <= 0}
+                          className="inline-flex items-center justify-center gap-1 text-xs font-black py-1.5 px-2 rounded-lg bg-white/5 hover:bg-[#ff3650] hover:text-white text-white/70 transition-colors cursor-pointer disabled:opacity-30"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> {lang === 'zh' ? '提名' : 'Nom'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                   </FilmContextMenu>
@@ -418,6 +379,7 @@ export const NominationsPage: React.FC<{
                         </div>
                         <p className="text-[10px] font-mono text-white/30">{Math.round(share * 100)}%</p>
                       </div>
+                      <VoteStepper filmId={item.filmId} />
                     </motion.div>
                     </FilmContextMenu>
                   );
@@ -425,130 +387,6 @@ export const NominationsPage: React.FC<{
               </div>
             )}
           </section>
-
-          {/* Rounds */}
-          <section className="mb-12">
-            <h2 className="text-xl font-black uppercase tracking-tight mb-5 flex items-center gap-2">
-              <Vote className="w-5 h-5 text-[#ff3650]" /> {lang === 'zh' ? '进行中轮次' : 'ACTIVE ROUNDS'}
-            </h2>
-
-            {rounds === null ? (
-              <div className="flex justify-center py-10"><Loader variant="morph" size={36} label="加载轮次" className="text-[#ff3650]" /></div>
-            ) : active.length === 0 && revealed.length === 0 ? (
-              <div className="bg-[#1a1a1a] border border-white/10 rounded-3xl p-12 text-center">
-                <Hourglass className="w-10 h-10 text-[#ff3650] mx-auto mb-3" />
-                <p className="text-white/60 font-bold">{lang === 'zh' ? '暂无进行中的提名,敬请期待。' : 'No active nominations right now.'}</p>
-              </div>
-            ) : (
-              active.map((round) => {
-                const myOptionIds = myVotes[round.id] ?? [];
-                return (
-                  <div key={round.id} className="mb-10">
-                    <div className="flex flex-wrap items-center gap-3 mb-1">
-                      {round.status === 'voting' ? (
-                        <span className="bg-[#ff3650] text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">{lang === 'zh' ? '投票中' : 'Voting'}</span>
-                      ) : (
-                        <span className="bg-white/10 text-white/70 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider inline-flex items-center gap-1"><PencilLine className="w-3 h-3" />{lang === 'zh' ? '提名收集中' : 'Collecting'}</span>
-                      )}
-                      {round.status === 'voting' && round.deadline && <span className="text-[#ff3650] text-xs font-black">⏳ {deadlineText(round.deadline)}</span>}
-                    </div>
-                    <div className="flex items-center justify-between gap-3 mb-5">
-                      <h3 className="text-2xl font-black text-[#f5ffe5]">{round.title}</h3>
-                      {round.status === 'collecting' && (
-                        <button onClick={() => openNominate()} disabled={quota !== null && quota.remainingNominations <= 0} className="inline-flex items-center gap-1.5 text-xs font-black text-[#ff3650] hover:text-white border border-[#ff3650]/40 hover:bg-[#ff3650] rounded-xl px-3.5 py-2 transition-colors cursor-pointer disabled:opacity-40">
-                          <Plus className="w-4 h-4" /> {lang === 'zh' ? '我要提名' : 'Nominate'}
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {round.options.map((opt, i) => {
-                        const isMine = myOptionIds.includes(opt.id);
-                        return (
-                          <FilmContextMenu key={opt.id} filmId={opt.film_id ?? ''} title={opt.film?.title_zh ?? opt.film?.title ?? opt.note ?? opt.film_id ?? ''}>
-                          <motion.div initial={{ x: 60, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: i * 0.07, ease: TRIGGER_EASE }} className={`group rounded-2xl overflow-hidden border-2 transition-all bg-[#1a1a1a] t-tilt-card ${isMine ? 'border-[#ff3650] shadow-[0_8px_30px_rgba(255,54,80,0.3)]' : 'border-white/10 hover:border-white/30'}`}>
-                            {opt.film?.image ? (
-                              <div className="relative aspect-[27/40] overflow-hidden">
-                                <img src={opt.film.image} alt={opt.film.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                                <div className="absolute bottom-0 inset-x-0 p-4">
-                                  <p className="font-black text-white text-sm leading-tight">{opt.film.title_zh ?? opt.film.title}</p>
-                                  <p className="text-white/50 text-xs font-bold mt-0.5">{opt.film.year}</p>
-                                </div>
-                                {opt.nominator && <span className="absolute top-3 left-3 bg-black/70 backdrop-blur text-white/80 text-[10px] font-black px-2 py-1 rounded-full">{opt.nominator} {lang === 'zh' ? '提名' : 'nominated'}</span>}
-                              </div>
-                            ) : (
-                              <div className="p-6"><p className="font-black text-white">{opt.note ?? opt.film_id ?? '?'}</p></div>
-                            )}
-                            <div className="p-3">
-                              {round.status === 'voting' ? (
-                                isMine ? (
-                                  <div className="flex items-center gap-1.5">
-                                    <motion.span
-                                      initial={{ scale: 0.85, opacity: 0 }}
-                                      animate={{ scale: 1, opacity: 1 }}
-                                      transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                                      className="flex-1 inline-flex items-center justify-center gap-2 text-sm font-black py-2.5 rounded-xl bg-[#ff3650] text-white"
-                                    >
-                                      <span className="t-success-check" data-state="in">
-                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                                          <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                      </span>
-                                      <span>{lang === 'zh' ? '已投票' : 'VOTED'}</span>
-                                    </motion.span>
-                                    <button
-                                      onClick={() => revokeVote(round.id, opt.id)}
-                                      disabled={revokingOption !== null}
-                                      title={lang === 'zh' ? '撤回投票' : 'Withdraw vote'}
-                                      className="shrink-0 w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white/60 hover:text-white inline-flex items-center justify-center transition-colors cursor-pointer disabled:opacity-40"
-                                    >
-                                      {revokingOption === opt.id ? <Loader variant="dots" size={16} className="text-white/60" /> : <Undo2 className="w-4 h-4" />}
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button onClick={() => castVote(round.id, opt.id)} disabled={votingOption !== null || (quota !== null && quota.remainingVotes <= 0)} className="w-full inline-flex items-center justify-center gap-2 bg-[#f5ffe5] hover:bg-[#ff3650] text-[#121212] hover:text-white font-black text-sm py-2.5 rounded-xl transition-colors disabled:opacity-50 cursor-pointer">
-                                    <Vote className="w-4 h-4" /> {votingOption === opt.id ? (lang === 'zh' ? '提交中...' : 'VOTING...') : (lang === 'zh' ? '投它一票' : 'VOTE')}
-                                  </button>
-                                )
-                              ) : (
-                                <p className="text-center text-xs font-bold text-white/40 py-2">{lang === 'zh' ? '等待提名截止...' : 'awaiting voting phase...'}</p>
-                              )}
-                            </div>
-                          </motion.div>
-                          </FilmContextMenu>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </section>
-
-          {/* Revealed */}
-          {revealed.length > 0 && (
-            <section>
-              <h2 className="text-xl font-black text-white/70 uppercase tracking-wider mb-4 border-t border-white/10 pt-8">{lang === 'zh' ? '历届结果' : 'PAST RESULTS'}</h2>
-              {revealed.map((round) => {
-                const sorted = [...round.options].sort((a, b) => b.votes_count - a.votes_count);
-                return (
-                  <div key={round.id} className="mb-8 bg-[#1a1a1a] border border-white/10 rounded-3xl p-6">
-                    <h3 className="font-black text-[#f5ffe5] mb-4">{round.title}</h3>
-                    <div className="space-y-2">
-                      {sorted.map((opt, i) => (
-                        <div key={opt.id} className="flex items-center gap-3">
-                          <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${i === 0 ? 'bg-[#ff3650] text-white' : 'bg-white/10 text-white/60'}`}>{i === 0 ? <Crown className="w-3.5 h-3.5" /> : i + 1}</span>
-                          <span className="font-bold text-sm text-[#f5ffe5] truncate">{opt.film?.title_zh ?? opt.film?.title ?? opt.note ?? opt.film_id}</span>
-                          <span className="ml-auto text-xs font-black text-white/50 shrink-0">{opt.votes_count} {lang === 'zh' ? '票' : 'votes'}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </section>
-          )}
         </div>
       </main>
 
@@ -559,7 +397,7 @@ export const NominationsPage: React.FC<{
           open
           initialFilmId={preSelectedFilmId}
           onClose={() => { setNominateOpen(false); setPreSelectedFilmId(null); }}
-          onSubmitted={() => { refreshQuota(); void reload(); }}
+          onSubmitted={() => { refreshQuota(); refreshMine(); nominations.plaza(scope).then((d) => setPlazaItems(d.items ?? [])).catch(() => {}); }}
         />
       )}
     </>

@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { WorkItem, Language } from '../../types';
-import { I18N } from '../../data/triggerData';
-import { repository, useRepo } from '../../lib/repository';
+import { I18N, WORKS_LIST } from '../../data/triggerData';
+import { catalog } from '../../lib/catalog';
+import { repository } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { ExpandArrow } from '../../components/motion/ExpandArrow';
 import { TextAnimation } from '../../components/motion/TextAnimation';
@@ -23,12 +24,30 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
   onOpenAllWorks,
 }) => {
   const sliderRef = useRef<HTMLDivElement>(null);
-  const films = useRepo(repository.films);
+  const [films, setFilms] = useState<WorkItem[]>(() => WORKS_LIST.slice(0, 12));
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const t = I18N[lang];
+
+  useEffect(() => {
+    let alive = true;
+    catalog
+      .featured()
+      .then((rows) => {
+        if (alive && rows.length > 0) setFilms(rows);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const openWork = async (work: WorkItem) => {
+    const full = await catalog.get(work.id).catch(() => work);
+    onSelectWork(full ?? work);
+  };
 
   // Update scrollbar progress indicator
   const handleScroll = () => {
@@ -145,7 +164,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
                 <motion.article
                   key={work.id}
                   data-film-id={work.id}
-                  onClick={() => onSelectWork(work)}
+                  onClick={() => void openWork(work)}
                   initial={{ x: 90, opacity: 0 }}
                   animate={introStarted ? { x: 0, opacity: 1 } : { x: 90, opacity: 0 }}
                   transition={{ duration: 0.7, delay: 0.68 + index * 0.06, ease: TRIGGER_EASE }}

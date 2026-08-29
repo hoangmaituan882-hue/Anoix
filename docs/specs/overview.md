@@ -26,6 +26,7 @@ server/
 │   ├── quota.js      ← quotaInfo / bumpQuota / unbumpQuota / QUOTA_LIMITS
 │   ├── users.js      ← mapUser / nextUserNo / insertUserRole
 │   ├── pure.js       ← 纯函数：weekStartDateString / personaFor / nextUserNoFromList
+│   ├── catalog.js    ← 纯函数：featured 排序 / 片库检索 / 周票 clamp
 │   └── middleware.js ← corsMiddleware / securityHeaders / errorHandler
 └── routes/           ← HTTP 端点（直接 import lib，无依赖注入）
     ├── content.js    ← /api/health /films /news /screenings /rsvp
@@ -53,12 +54,12 @@ routes/* ──→ lib/identity.js ──→ lib/users.js ──→ lib/db.js �
 ## 4. 数据流（写操作示例：投票）
 
 ```
-前端 POST /api/vote {roundId, optionId}
-  → voting.js: 字段校验 → 限流 → resolveIdentity（Bearer/login 或匿名 cookie）
-  → quotaInfo（查周配额）→ 校验轮次状态/deadline/选项归属
-  → pgWrite('POST','/votes')（UNIQUE 防重复 → 409）
-  → bumpQuota（PATCH user_quota）
-  → 200 { ok }
+前端 POST /api/vote { filmId, count? }
+  → voting.js: 限流 → resolveIdentity → clampAddVotes
+  → filmVoteGate（已放过 / 仅未来场 / 开放）
+  → upsert film_week_votes.count
+  → bumpQuota(..., n)
+  → 200 { ok, count }
 ```
 
 ## 5. 身份模型

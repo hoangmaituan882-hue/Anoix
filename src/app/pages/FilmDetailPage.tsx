@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate, useLocation, useViewTransitionState } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language, WorkItem } from '../../types';
-import { repository, useRepo } from '../../lib/repository';
+import { catalog } from '../../lib/catalog';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { FilmDetailBody } from '../../features/films/FilmDetailBody';
 import { WatchPanel } from '../../features/films/WatchPanel';
+import { Loader } from '../../components/motion/loader';
 import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Check, Sparkles } from 'lucide-react';
 
 interface FilmDetailPageProps {
@@ -28,20 +29,46 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const isTransitioning = useViewTransitionState(location);
-  const films = useRepo(repository.films);
+  const [work, setWork] = useState<WorkItem | null | undefined>(undefined);
+  const [neighbors, setNeighbors] = useState<WorkItem[]>([]);
   const [copied, setCopied] = useState(false);
-
-  const currentIndex = films.findIndex((w) => w.id === id);
-  const work = currentIndex !== -1 ? films[currentIndex] : undefined;
-
-  const prevWork = currentIndex > 0 ? films[currentIndex - 1] : undefined;
-  const nextWork = currentIndex !== -1 && currentIndex < films.length - 1 ? films[currentIndex + 1] : undefined;
-
-  const otherWorks = films.filter((w) => w.id !== id).slice(0, 4);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  useEffect(() => {
+    if (!id) {
+      setWork(null);
+      return;
+    }
+    let alive = true;
+    setWork(undefined);
+    catalog
+      .get(id)
+      .then((row) => {
+        if (alive) setWork(row);
+      })
+      .catch(() => {
+        if (alive) setWork(null);
+      });
+    catalog
+      .list({ limit: 24, offset: 0 })
+      .then((page) => {
+        if (alive) setNeighbors(page.items);
+      })
+      .catch(() => {
+        if (alive) setNeighbors([]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+
+  const currentIndex = neighbors.findIndex((w) => w.id === id);
+  const prevWork = currentIndex > 0 ? neighbors[currentIndex - 1] : undefined;
+  const nextWork = currentIndex !== -1 && currentIndex < neighbors.length - 1 ? neighbors[currentIndex + 1] : undefined;
+  const otherWorks = neighbors.filter((w) => w.id !== id).slice(0, 4);
 
   const handleShare = () => {
     if (navigator.clipboard) {
@@ -104,7 +131,11 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
             )}
           </div>
 
-          {work ? (
+          {work === undefined ? (
+            <div className="py-24 flex justify-center">
+              <Loader variant="comet" size={36} label={lang === 'zh' ? '加载作品' : 'Loading'} className="text-[#ff3650]" />
+            </div>
+          ) : work ? (
             <div className="space-y-10">
               {/* Main Film Card */}
               <div className="bg-[#1a1a1a] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-[#f5ffe5]">

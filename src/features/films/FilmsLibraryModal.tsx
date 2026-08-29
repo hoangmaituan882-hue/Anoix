@@ -1,13 +1,14 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WorkItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
-import { repository, useRepo } from '../../lib/repository';
+import { catalog } from '../../lib/catalog';
 import { community, WatchItem } from '../../lib/community';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { TiltCard } from '../../components/motion/TiltCard';
 import { AnimatedBadge } from '../../components/motion/AnimatedBadge';
 import { useToast } from '../../components/ui/Toast';
+import { Loader } from '../../components/motion/loader';
 import {
   X,
   Play,
@@ -39,7 +40,10 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
   const [filter, setFilter] = useState<'all' | 'TV Series' | 'Movie' | 'Original Animation'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
-  const films = useRepo(repository.films);
+  const [sortKey, setSortKey] = useState<'screened' | 'year'>('screened');
+  const [films, setFilms] = useState<WorkItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loadingList, setLoadingList] = useState(true);
   const t = I18N[lang];
   const { success, error: toastError } = useToast();
 
@@ -48,6 +52,49 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [watchedMap, setWatchedMap] = useState<Record<string, WatchItem>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    const category =
+      filter === 'TV Series' ? 'tv' : filter === 'Movie' ? 'movie' : filter === 'Original Animation' ? 'original' : 'all';
+    const sort = sortKey === 'year' ? (sortOrder === 'asc' ? 'year_asc' : 'year_desc') : 'screened_desc';
+    const timer = setTimeout(() => {
+      setLoadingList(true);
+      catalog
+        .list({ q: searchQuery, category, sort, limit: 24, offset: 0 })
+        .then((page) => {
+          if (!alive) return;
+          setFilms(page.items);
+          setTotal(page.total);
+        })
+        .catch(() => {
+          if (alive) {
+            setFilms([]);
+            setTotal(0);
+          }
+        })
+        .finally(() => {
+          if (alive) setLoadingList(false);
+        });
+    }, searchQuery.trim() ? 300 : 0);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [filter, searchQuery, sortOrder, sortKey]);
+
+  const loadMore = () => {
+    const category =
+      filter === 'TV Series' ? 'tv' : filter === 'Movie' ? 'movie' : filter === 'Original Animation' ? 'original' : 'all';
+    const sort = sortKey === 'year' ? (sortOrder === 'asc' ? 'year_asc' : 'year_desc') : 'screened_desc';
+    catalog
+      .list({ q: searchQuery, category, sort, limit: 24, offset: films.length })
+      .then((page) => {
+        setFilms((prev) => [...prev, ...page.items]);
+        setTotal(page.total);
+      })
+      .catch(() => {});
+  };
 
   // Load existing watch-log on mount
   useEffect(() => {
@@ -68,38 +115,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
     };
   }, []);
 
-  const filteredWorks = useMemo(() => {
-    return films
-      .filter((w) => {
-        const matchesCategory =
-          filter === 'all' ||
-          w.category.toLowerCase().includes(filter.toLowerCase()) ||
-          (filter === 'Original Animation' && (w.category.includes('Netflix') || w.category.includes('Original')));
-
-        if (!matchesCategory) return false;
-
-        if (!searchQuery.trim()) return true;
-        const q = searchQuery.toLowerCase();
-        const titleMatch =
-          w.title.toLowerCase().includes(q) ||
-          (w.titleZh && w.titleZh.toLowerCase().includes(q)) ||
-          (w.titleEn && w.titleEn.toLowerCase().includes(q));
-        const directorMatch = w.director && w.director.toLowerCase().includes(q);
-        const tagMatch = w.tagline && w.tagline.toLowerCase().includes(q);
-        const yearMatch = w.year && w.year.toLowerCase().includes(q);
-
-        return titleMatch || directorMatch || tagMatch || yearMatch;
-      })
-      .sort((a, b) => {
-        const getYearNum = (str: string) => {
-          const match = str.match(/\d{4}/);
-          return match ? parseInt(match[0], 10) : 0;
-        };
-        const yearA = getYearNum(a.year);
-        const yearB = getYearNum(b.year);
-        return sortOrder === 'desc' ? yearB - yearA : yearA - yearB;
-      });
-  }, [films, filter, searchQuery, sortOrder]);
+  const filteredWorks = films;
 
   // Toggle selection for a single work
   const handleToggleSelect = (workId: string, e?: React.MouseEvent) => {
@@ -250,7 +266,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                   : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
               }`}
             >
-              {lang === 'zh' ? `全部 (${films.length})` : `ALL (${films.length})`}
+              {lang === 'zh' ? (filter === 'all' ? `全部 (${total})` : '全部') : (filter === 'all' ? `ALL (${total})` : 'ALL')}
             </button>
             <button
               onClick={() => setFilter('TV Series')}
@@ -312,21 +328,30 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             </div>
 
             <button
-              onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
+              onClick={() => setSortKey((prev) => (prev === 'screened' ? 'year' : 'screened'))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white/80 transition-colors cursor-pointer whitespace-nowrap border border-white/10"
-              title={sortOrder === 'desc' ? '最新在前' : '早期在前'}
+              title={sortKey === 'screened' ? '按社内放映日' : '按制作年份'}
             >
-              <ArrowUpDown className="w-3.5 h-3.5 text-[#ff3650]" />
-              <span>
-                {sortOrder === 'desc'
-                  ? lang === 'zh'
-                    ? '最新优先'
-                    : 'Newest'
-                  : lang === 'zh'
-                  ? '年代顺序'
-                  : 'Oldest'}
-              </span>
+              <span>{sortKey === 'screened' ? (lang === 'zh' ? '放映日' : 'Screened') : (lang === 'zh' ? '年份' : 'Year')}</span>
             </button>
+            {sortKey === 'year' && (
+              <button
+                onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white/80 transition-colors cursor-pointer whitespace-nowrap border border-white/10"
+                title={sortOrder === 'desc' ? '最新在前' : '早期在前'}
+              >
+                <ArrowUpDown className="w-3.5 h-3.5 text-[#ff3650]" />
+                <span>
+                  {sortOrder === 'desc'
+                    ? lang === 'zh'
+                      ? '最新优先'
+                      : 'Newest'
+                    : lang === 'zh'
+                    ? '年代顺序'
+                    : 'Oldest'}
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -369,7 +394,11 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
         {/* Grid of works with layout animations */}
         <div className="p-6 sm:p-8 overflow-y-auto flex-1 relative pb-28">
           <AnimatePresence mode="popLayout">
-            {filteredWorks.length === 0 ? (
+            {loadingList && films.length === 0 ? (
+              <div className="py-16 flex justify-center">
+                <Loader variant="comet" size={32} label={lang === 'zh' ? '加载片库' : 'Loading'} className="text-[#ff3650]" />
+              </div>
+            ) : filteredWorks.length === 0 ? (
               <motion.div
                 key="empty-state"
                 initial={{ opacity: 0, y: 15 }}
@@ -401,6 +430,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                 </button>
               </motion.div>
             ) : (
+              <>
               <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
                 <AnimatePresence mode="popLayout">
                   {filteredWorks.map((work) => {
@@ -427,7 +457,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                             if (isBatchMode) {
                               handleToggleSelect(work.id);
                             } else {
-                              onSelectWork(work);
+                              void catalog.get(work.id).then((full) => onSelectWork(full ?? work)).catch(() => onSelectWork(work));
                             }
                           }}
                           className={`group/item cursor-pointer flex flex-col bg-[#222222] rounded-2xl overflow-hidden border transition-all duration-300 relative ${
@@ -519,6 +549,18 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                   })}
                 </AnimatePresence>
               </motion.div>
+              {films.length < total && (
+                <div className="flex justify-center pt-6">
+                  <button
+                    type="button"
+                    onClick={loadMore}
+                    className="px-5 py-2 rounded-full bg-white/10 hover:bg-[#ff3650] text-xs font-black text-white border border-white/15 transition-colors cursor-pointer"
+                  >
+                    {lang === 'zh' ? `加载更多（${films.length}/${total}）` : `Load more (${films.length}/${total})`}
+                  </button>
+                </div>
+              )}
+              </>
             )}
           </AnimatePresence>
         </div>

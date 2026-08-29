@@ -11,9 +11,10 @@
 
 | 模块 | 路径 | 职责 |
 |---|---|---|
-| `repository` | `src/lib/repository.ts` | 核心单例仓储，管理 `films` / `news` / `goods` / `youtube` / `social` 内存缓存，基于 `useSyncExternalStore` 实现组件无损重渲染；`refresh()` 静默拉取服务端数据并热替换 |
-| `community` | `src/lib/community.ts` | 社区交互 API Client，封装观影打分、收藏夹、放映 RSVP、消息通知、放映日历与年度回顾 |
-| `nominations` | `src/lib/nominations.ts` | 选片业务专有 Client，包含自然周配额查询、提名提交、广场排行榜与个人活动明细 |
+| `repository` | `src/lib/repository.ts` | 核心单例仓储，管理 `films` / `news` / `goods` / `youtube` / `social` 内存缓存（全量 `/api/films` 仍给后台与非片库页兜底） |
+| `catalog` | `src/lib/catalog.ts` | 片库分页 Client：`featured()` / `list()` / `get()`，`credentials: 'include'` |
+| `community` | `src/lib/community.ts` | 社区交互 API Client |
+| `nominations` | `src/lib/nominations.ts` | 配额、提名、广场、片库叠票 `vote` / `unvote` / `myVotes` |
 | `session` / `cloudbase` | `src/lib/session.ts` / `src/lib/cloudbase.ts` | 腾讯云 CloudBase 认证接入，提供用户登录、注册、登出、会话持久化与 AccessToken 获取 |
 | `pgAdmin` / `poolAdmin` / `adminUsers` | `src/lib/pgAdmin.ts` 等 | 管理后台直连 PostgREST 与管理员业务 API 的数据访问模块 |
 | `me` | `src/lib/me.ts` | 个人资料维护与改密 API |
@@ -23,16 +24,14 @@
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│               UI 组件 (e.g. FilmsSection)              │
-│       const films = useRepo(repository.films);         │
+│     UI：FilmsSection / FilmsLibraryModal / ⌘K          │
+│     catalog.featured() / catalog.list() / catalog.get()│
 └───────────────────────────▲────────────────────────────┘
-                            │ useSyncExternalStore 订阅
+                            │ GET /api/films/featured & ?q&limit
 ┌───────────────────────────┴────────────────────────────┐
-│              Single Repository Cache (内存)            │
-│  - 初始态: 静态种子 (triggerData.ts) -> 首屏瞬间直出   │
-│  - 远端刷新: repository.refresh()                      │
+│  全量 repository.refresh() 仍走无查询 GET /api/films   │
 └───────────────────────────▲────────────────────────────┘
-                            │ HTTP GET /films, /news, /goods
+                            │
 ┌───────────────────────────┴────────────────────────────┐
 │            CloudBase API / PostgreSQL 数据库            │
 └────────────────────────────────────────────────────────┘
@@ -42,9 +41,10 @@
 
 | 模块 | 端点范围 | 说明 |
 |---|---|---|
-| `repository` | `/films`, `/news`, `/api/goods` | 基础公开只读数据，15s 服务端缓存 |
+| `repository` | `/api/films`（无查询=全量）, `/api/news`, `/api/goods` | 基础公开只读数据，15s 服务端缓存 |
+| `catalog` | `/api/films/featured`, `/api/films?…`, `/api/films/:id` | 首页 reel 与分页片库 |
 | `community` | `/api/calendar`, `/api/notifications`, `/api/watch`, `/api/favorites`, `/api/rsvp`, `/api/me/year-review` | 社区业务与用户自读数据 |
-| `nominations` | `/api/quota`, `/api/nominations`, `/api/nominations/plaza`, `/api/me/activity` | 选片与周配额系统 |
+| `nominations` | `/api/quota`, `/api/nominations`, `/api/nominations/plaza`, `/api/vote`, `/api/vote/mine`, `/api/me/activity` | 选片、叠票与周配额 |
 | `pgAdmin` | `/v1/rdb/rest/v1/*` | 管理员直连 PostgREST（带 Bearer admin token） |
 
 ## 错误处理与容灾设计

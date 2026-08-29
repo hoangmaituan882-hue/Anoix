@@ -16,7 +16,8 @@
 | `UsersAdmin` | `src/features/admin/UsersAdmin.tsx` | 用户管理面板，支持查看 `user_no` 顺序编号 (001...)、修改角色 (admin/user)、封禁 (ban) 与检索 |
 | `PoolAdmin` | `src/features/admin/PoolAdmin.tsx` | 影迷提名池管理，支持一键入库为作品、一键排期放映、批量审核与移除 |
 | `RoundsAdmin` | `src/features/admin/RoundsAdmin.tsx` | 选片投票轮次管理，创建新轮次、添加候选作品、推进轮次 6 态流转与统计详情 |
-| `ScreeningsAdmin` | `src/features/admin/ScreeningsAdmin.tsx` | 放映会场次编排、时间场地管理与关联展映作品多选绑定 |
+| `ScreeningsAdmin` | `src/features/admin/ScreeningsAdmin.tsx` | 放映会场次编排；顶部 `ScheduleBoard` 时刻表（未排期拖到日历 + 12 格首页预览） |
+| `ScheduleBoard` | `src/features/admin/ScheduleBoard.tsx` | 三栏：未排期片库 / 月历拖放 / 已放映 12 格预览（前两格 NEW） |
 | `StatsAdmin` | `src/features/admin/StatsAdmin.tsx` | 选片大盘与社区统计看板（投票人数、提名采纳率、活跃度分布） |
 | `GoodsAdmin` | `src/features/admin/GoodsAdmin.tsx` | 周边商品数据库 CRUD、淘宝链接与预售状态管理 |
 | `TmdbImportModal` | `src/features/admin/TmdbImportModal.tsx` | 后台 TMDB 批量抓取与入库工具弹窗 |
@@ -53,6 +54,7 @@
 1. **多重安全屏障拦截**：非管理员或未登录用户进入后显示 `Unauthorized` 界面，无法读取或写入敏感数据。
 2. **破坏性操作确认**：删除作品、解散轮次、封禁用户均调用 `ConfirmDialog` 弹窗进行二次确认。
 3. **即时开关与微动画**：置顶、发布状态、预售等属性使用 `Switch` 组件即时同步，列表带有平滑过滤。
+4. **时刻表排期**：在「放映档案」把未排期片子拖到某一天，同晚可拖动改顺序；保存时写入 `screenings.film_ids` 并回写该片 `screening_date` / `screening_status`。右侧 12 格只反映已放过场次。
 
 ## 边界与备注
 

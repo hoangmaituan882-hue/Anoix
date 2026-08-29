@@ -1,6 +1,6 @@
 # Specs 索引
 
-> Anoix 的逐模块规格说明（spec）。本文档是**导航入口**：共 26 个 spec，覆盖架构、数据表、API、lib 模块、前端功能。
+> Anoix 的逐模块规格说明（spec）。本文档是**导航入口**：共 27 个 spec，覆盖架构、数据表、API、lib 模块、前端功能。
 
 ## 统一模板（每个 spec 遵循）
 
@@ -25,14 +25,14 @@
 
 | 文件 | 说明 |
 |---|---|
-| [data/schema.md](data/schema.md) | 14 张表完整 schema（列/约束/RLS/用途） |
+| [data/schema.md](data/schema.md) | 15 张表完整 schema（列/约束/RLS/用途） |
 
-### api/ — 后端路由（44 端点）
+### api/ — 后端路由（46 端点）
 
 | 文件 | 端点数 | 说明 |
 |---|---|---|
-| [api/content.md](api/content.md) | 9 | 健康检查 / 作品 / 新闻 / 放映会 / 参与 rsvp |
-| [api/voting.md](api/voting.md) | 9 | 投票 / 配额 / 提名 / 提名广场（含投票完整流程） |
+| [api/content.md](api/content.md) | 10 | 健康检查 / 作品（featured + 分页列表） / 新闻 / 放映会 / 参与 rsvp |
+| [api/voting.md](api/voting.md) | 10 | 片库叠票 / 配额 / 提名 / 提名广场（轮次票保留给后台） |
 | [api/admin.md](api/admin.md) | 11 | 用户管理 / 提名池 / 排期 / 轮次 / 统计 |
 | [api/social.md](api/social.md) | 11 | 通知 / 收藏 / 日历 / 观影评分 / 年度回顾 / 商品 |
 | [api/me.md](api/me.md) | 4 | 个人资料 / 改密 / 我的活动 |
@@ -46,6 +46,7 @@
 | [lib/quota.md](lib/quota.md) | 周配额（quotaInfo/bump/unbump/QUOTA_LIMITS） |
 | [lib/users.md](lib/users.md) | mapUser / nextUserNo / insertUserRole |
 | [lib/pure.md](lib/pure.md) | 纯函数：周起始 / 年度称号 / 编号推导（有单测） |
+| [lib/catalog.md](lib/catalog.md) | 纯函数：首页 reel / 片库检索 / 周票 clamp（有单测） |
 | [lib/middleware.md](lib/middleware.md) | CORS / 安全头 / 统一错误处理 |
 | [lib/support.md](lib/support.md) | 支撑模块：auth（匿名身份+限流）/ tcapi / tmdb |
 

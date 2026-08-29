@@ -45,6 +45,7 @@ import {
   Clock,
   Star,
   CheckCircle2,
+  LogOut,
 } from 'lucide-react';
 
 export const ProfilePage: React.FC<{
@@ -228,7 +229,13 @@ export const ProfilePage: React.FC<{
                       <span className="ml-auto font-mono text-xs text-white/40 truncate max-w-[140px]">{profile.uid}</span>
                     </div>
                     <Separator />
-                    <Button variant="outline" className="w-full" onClick={doLogout}>退出登录</Button>
+                    <button
+                      onClick={doLogout}
+                      className="w-full py-2.5 rounded-full border border-white/20 hover:border-[#ff3650] hover:bg-[#ff3650]/10 text-white/70 hover:text-[#ff3650] font-black text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>退出登录</span>
+                    </button>
                   </CardContent>
                 </Card>
 
@@ -290,10 +297,17 @@ export const ProfilePage: React.FC<{
                         <p className="text-[11px] text-white/30">填写图片直链，留空则使用首字母头像</p>
                       </div>
 
-                      <div className="flex justify-end pt-2">
-                        <Button onClick={save} disabled={saving}>
-                          <Save className="w-4 h-4" /> {saving ? '保存中...' : '保存资料'}
-                        </Button>
+                      <div className="flex justify-end pt-3">
+                        <button
+                          onClick={save}
+                          disabled={saving}
+                          className="group/btn inline-flex items-center gap-2.5 bg-[#ff3650] hover:bg-[#ff203c] text-white font-extrabold text-xs px-6 py-2.5 rounded-full transition-all duration-200 cursor-pointer disabled:opacity-50 shadow-[0_4px_16px_rgba(255,54,80,0.35)]"
+                        >
+                          <span className="tracking-wider">{saving ? '保存中...' : '保存资料'}</span>
+                          <span className="w-5 h-5 rounded-full bg-white text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-0.5">
+                            <Save className="w-3 h-3 stroke-[2.5]" />
+                          </span>
+                        </button>
                       </div>
                     </TabsContent>
 
@@ -438,10 +452,17 @@ export const ProfilePage: React.FC<{
                         <Label className="text-white/60 uppercase text-xs font-black">确认新密码</Label>
                         <Input type="password" value={pwd.confirm} onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })} placeholder="再次输入新密码" />
                       </div>
-                      <div className="flex justify-end pt-2">
-                        <Button onClick={changePassword} disabled={changing}>
-                          <KeyRound className="w-4 h-4" /> {changing ? '提交中...' : '确认修改'}
-                        </Button>
+                      <div className="flex justify-end pt-3">
+                        <button
+                          onClick={changePassword}
+                          disabled={changing}
+                          className="group/btn inline-flex items-center gap-2.5 bg-[#ff3650] hover:bg-[#ff203c] text-white font-extrabold text-xs px-6 py-2.5 rounded-full transition-all duration-200 cursor-pointer disabled:opacity-50 shadow-[0_4px_16px_rgba(255,54,80,0.35)]"
+                        >
+                          <span className="tracking-wider">{changing ? '提交中...' : '确认修改'}</span>
+                          <span className="w-5 h-5 rounded-full bg-white text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-0.5">
+                            <KeyRound className="w-3 h-3 stroke-[2.5]" />
+                          </span>
+                        </button>
                       </div>
                     </TabsContent>
                   </Tabs>

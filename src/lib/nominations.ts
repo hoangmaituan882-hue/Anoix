@@ -10,6 +10,7 @@ async function authHeaders(): Promise<Record<string, string>> {
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const r = await fetch(`${API_BASE}${path}`, {
     ...init,
+    credentials: 'include',
     headers: { ...(await authHeaders()), ...(init.headers || {}) },
   });
   if (!r.ok) {
@@ -91,6 +92,23 @@ export const nominations = {
 
   plaza: (scope: 'week' | 'all' = 'week') =>
     request<{ items: PlazaItem[] }>(`/api/nominations/plaza?scope=${scope}`),
+
+  myVotes: () =>
+    request<{ items: { filmId: string; count: number }[] }>('/api/vote/mine'),
+
+  vote: (filmId: string, count?: number) =>
+    request<{ ok: boolean; count: number }>('/api/vote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(count != null ? { filmId, count } : { filmId }),
+    }),
+
+  unvote: (filmId: string) =>
+    request<{ ok: boolean; count: number }>('/api/vote', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filmId }),
+    }),
 
   activity: () =>
     request<{ nominations: NominationActivity[]; votes: VoteActivity[] }>('/api/me/activity'),

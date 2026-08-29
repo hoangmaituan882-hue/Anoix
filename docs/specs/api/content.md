@@ -2,21 +2,34 @@
 
 - 类型: 路由模块
 - 路径: `server/routes/content.js`
-- 依赖: `lib/config` `lib/db` `lib/identity` `auth`
+- 依赖: `lib/config` `lib/db` `lib/identity` `lib/catalog` `auth`
 
 ## 端点
 
 | 方法 | 路径 | 鉴权 | 限流 | 说明 |
 |---|---|---|---|---|
 | GET | /api/health | 无 | 无 | 健康检查，`{ok,env,db,time}`，db ∈ ok/disabled/degraded |
-| GET | /api/films | 无 | 无 | 全量作品（15s 缓存），`sort_order` 升序 |
-| GET | /api/films/:id | 无 | 无 | 单作品，无则 `null` |
+| GET | /api/films/featured | 无 | 无 | 首页 reel：已放过最多 12 张，按社内放映日；前两张 `isNew` |
+| GET | /api/films | 无 | 无 | 无查询参数时：全量（15s 缓存）。带 `q\|category\|sort\|limit` 时：分页 `{items,total,offset,limit}`，默认 `sort=screened_desc`，FilmCard 字段 |
+| GET | /api/films/:id | 无 | 无 | 单作品详情，无则 `null` |
 | GET | /api/news | 无 | 无 | 已发布动态（15s 缓存），按 pinned 置顶 |
 | GET | /api/screenings | 无 | 无 | 放映会列表，`screen_date` 降序 |
 | GET | /api/screenings/:id | 无 | 无 | 单场详情 + 关联 `films` |
 | GET | /api/rsvp/:screeningId | 可选 | 无 | `{rsvped, count}`（有身份时给出本人是否参与） |
 | POST | /api/rsvp/:screeningId | 必选 | rsvp 20/min | 参与（404 无此场次；409 幂等返回 ok） |
 | DELETE | /api/rsvp/:screeningId | 必选 | rsvp 20/min | 取消参与 |
+
+## 列表查询参数（`GET /api/films` 分页模式）
+
+| 参数 | 说明 |
+|---|---|
+| q | title / title_zh / title_en / director / year |
+| category | `all`（默认）/ `tv` / `movie` / `original` |
+| sort | `screened_desc`（默认）/ `year_desc` / `year_asc` |
+| limit | 1–48，默认 24 |
+| offset | 默认 0 |
+
+`/api/films/featured` 必须注册在 `/api/films/:id` 之前。
 
 ## 错误码
 
@@ -30,5 +43,6 @@
 
 ## 备注
 
-- films/news 走 `contentCache`（15s），admin 改库后最多 15s 延迟（无主动失效）。
+- 无查询参数的 films/news 走 `contentCache`（15s），admin 改库后最多 15s 延迟（无主动失效）。
+- 分页列表与 featured 每次现算社内放映日，不走 15s 全量缓存。
 - 匿名参与以签名 Cookie 身份写入 `rsvps.uid`。

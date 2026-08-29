@@ -12,6 +12,10 @@ import {
   ArrowRight,
   MapPin,
   X,
+  Clock,
+  Flame,
+  History,
+  Trash2,
 } from 'lucide-react';
 
 export interface CommandItem {
@@ -41,23 +45,72 @@ interface CommandPaletteProps {
   onClose: () => void;
   commands: CommandItem[];
   lang?: 'zh' | 'ja' | 'en';
+  onQueryChange?: (query: string) => void;
 }
 
 type FilterTab = 'all' | 'films' | 'screenings' | 'news';
 
+const RECENT_STORAGE_KEY = 'anoix_recent_searches';
+
+const TRENDING_CHIPS = [
+  '斩服少女',
+  '普罗米亚',
+  '边缘行者',
+  '迷宫饭',
+  '古立特宇宙',
+  '杜比全景声放映',
+];
+
+const getStoredRecents = (): string[] => {
+  try {
+    const raw = localStorage.getItem(RECENT_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveStoredRecent = (term: string) => {
+  try {
+    const trimmed = term.trim();
+    if (!trimmed) return;
+    const list = getStoredRecents().filter((s) => s.toLowerCase() !== trimmed.toLowerCase());
+    const next = [trimmed, ...list].slice(0, 5);
+    localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(next));
+  } catch {}
+};
+
+const removeStoredRecent = (term: string) => {
+  try {
+    const next = getStoredRecents().filter((s) => s !== term);
+    localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return [];
+  }
+};
+
 /**
- * Modern Raycast/Linear Spotlight Split-View Command Palette adhering to pure Chinese design system.
+ * Modern Raycast/Linear Spotlight Split-View Command Palette with Zero-State exploration and search history.
  */
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
   open,
   onClose,
   commands,
+  onQueryChange,
 }) => {
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [activeIndex, setActiveIndex] = useState(0);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const listContainerRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (open) {
+      setRecentSearches(getStoredRecents());
+    }
+  }, [open]);
 
   // Filter commands by search query and category tab
   const filtered = useMemo(() => {
@@ -90,6 +143,30 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     setActiveIndex(0);
   }, [query, activeTab]);
 
+  useEffect(() => {
+    onQueryChange?.(query);
+  }, [query, onQueryChange]);
+
+  const handleSelectCommand = (item: CommandItem) => {
+    saveStoredRecent(item.label);
+    item.action();
+    onClose();
+  };
+
+  const handleRemoveRecent = (e: React.MouseEvent, term: string) => {
+    e.stopPropagation();
+    const next = removeStoredRecent(term);
+    setRecentSearches(next);
+  };
+
+  const handleClearAllRecents = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      localStorage.removeItem(RECENT_STORAGE_KEY);
+      setRecentSearches([]);
+    } catch {}
+  };
+
   // Keyboard navigation
   useEffect(() => {
     if (!open) return;
@@ -113,8 +190,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         e.preventDefault();
         const item = filtered[activeIndex];
         if (item) {
-          item.action();
-          onClose();
+          handleSelectCommand(item);
         }
       }
     };
@@ -233,62 +309,122 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               {/* Left Column: Result List */}
               <div
                 ref={listContainerRef}
-                className="md:col-span-7 overflow-y-auto p-2 divide-y divide-white/5 max-h-[50vh] md:max-h-none border-b md:border-b-0 md:border-r border-white/10"
+                className="md:col-span-7 overflow-y-auto divide-y divide-white/5 max-h-[50vh] md:max-h-none border-b md:border-b-0 md:border-r border-white/10"
               >
-                {filtered.length === 0 ? (
-                  <div className="py-14 text-center">
-                    <Search className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                    <p className="text-[16px] font-bold text-white/60">
-                      未找到相关结果
-                    </p>
-                    <p className="text-[14px] text-white/40 mt-1 leading-[1.55]">
-                      尝试搜索“边缘行者”、“普罗米亚”或“天元突破”
-                    </p>
+                {/* Zero-State: Recent Searches & Trending Chips when query is empty */}
+                {!query.trim() && activeTab === 'all' && (
+                  <div className="p-3 space-y-3.5 bg-black/20 border-b border-white/10">
+                    {/* Recent Searches */}
+                    {recentSearches.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between text-xs font-black text-white/50 mb-2">
+                          <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                            <History className="w-3.5 h-3.5 text-[#ff3650]" /> 最近搜索
+                          </span>
+                          <button
+                            onClick={handleClearAllRecents}
+                            className="text-[11px] font-bold text-white/40 hover:text-[#ff3650] transition-colors cursor-pointer flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3 h-3" /> 清空
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {recentSearches.map((term) => (
+                            <button
+                              key={term}
+                              onClick={() => setQuery(term)}
+                              className="group inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-xs font-bold text-white/80 hover:text-white transition-colors cursor-pointer"
+                            >
+                              <Clock className="w-3 h-3 text-white/40" />
+                              <span>{term}</span>
+                              <span
+                                onClick={(e) => handleRemoveRecent(e, term)}
+                                className="w-3.5 h-3.5 rounded-full hover:bg-[#ff3650] hover:text-white flex items-center justify-center text-white/40 ml-0.5"
+                                title="移除"
+                              >
+                                <X className="w-2.5 h-2.5" />
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Trending Chips */}
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs font-black text-white/50 mb-2 uppercase tracking-wider text-[11px]">
+                        <Flame className="w-3.5 h-3.5 text-[#ff3650]" /> 热门神作快捷检索
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {TRENDING_CHIPS.map((chip) => (
+                          <button
+                            key={chip}
+                            onClick={() => setQuery(chip)}
+                            className="group inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/5 hover:bg-[#ff3650] border border-white/10 hover:border-[#ff3650] text-xs font-bold text-white/80 hover:text-white transition-all cursor-pointer shadow-xs"
+                          >
+                            <span className="text-[#ff3650] group-hover:text-white font-mono font-bold">#</span>
+                            <span>{chip}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  filtered.map((item, i) => {
-                    const isSelected = i === activeIndex;
-                    return (
-                      <div
-                        key={item.id}
-                        data-index={i}
-                        onClick={() => {
-                          item.action();
-                          onClose();
-                        }}
-                        onMouseEnter={() => setActiveIndex(i)}
-                        className={`group flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#ff3650]/15 text-white border border-[#ff3650]/40 shadow-xs'
-                            : 'hover:bg-white/5 text-white/75 border border-transparent'
-                        }`}
-                      >
+                )}
+
+                {/* Filtered list items */}
+                <div className="p-2 space-y-1">
+                  {filtered.length === 0 ? (
+                    <div className="py-14 text-center">
+                      <Search className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                      <p className="text-[16px] font-bold text-white/60">
+                        未找到相关结果
+                      </p>
+                      <p className="text-[14px] text-white/40 mt-1 leading-[1.55]">
+                        尝试搜索“边缘行者”、“普罗米亚”或“斩服少女”
+                      </p>
+                    </div>
+                  ) : (
+                    filtered.map((item, i) => {
+                      const isSelected = i === activeIndex;
+                      return (
                         <div
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                          key={item.id}
+                          data-index={i}
+                          onClick={() => handleSelectCommand(item)}
+                          onMouseEnter={() => setActiveIndex(i)}
+                          className={`group flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer ${
                             isSelected
-                              ? 'bg-[#ff3650] text-white'
-                              : 'bg-white/5 text-white/60 group-hover:text-white'
+                              ? 'bg-[#ff3650]/15 text-white border border-[#ff3650]/40 shadow-xs'
+                              : 'hover:bg-white/5 text-white/75 border border-transparent'
                           }`}
                         >
-                          {item.icon}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[14px] font-bold truncate text-white leading-snug">
-                            {item.label}
-                          </p>
-                          {item.hint && (
-                            <p className="text-[12px] text-white/45 truncate mt-0.5 font-normal">
-                              {item.hint}
+                          <div
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                              isSelected
+                                ? 'bg-[#ff3650] text-white'
+                                : 'bg-white/5 text-white/60 group-hover:text-white'
+                            }`}
+                          >
+                            {item.icon}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[14px] font-bold truncate text-white leading-snug">
+                              {item.label}
                             </p>
+                            {item.hint && (
+                              <p className="text-[12px] text-white/45 truncate mt-0.5 font-normal">
+                                {item.hint}
+                              </p>
+                            )}
+                          </div>
+                          {isSelected && (
+                            <CornerDownLeft className="w-4 h-4 text-[#ff3650] shrink-0" />
                           )}
                         </div>
-                        {isSelected && (
-                          <CornerDownLeft className="w-4 h-4 text-[#ff3650] shrink-0" />
-                        )}
-                      </div>
-                    );
-                  })
-                )}
+                      );
+                    })
+                  )}
+                </div>
               </div>
 
               {/* Right Column: Split-View Live Preview Pane */}
@@ -304,11 +440,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        {activeItem.preview.metaBadge && (
-                          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 text-[10px] font-bold bg-[#ff3650] text-white rounded-md">
-                            {activeItem.preview.metaBadge}
-                          </span>
-                        )}
+                        <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase bg-[#ff3650] text-white rounded-full shadow-sm">
+                          {activeItem.preview.metaBadge || (!query.trim() ? '今日精选推荐' : '即时档案')}
+                        </span>
                       </div>
                     )}
 
@@ -368,17 +502,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   </div>
                 )}
 
-                {/* Primary Action Button: 16px Bold */}
+                {/* Primary Action Button: Standard Brutalist Capsule CTA */}
                 {activeItem && (
                   <button
-                    onClick={() => {
-                      activeItem.action();
-                      onClose();
-                    }}
-                    className="w-full mt-4 py-2.5 rounded-xl bg-[#ff3650] hover:bg-[#ff1f3d] text-white text-[16px] font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                    onClick={() => handleSelectCommand(activeItem)}
+                    className="group/cta w-full mt-4 py-2.5 rounded-full bg-[#ff3650] hover:bg-[#ff203c] text-white text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-[0_4px_20px_rgba(255,54,80,0.35)] shrink-0"
                   >
-                    <span>查看详情</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>查看详情档案</span>
+                    <span className="w-5 h-5 rounded-full bg-white text-[#ff3650] flex items-center justify-center transition-transform group-hover/cta:translate-x-0.5">
+                      <ArrowRight className="w-3 h-3 stroke-[3]" />
+                    </span>
                   </button>
                 )}
               </div>

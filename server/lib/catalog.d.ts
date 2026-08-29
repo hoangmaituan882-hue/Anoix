@@ -1,0 +1,15 @@
+export function shanghaiDateString(now?: number): string;
+export function latestPastClubDate(dates: string[] | null | undefined, today: string): string | null;
+export function filmVoteGate(dates: string[] | null | undefined, today: string): 'open' | 'frozen' | 'screened';
+export function clubIndexByFilm(screenings: unknown[]): Map<string, { dates: string[]; order: Map<string, number> }>;
+export function rankFeatured<T extends { id: string }>(films: T[], screenings: unknown[], today: string): Array<T & { isNew: boolean; screeningDate: string }>;
+export function yearNum(str: string | null | undefined): number;
+export function sortScreenedDesc<T extends { id: string; year?: string }>(films: T[], latestById: Record<string, string | null>): T[];
+export function matchFilmQuery(film: Record<string, unknown>, q: string): boolean;
+export function matchFilmCategory(film: Record<string, unknown>, category: string): boolean;
+export function paginate<T>(items: T[] | null | undefined, offset: number, limit: number): { items: T[]; total: number; offset: number; limit: number };
+export function clampAddVotes(requested: number | null | undefined, remaining: number): { ok: true; count: number } | { ok: false; error: string };
+export function placeFilmOnNight<T extends { screen_date?: string; film_ids?: string[] | null }>(screenings: T[], filmId: string, date: string, insertIndex?: number): T[];
+export function moveFilmBetweenNights<T extends { screen_date?: string; film_ids?: string[] | null }>(screenings: T[], filmId: string, fromDate: string | null, toDate: string, insertIndex?: number): T[];
+export function reorderNight<T extends { screen_date?: string; film_ids?: string[] | null }>(screenings: T[], date: string, orderedIds: string[]): T[];
+export function filmScheduleFields(dates: string[] | null | undefined, today: string): { screening_date: string | null; screening_status: 'screened' | 'scheduled' | 'unscheduled' };

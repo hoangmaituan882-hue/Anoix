@@ -3,6 +3,20 @@ import { ENV_ID, dbEnabled } from '../lib/config.js';
 import { getAdminToken, pgGet, pgWrite, contentCache } from '../lib/db.js';
 import { resolveIdentity } from '../lib/identity.js';
 import { allowRate, clientIp } from '../auth.js';
+import {
+  shanghaiDateString,
+  clubIndexByFilm,
+  latestPastClubDate,
+  rankFeatured,
+  sortScreenedDesc,
+  matchFilmQuery,
+  matchFilmCategory,
+  paginate,
+  yearNum,
+} from '../lib/catalog.js';
+
+const FILM_CARD =
+  'id,title,title_zh,title_en,year,category,image,director,screening_date,screening_status';
 
 /**
  * Public content + screening participation: health, films, news, screenings, rsvp.
@@ -16,12 +30,53 @@ export function contentRoutes(app) {
     res.json({ ok: true, env: ENV_ID, db, time: new Date().toISOString() });
   });
 
-  app.get('/api/films', asyncHandler(async (_req, res) => {
-    const cached = contentCache.get('films');
-    if (cached) return res.json(cached);
-    const rows = await pgGet('/films?select=*&order=sort_order.asc');
-    contentCache.set('films', rows ?? []);
-    res.json(rows ?? []);
+  app.get('/api/films/featured', asyncHandler(async (_req, res) => {
+    const [films, screenings] = await Promise.all([
+      pgGet(`/films?select=${FILM_CARD}`),
+      pgGet('/screenings?select=screen_date,film_ids'),
+    ]);
+    res.json(rankFeatured(films ?? [], screenings ?? [], shanghaiDateString()));
+  }));
+
+  app.get('/api/films', asyncHandler(async (req, res) => {
+    const hasPage = req.query.limit != null || req.query.q || req.query.category || req.query.sort;
+    if (!hasPage) {
+      const cached = contentCache.get('films');
+      if (cached) return res.json(cached);
+      const rows = await pgGet('/films?select=*&order=sort_order.asc');
+      contentCache.set('films', rows ?? []);
+      return res.json(rows ?? []);
+    }
+
+    const q = String(req.query.q || '');
+    const category = String(req.query.category || 'all');
+    const sort = String(req.query.sort || 'screened_desc');
+    const limit = Math.min(48, Math.max(1, Number(req.query.limit) || 24));
+    const offset = Math.max(0, Number(req.query.offset) || 0);
+
+    const [films, screenings] = await Promise.all([
+      pgGet(`/films?select=${FILM_CARD}`),
+      pgGet('/screenings?select=screen_date,film_ids'),
+    ]);
+    const today = shanghaiDateString();
+    const index = clubIndexByFilm(screenings ?? []);
+    const latest = {};
+    for (const f of films ?? []) {
+      const rec = index.get(f.id);
+      const past = rec ? latestPastClubDate(rec.dates, today) : null;
+      if (past) latest[f.id] = past;
+    }
+
+    let list = (films ?? []).filter((f) => matchFilmQuery(f, q) && matchFilmCategory(f, category));
+    if (sort === 'year_asc') list.sort((a, b) => yearNum(a.year) - yearNum(b.year));
+    else if (sort === 'year_desc') list.sort((a, b) => yearNum(b.year) - yearNum(a.year));
+    else list = sortScreenedDesc(list, latest);
+
+    const newIds = new Set(
+      rankFeatured(films ?? [], screenings ?? [], today).slice(0, 2).map((f) => f.id),
+    );
+    const cards = list.map((f) => ({ ...f, isNew: newIds.has(f.id) }));
+    res.json(paginate(cards, offset, limit));
   }));
 
   app.get('/api/films/:id', asyncHandler(async (req, res) => {

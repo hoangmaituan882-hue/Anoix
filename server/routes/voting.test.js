@@ -14,14 +14,21 @@ const st = {
   round: { id: 'r1', status: 'voting', deadline: null },
   option: { id: 1, round_id: 'r1' },
   pgWriteStatus: 200,                   // what pgWrite returns as [status]
+  film: { id: 'f1', screening_date: null },
+  screenings: [],
+  weekVotes: [],
 };
 
 mock.module('../lib/db.js', {
   namedExports: {
     pgGet: mock.fn(async (path) => {
-      if (String(path).includes('nomination_rounds')) return st.round ? [st.round] : [];
-      if (String(path).includes('nomination_options')) return st.option ? [st.option] : [];
-      if (String(path).includes('votes')) return st.round ? [] : [];
+      const p = String(path);
+      if (p.includes('film_week_votes')) return st.weekVotes ?? [];
+      if (p.includes('nomination_rounds')) return st.round ? [st.round] : [];
+      if (p.includes('nomination_options')) return st.option ? [st.option] : [];
+      if (p.includes('/votes')) return st.round ? [] : [];
+      if (p.includes('/films')) return st.film ? [st.film] : [];
+      if (p.includes('screenings')) return st.screenings ?? [];
       return [];
     }),
     pgWrite: mock.fn(async () => [st.pgWriteStatus, {}]),
@@ -134,5 +141,43 @@ test('GET /api/nominations: empty → 200', async () => {
     const r = await fetch(`${base}/api/nominations`).then(async (x) => ({ status: x.status, body: await x.json() }));
     assert.equal(r.status, 200);
     assert.ok(Array.isArray(r.body));
+  });
+});
+
+test('POST /api/vote filmId: stacks +1 → 200', async () => {
+  st.identity = { identityId: 'u1', kind: 'user' };
+  st.quota.remainingVotes = 6;
+  st.film = { id: 'f1', screening_date: null };
+  st.screenings = [];
+  st.weekVotes = [];
+  st.pgWriteStatus = 200;
+  await withServer(async (base) => {
+    const r = await postVote(base, { filmId: 'f1' });
+    assert.equal(r.status, 200);
+    assert.deepEqual(r.body, { ok: true, count: 1 });
+  });
+});
+
+test('POST /api/vote filmId: already screened → 409', async () => {
+  st.identity = { identityId: 'u1', kind: 'user' };
+  st.quota.remainingVotes = 6;
+  st.film = { id: 'f1', screening_date: null };
+  st.screenings = [{ screen_date: '2020-01-01', film_ids: ['f1'] }];
+  await withServer(async (base) => {
+    const r = await postVote(base, { filmId: 'f1' });
+    assert.equal(r.status, 409);
+    assert.equal(r.body.error, 'already_screened');
+  });
+});
+
+test('POST /api/vote filmId: missing film → 404', async () => {
+  st.identity = { identityId: 'u1', kind: 'user' };
+  st.quota.remainingVotes = 6;
+  st.film = null;
+  st.screenings = [];
+  await withServer(async (base) => {
+    const r = await postVote(base, { filmId: 'nope' });
+    assert.equal(r.status, 404);
+    assert.equal(r.body.error, 'film_not_found');
   });
 });

@@ -38,7 +38,8 @@ export async function quotaInfo(identityId, kind) {
   }
 }
 
-export async function bumpQuota(identityId, type) {
+export async function bumpQuota(identityId, type, n = 1) {
+  const add = Math.max(1, Number(n) || 1);
   const ws = weekStartDateString();
   const rows = await pgGet(
     `/user_quota?identity_id=eq.${encodeURIComponent(identityId)}&week_start=eq.${ws}&select=nominations_used,votes_used&limit=1`,
@@ -46,33 +47,34 @@ export async function bumpQuota(identityId, type) {
   if (rows?.length) {
     const r = rows[0];
     const body = type === 'nomination'
-      ? { nominations_used: (r.nominations_used ?? 0) + 1 }
-      : { votes_used: (r.votes_used ?? 0) + 1 };
+      ? { nominations_used: (r.nominations_used ?? 0) + add }
+      : { votes_used: (r.votes_used ?? 0) + add };
     await pgWrite('PATCH', `/user_quota?identity_id=eq.${encodeURIComponent(identityId)}&week_start=eq.${ws}`, body);
   } else {
     await pgWrite('POST', '/user_quota', {
       identity_id: identityId,
       week_start: ws,
-      nominations_used: type === 'nomination' ? 1 : 0,
-      votes_used: type === 'vote' ? 1 : 0,
+      nominations_used: type === 'nomination' ? add : 0,
+      votes_used: type === 'vote' ? add : 0,
     });
   }
 }
 
-export async function unbumpQuota(identityId, type) {
+export async function unbumpQuota(identityId, type, n = 1) {
+  const sub = Math.max(1, Number(n) || 1);
   const ws = weekStartDateString();
   const rows = await pgGet(
     `/user_quota?identity_id=eq.${encodeURIComponent(identityId)}&week_start=eq.${ws}&select=nominations_used,votes_used&limit=1`,
   );
-  if (!rows?.length) return; // no row → nothing to decrement
+  if (!rows?.length) return;
   const r = rows[0];
   if (type === 'vote') {
     await pgWrite('PATCH', `/user_quota?identity_id=eq.${encodeURIComponent(identityId)}&week_start=eq.${ws}`, {
-      votes_used: Math.max(0, (r.votes_used ?? 0) - 1),
+      votes_used: Math.max(0, (r.votes_used ?? 0) - sub),
     });
   } else {
     await pgWrite('PATCH', `/user_quota?identity_id=eq.${encodeURIComponent(identityId)}&week_start=eq.${ws}`, {
-      nominations_used: Math.max(0, (r.nominations_used ?? 0) - 1),
+      nominations_used: Math.max(0, (r.nominations_used ?? 0) - sub),
     });
   }
 }

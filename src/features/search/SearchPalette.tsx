@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Film, Newspaper, CalendarDays, Sparkles, Navigation } from 'lucide-react';
 import { repository, useRepo } from '../../lib/repository';
+import { catalog } from '../../lib/catalog';
 import { openFilmPreview } from '../../lib/filmPreview';
 import { SCREENINGS_DATA } from '../../data/screeningData';
 import { CommandPalette, CommandItem } from '../../components/ui/CommandPalette';
 import { Screening } from '../../types/screening';
+import { WorkItem } from '../../types';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
 
@@ -22,10 +24,15 @@ export function openSearch() {
 /** Global ⌘K search: works + news + screenings + quick actions with pure Chinese live preview. */
 export const SearchPalette: React.FC = () => {
   const navigate = useNavigate();
-  const films = useRepo(repository.films);
   const news = useRepo(repository.news);
   const [screenings, setScreenings] = useState<Screening[]>(SCREENINGS_DATA);
   const [open, setOpen] = useState(false);
+  const [filmHits, setFilmHits] = useState<WorkItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const onQueryChange = useCallback((q: string) => {
+    setSearchQuery(q);
+  }, []);
 
   useEffect(() => {
     const handleOpen = () => setOpen(true);
@@ -66,20 +73,41 @@ export const SearchPalette: React.FC = () => {
       .catch(() => setScreenings(SCREENINGS_DATA));
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    const timer = setTimeout(() => {
+      catalog
+        .list({ q: searchQuery, limit: 8, offset: 0 })
+        .then((page) => {
+          if (alive) setFilmHits(page.items);
+        })
+        .catch(() => {
+          if (alive) setFilmHits([]);
+        });
+    }, searchQuery.trim() ? 300 : 0);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [open, searchQuery]);
+
   const commands: CommandItem[] = useMemo(() => {
     const cmds: CommandItem[] = [];
 
-    // 1. Films (动画作品)
-    for (const f of films) {
+    // 1. Films (动画作品) — server-ranked, max 8
+    for (const f of filmHits) {
       const title = f.titleZh ?? f.title;
       cmds.push({
         id: `film-${f.id}`,
         category: 'films',
         label: title,
         labelEn: f.title,
-        hint: `动画作品 · ${f.year || 'TRIGGER'} · 导演: ${f.director || 'TRIGGER 制作团队'}`,
+        hint: `动画作品 · ${f.year || ''} · 导演: ${f.director || ''}`,
         icon: <Film className="w-4 h-4 text-[#ff3650]" />,
-        action: () => openFilmPreview(f),
+        action: () => {
+          void catalog.get(f.id).then((full) => openFilmPreview(full ?? f)).catch(() => openFilmPreview(f));
+        },
         preview: {
           type: 'film',
           image: f.landscapeImage || f.image,
@@ -175,7 +203,7 @@ export const SearchPalette: React.FC = () => {
     }
 
     return cmds;
-  }, [films, news, screenings, navigate]);
+  }, [filmHits, news, screenings, navigate]);
 
-  return <CommandPalette open={open} onClose={() => setOpen(false)} commands={commands} />;
+  return <CommandPalette open={open} onClose={() => setOpen(false)} commands={commands} onQueryChange={onQueryChange} />;
 };

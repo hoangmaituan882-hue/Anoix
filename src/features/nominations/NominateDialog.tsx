@@ -1,13 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { repository, useRepo } from '../../lib/repository';
+import React, { useEffect, useState } from 'react';
+import { catalog } from '../../lib/catalog';
 import { nominations, TmdbNominationPayload } from '../../lib/nominations';
 import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
-import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
-import { Badge } from '../../components/ui/badge';
 import { useToast } from '../../components/ui/Toast';
 import { Search, X, Clapperboard, Film, Star, Plus } from 'lucide-react';
 
@@ -30,7 +28,6 @@ export const NominateDialog: React.FC<{
   onSubmitted: () => void;
   initialFilmId?: string | null;
 }> = ({ roundTitle, open, onClose, onSubmitted, initialFilmId }) => {
-  const films = useRepo(repository.films);
   const { success, error: toastError } = useToast();
 
   const [tab, setTab] = useState<'library' | 'tmdb'>('library');
@@ -38,6 +35,8 @@ export const NominateDialog: React.FC<{
   const [busy, setBusy] = useState(false);
 
   const [libQuery, setLibQuery] = useState('');
+  const [libFilms, setLibFilms] = useState<WorkItem[]>([]);
+  const [libLoading, setLibLoading] = useState(false);
   const [selectedFilm, setSelectedFilm] = useState<WorkItem | null>(null);
 
   const [tmdbQuery, setTmdbQuery] = useState('');
@@ -51,14 +50,36 @@ export const NominateDialog: React.FC<{
       setNote(''); setSelectedTmdb(null);
       setLibQuery(''); setTmdbQuery(''); setTmdbResults([]);
       if (initialFilmId) {
-        const f = films.find((x) => x.id === initialFilmId);
-        setSelectedFilm(f ?? null);
-        setTab(f ? 'library' : 'tmdb');
+        setTab('library');
+        catalog.get(initialFilmId).then((f) => setSelectedFilm(f)).catch(() => setSelectedFilm(null));
       } else {
         setSelectedFilm(null);
       }
     }
-  }, [open, initialFilmId, films]);
+  }, [open, initialFilmId]);
+
+  useEffect(() => {
+    if (!open || tab !== 'library') return;
+    let alive = true;
+    const timer = setTimeout(() => {
+      setLibLoading(true);
+      catalog
+        .list({ q: libQuery, limit: 20, offset: 0 })
+        .then((page) => {
+          if (alive) setLibFilms(page.items);
+        })
+        .catch(() => {
+          if (alive) setLibFilms([]);
+        })
+        .finally(() => {
+          if (alive) setLibLoading(false);
+        });
+    }, libQuery.trim() ? 300 : 0);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [open, tab, libQuery]);
 
   // TMDB search (debounced)
   useEffect(() => {
@@ -74,12 +95,6 @@ export const NominateDialog: React.FC<{
     }, 450);
     return () => { alive = false; clearTimeout(t); };
   }, [open, tab, tmdbQuery]);
-
-  const filteredFilms = useMemo(() => {
-    const q = libQuery.trim().toLowerCase();
-    if (!q) return films.slice(0, 30);
-    return films.filter((f) => [f.title, f.titleZh, f.titleEn, f.year].some((v) => v && String(v).toLowerCase().includes(q))).slice(0, 30);
-  }, [films, libQuery]);
 
   const canSubmit = Boolean(selectedFilm || selectedTmdb) && note.trim().length > 0;
 
@@ -145,7 +160,12 @@ export const NominateDialog: React.FC<{
                 <Input value={libQuery} onChange={(e) => setLibQuery(e.target.value)} placeholder="搜索片库..." className="pl-9" />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-64 overflow-y-auto">
-                {filteredFilms.map((f) => (
+                {libLoading && libFilms.length === 0 ? (
+                  <div className="col-span-full py-8 flex justify-center">
+                    <Loader variant="dots" size={24} label="加载片库" className="text-[#ff3650]" />
+                  </div>
+                ) : (
+                  libFilms.map((f) => (
                   <button
                     key={f.id}
                     type="button"
@@ -157,7 +177,8 @@ export const NominateDialog: React.FC<{
                     </div>
                     <p className="p-1.5 text-xs font-bold truncate">{f.titleZh ?? f.title}</p>
                   </button>
-                ))}
+                  ))
+                )}
               </div>
               {selectedFilm && <p className="text-xs text-[#e0fe3d] font-bold">已选：{selectedFilm.titleZh ?? selectedFilm.title}</p>}
             </TabsContent>
@@ -207,11 +228,24 @@ export const NominateDialog: React.FC<{
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-white/10 shrink-0">
-          <Button type="button" variant="outline" onClick={onClose}>取消</Button>
-          <Button onClick={submit} disabled={!canSubmit || busy}>
-            <Plus className="w-4 h-4" /> {busy ? '提交中...' : '提交提名'}
-          </Button>
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 rounded-full border border-white/20 hover:border-white/40 text-white/70 hover:text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+          >
+            取消
+          </button>
+          <button
+            onClick={submit}
+            disabled={!canSubmit || busy}
+            className="group/btn inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] disabled:opacity-40 text-white font-extrabold text-xs px-6 py-2.5 rounded-full transition-all duration-200 cursor-pointer shadow-[0_4px_16px_rgba(255,54,80,0.35)]"
+          >
+            <span className="tracking-wider">{busy ? '提交中...' : '提交提名'}</span>
+            <span className="w-5 h-5 rounded-full bg-white text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-0.5">
+              <Plus className="w-3 h-3 stroke-[3]" />
+            </span>
+          </button>
         </div>
       </div>
     </div>

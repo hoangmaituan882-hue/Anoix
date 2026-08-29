@@ -99,14 +99,24 @@ export const ScreeningDetailPage: React.FC<{
                     </p>
                   </div>
                 </div>
-                <motion.button
+                <button
                   onClick={toggle}
                   disabled={busy}
-                  whileTap={{ scale: 0.96 }}
-                  className={`sm:ml-auto inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-sm transition-all cursor-pointer disabled:opacity-50 shadow-lg ${rsvped ? 'bg-[#e0fe3d] text-[#121212] hover:bg-[#c9e42c]' : 'bg-[#ff3650] text-white hover:bg-[#ff203c] shadow-[0_8px_24px_rgba(255,54,80,0.35)]'}`}
+                  className={`group/btn sm:ml-auto inline-flex items-center gap-3 px-7 py-3 rounded-full font-black text-sm uppercase tracking-wider transition-all duration-200 cursor-pointer disabled:opacity-50 shadow-lg ${
+                    rsvped
+                      ? 'bg-[#e0fe3d] text-[#121212] hover:bg-white shadow-[0_4px_20px_rgba(224,254,61,0.3)]'
+                      : 'bg-[#ff3650] text-white hover:bg-[#ff203c] shadow-[0_8px_24px_rgba(255,54,80,0.35)]'
+                  }`}
                 >
-                  {rsvped ? <><Check className="w-5 h-5" strokeWidth={3} /> 已参与</> : <><Ticket className="w-5 h-5" /> 我要参与</>}
-                </motion.button>
+                  <span className="font-extrabold tracking-wider">{rsvped ? '已参与' : '我要参与'}</span>
+                  <span
+                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform group-hover/btn:translate-x-0.5 ${
+                      rsvped ? 'bg-[#121212] text-[#e0fe3d]' : 'bg-white text-[#ff3650]'
+                    }`}
+                  >
+                    {rsvped ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Ticket className="w-3.5 h-3.5" />}
+                  </span>
+                </button>
               </div>
 
               {/* Film list */}

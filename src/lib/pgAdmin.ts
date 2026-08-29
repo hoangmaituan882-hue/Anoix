@@ -72,6 +72,8 @@ export interface FilmRow {
   official_url: string | null;
   trailer_url: string | null;
   is_new: boolean | null;
+  screening_date?: string | null;
+  screening_status?: string | null;
   sort_order: number;
 }
 

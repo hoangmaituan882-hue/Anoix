@@ -1,6 +1,6 @@
 # Spec: 数据库 Schema
 
-> 来源：`migrations/*.sql`（已全部应用）。共 14 张表。RLS 默认启用；服务端写操作走 admin token 绕开 RLS。
+> 来源：`migrations/*.sql`（已全部应用）。共 15 张表。RLS 默认启用；服务端写操作走 admin token 绕开 RLS。
 
 ## 内容类
 
@@ -125,6 +125,20 @@ RLS：公开读 `goods_public_read`；admin 写。种子 5 件淘宝 TOP5 已入
 | created_at | — |
 
 索引：status、nominee_identity_id。RLS：公开读 / admin 写。
+
+### `film_week_votes` — 按周叠票（片，不是轮次选项）
+
+用途：同一身份同一自然周对同一部片只一行，`count` 可叠到周配额上限。终身票数 = `SUM(count)`（视图 `film_vote_counts`）。
+
+| 列 | 类型 | 说明 |
+|---|---|---|
+| identity_id | text | uid 或匿名 cookie |
+| film_id | text | films.id |
+| week_start | date | 周一（Asia/Shanghai） |
+| count | integer | `> 0` |
+| updated_at | timestamptz | |
+
+主键：`(identity_id, film_id, week_start)`。RLS：admin 全开；服务端写走 admin token。
 
 ### `user_quota` — 周配额
 
