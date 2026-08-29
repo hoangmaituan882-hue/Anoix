@@ -10,7 +10,6 @@ import { DynamicContextMenu } from '../components/ui/DynamicContextMenu';
 import { HomePage } from './pages/HomePage';
 import { FilmDetailPage } from './pages/FilmDetailPage';
 import { ScreeningsPage } from './pages/ScreeningsPage';
-import { HistoryPage } from './pages/HistoryPage';
 import { NominationsPage } from './pages/NominationsPage';
 import { AdminPage } from './pages/AdminPage';
 import { AuthPage } from './pages/AuthPage';
@@ -171,12 +170,6 @@ const AppShell: React.FC = () => {
             }
           />
           <Route
-            path="/history"
-            element={
-              <HistoryPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
-            }
-          />
-          <Route
             path="/nominations"
             element={
               <NominationsPage lang={lang} setLang={setLang} onOpenModal={handleOpenModal} />
@@ -195,6 +188,7 @@ const AppShell: React.FC = () => {
           />
           {/* Legacy plaza URL → merged nominations page */}
           <Route path="/plaza" element={<Navigate to="/nominations" replace />} />
+          <Route path="/history" element={<Navigate to="/" replace />} />
           {/* Calendar (future live schedule) */}
           <Route
             path="/calendar"

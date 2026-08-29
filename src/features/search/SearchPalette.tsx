@@ -176,7 +176,6 @@ export const SearchPalette: React.FC = () => {
     // 4. Quick Navigation (快捷直达)
     const routes = [
       { path: '/screenings', label: '放映档案库', hint: '浏览特设海报与纪念票根', icon: CalendarDays },
-      { path: '/history', label: '历史编年史', hint: '查看 15 年创作历史与监督系谱', icon: Sparkles },
       { path: '/nominations', label: '选片与投票中心', hint: '参与社区公投决定下一场放映', icon: Sparkles },
       { path: '/calendar', label: '活动与放映日历', hint: '排期日历与直播同好会', icon: CalendarDays },
       { path: '/credentials', label: '我的放映资历', hint: '查看观影履历与通行证徽章', icon: Navigation },

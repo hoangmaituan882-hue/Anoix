@@ -132,13 +132,6 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               放映档案
             </button>
             <button
-              id="nav-history"
-              onClick={() => { setMobileMenuOpen(false); navigate('/history', { viewTransition: true }); }}
-              className={pillItem}
-            >
-              历史编年
-            </button>
-            <button
               id="nav-nominations"
               onClick={() => { setMobileMenuOpen(false); navigate('/nominations', { viewTransition: true }); }}
               className={pillItem}
@@ -282,9 +275,6 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             </button>
             <button onClick={() => { setMobileMenuOpen(false); navigate('/screenings', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">
               放映档案
-            </button>
-            <button onClick={() => { setMobileMenuOpen(false); navigate('/history', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">
-              历史编年
             </button>
             <button onClick={() => { setMobileMenuOpen(false); navigate('/nominations', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">
               选片投票
