@@ -13,7 +13,7 @@ import { catalog } from '../../lib/catalog';
 import { me, EMPTY_ME_STATS, MeStats } from '../../lib/me';
 import { uniqueFilmIds, buildCoverflowSlides } from '../../lib/credentialsCatalog.js';
 import { UserClubStats } from '../../features/credentials/UserClubStats';
-import { Language } from '../../types';
+import { Language, OpenSiteModal } from '../../types';
 import {
   Share2,
   Plus,
@@ -36,31 +36,12 @@ interface BoardItem {
 
 const INITIAL_BOARDS: BoardItem[] = [];
 
-const SHARED_BOARDS: BoardItem[] = [
-  {
-    id: 'shared-1',
-    title: 'TRIGGER 放映会社区公开展台 2026',
-    tag: '官方联名',
-    underImage: '/assets/riffle/image-004.webp',
-    coverImage: '/assets/riffle/image-005.webp',
-    timeAgo: '社区主理人 2 天前分享',
-    isShared: true,
-  },
-  {
-    id: 'shared-2',
-    title: '今石洋之监督名作典藏原声连奏',
-    tag: '精选合集',
-    underImage: '/assets/riffle/image-006.webp',
-    coverImage: '/assets/riffle/image-007.webp',
-    timeAgo: '放映组 5 天前分享',
-    isShared: true,
-  },
-];
+const SHARED_BOARDS: BoardItem[] = [];
 
 interface CredentialsPageProps {
   lang: Language;
   setLang: (l: Language) => void;
-  onOpenModal: (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (modalName: OpenSiteModal) => void;
   onPlayTrailer?: (url: string) => void;
 }
 

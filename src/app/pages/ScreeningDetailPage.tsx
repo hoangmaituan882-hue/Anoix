@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Language } from '../../types';
+import { Language, OpenSiteModal } from '../../types';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { community, ScreeningDetail } from '../../lib/community';
 import { Header } from '../../components/layout/Header';
@@ -20,26 +20,33 @@ const fmt = (iso: string) => {
 export const ScreeningDetailPage: React.FC<{
   lang: Language;
   setLang: (l: Language) => void;
-  onOpenModal: (m: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (m: OpenSiteModal) => void;
 }> = ({ lang, setLang, onOpenModal }) => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { success, error: toastError } = useToast();
 
   const [s, setS] = useState<ScreeningDetail | null>(null);
+  const [missing, setMissing] = useState(false);
   const [rsvped, setRsvped] = useState(false);
   const [count, setCount] = useState(0);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setMissing(true);
+      setS(null);
+      return;
+    }
     let alive = true;
+    setMissing(false);
+    setS(null);
     Promise.all([community.screening(id), community.rsvp(id)])
       .then(([d, r]) => {
         if (!alive) return;
         setS(d); setRsvped(r.rsvped); setCount(r.count);
       })
-      .catch(() => { if (alive) setS(null); });
+      .catch(() => { if (alive) { setS(null); setMissing(true); } });
     return () => { alive = false; };
   }, [id]);
 
@@ -73,7 +80,18 @@ export const ScreeningDetailPage: React.FC<{
             <span>{lang === 'zh' ? '返回' : 'BACK'}</span>
           </button>
 
-          {s === null ? (
+          {missing ? (
+            <div className="py-20 text-center space-y-4">
+              <p className="text-white/50 text-sm font-bold">找不到这场放映。</p>
+              <button
+                type="button"
+                onClick={() => navigate('/screenings', { viewTransition: true })}
+                className="text-[#ff3650] text-xs font-black uppercase tracking-wider hover:text-white transition-colors cursor-pointer"
+              >
+                返回放映档案
+              </button>
+            </div>
+          ) : s === null ? (
             <div className="py-20 flex justify-center"><Loader variant="comet" size={36} label="加载放映会" className="text-[#ff3650]" /></div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: TRIGGER_EASE }} className="space-y-6">

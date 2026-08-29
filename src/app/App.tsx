@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Language, WorkItem, NewsItem, GoodsItem } from '../types';
+import { Language, WorkItem, NewsItem, GoodsItem, OpenSiteModal } from '../types';
 import { TRIGGER_EASE } from '../lib/motion';
 import { repository } from '../lib/repository';
 import { registerFilmPreview } from '../lib/filmPreview';
+import { registerNewsPreview } from '../lib/newsPreview';
 import { registerWorksModal } from '../lib/worksModal';
 import { DynamicContextMenu } from '../components/ui/DynamicContextMenu';
 import { HomePage } from './pages/HomePage';
@@ -19,15 +20,12 @@ import { CredentialsPage } from './pages/CredentialsPage';
 import { ScreeningDetailPage } from './pages/ScreeningDetailPage';
 import { ActivityDrawer } from '../features/profile/ActivityDrawer';
 import { SearchPalette } from '../features/search/SearchPalette';
-import { CreditsSheetModal } from '../features/credits/CreditsSheetModal';
 import { FilmDetailModal } from '../features/films/FilmDetailModal';
 import { FilmsLibraryModal } from '../features/films/FilmsLibraryModal';
 import { NewsDetailModal } from '../features/news/NewsDetailModal';
 import { VideoModal } from '../components/ui/VideoModal';
 import { GoodsDetailModal } from '../features/goods/GoodsDetailModal';
 import { AboutModal } from '../features/about/AboutModal';
-import { RecruitModal } from '../features/about/RecruitModal';
-import { ContactModal } from '../features/about/ContactModal';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
 import { ArrowUp } from 'lucide-react';
 import { ToastProvider } from '../components/ui/Toast';
@@ -59,8 +57,6 @@ const AppShell: React.FC = () => {
   const [selectedGoods, setSelectedGoods] = useState<GoodsItem | null>(null);
   const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
-  const [recruitModalOpen, setRecruitModalOpen] = useState(false);
-  const [contactModalOpen, setContactModalOpen] = useState(false);
 
   // Pull live news/goods once; films come from catalog.* per screen.
   useEffect(() => {
@@ -70,6 +66,7 @@ const AppShell: React.FC = () => {
   // Let the global search palette open the film detail modal (unified preview).
   useEffect(() => {
     registerFilmPreview(setSelectedWork);
+    registerNewsPreview(setSelectedNews);
     registerWorksModal(() => setAllWorksOpen(true));
     const handleOpenWorks = () => setAllWorksOpen(true);
     window.addEventListener('open-all-works-modal', handleOpenWorks);
@@ -86,11 +83,9 @@ const AppShell: React.FC = () => {
     setActiveVideo(null);
     setAllWorksOpen(false);
     setAboutModalOpen(false);
-    setRecruitModalOpen(false);
-    setContactModalOpen(false);
   }, [location.pathname]);
 
-  const handleOpenModal = (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => {
+  const handleOpenModal = (modalName: OpenSiteModal) => {
     switch (modalName) {
       case 'about':
         setAboutModalOpen(true);
@@ -98,20 +93,11 @@ const AppShell: React.FC = () => {
       case 'works':
         setAllWorksOpen(true);
         break;
-      case 'news':
-        // News library page arrives with the archive stage; no-op for now.
-        break;
-      case 'recruit':
-        document.getElementById('cb_content_427')?.scrollIntoView({ behavior: 'smooth' });
-        break;
-      case 'contact':
-        setContactModalOpen(true);
-        break;
     }
   };
 
   const handlePlayTrailer = (url: string) => {
-    setActiveVideo({ url, title: 'TRIGGER Official Trailer' });
+    setActiveVideo({ url, title: 'Trailer' });
   };
 
   return (
@@ -187,7 +173,7 @@ const AppShell: React.FC = () => {
           {/* Legacy plaza URL → merged nominations page */}
           <Route path="/plaza" element={<Navigate to="/nominations" replace />} />
           <Route path="/history" element={<Navigate to="/" replace />} />
-          {/* Calendar (future live schedule) */}
+            {/* Calendar (club nights) */}
           <Route
             path="/calendar"
             element={
@@ -226,9 +212,6 @@ const AppShell: React.FC = () => {
 
       {/* Global ⌘K search palette */}
       <SearchPalette />
-
-      {/* Global Credits Top-Up & Usage Sheet Modal */}
-      <CreditsSheetModal lang={lang} />
 
       {/* --- MODALS --- */}
       <AnimatePresence>
@@ -294,24 +277,6 @@ const AppShell: React.FC = () => {
             key="about-modal"
             lang={lang}
             onClose={() => setAboutModalOpen(false)}
-          />
-        )}
-
-        {/* 7. Recruit Modal */}
-        {recruitModalOpen && (
-          <RecruitModal
-            key="recruit-modal"
-            lang={lang}
-            onClose={() => setRecruitModalOpen(false)}
-          />
-        )}
-
-        {/* 8. Contact Modal */}
-        {contactModalOpen && (
-          <ContactModal
-            key="contact-modal"
-            lang={lang}
-            onClose={() => setContactModalOpen(false)}
           />
         )}
       </AnimatePresence>

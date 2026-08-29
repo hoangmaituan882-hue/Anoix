@@ -34,7 +34,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
         <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-black/40">
           <div className="flex items-center gap-2 text-sm font-bold text-white/90 line-clamp-1 pr-4">
             <Youtube className="w-5 h-5 text-[#ff3650] flex-shrink-0" />
-            <span>{title || 'TRIGGER Official Video'}</span>
+            <span>{title || 'Trailer'}</span>
           </div>
 
           <button
@@ -51,7 +51,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
           {embedId ? (
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${embedId}?autoplay=1&rel=0`}
-              title={title || 'TRIGGER Video'}
+              title={title || 'Trailer'}
               className="w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen

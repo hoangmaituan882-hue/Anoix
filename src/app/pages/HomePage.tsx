@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Language, WorkItem, NewsItem, GoodsItem } from '../../types';
+import { Language, OpenSiteModal, WorkItem, NewsItem, GoodsItem } from '../../types';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { FilmsSection } from '../../features/films/FilmsSection';
@@ -17,7 +17,7 @@ interface HomePageProps {
   onOpenAllWorks: () => void;
   onSelectNews: (news: NewsItem) => void;
   onSelectGoods: (goods: GoodsItem) => void;
-  onOpenModal: (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (modalName: OpenSiteModal) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -70,10 +70,6 @@ export const HomePage: React.FC<HomePageProps> = ({
         <NewsSection
           lang={lang}
           onSelectNews={onSelectNews}
-          onOpenAllNews={() => {
-            const el = document.getElementById('cb_content_90');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
         />
 
         {/* 3. NEXT Section (Neon Lime + upcoming nights timeline) */}

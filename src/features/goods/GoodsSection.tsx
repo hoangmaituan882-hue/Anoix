@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { GoodsItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { repository } from '../../lib/repository';
-import { ArrowRight, ChevronLeft, ChevronRight, ShoppingBag, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingBag, ExternalLink } from 'lucide-react';
 
 interface GoodsSectionProps {
   lang: Language;
@@ -52,7 +52,7 @@ export const GoodsSection: React.FC<GoodsSectionProps> = ({
         <div className="mb-10 md:mb-14">
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#ff3650] uppercase mb-2">
             <ShoppingBag className="w-4 h-4" />
-            <span>TRIGGER OFFICIAL MERCHANDISE</span>
+            <span>CLUB MERCHANDISE</span>
           </div>
           <h2
             className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight uppercase"
@@ -127,24 +127,6 @@ export const GoodsSection: React.FC<GoodsSectionProps> = ({
           >
             <ChevronRight className="w-6 h-6" />
           </button>
-        </div>
-
-        {/* Action Button: TRIGGER ONLINE STORE */}
-        <div className="mt-12 flex justify-start">
-          <a
-            id="btn-goods-store"
-            href="https://trigger-online.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="design_button group/btn inline-flex items-center gap-3 bg-[#f5ffe5] text-[#121212] hover:bg-[#ff3650] hover:text-white px-8 py-3.5 rounded-full font-black text-sm md:text-base tracking-wider uppercase transition-all duration-300 shadow-xl hover:shadow-[0_8px_25px_rgba(255,54,80,0.4)]"
-          >
-            <span className="label font-extrabold tracking-widest">
-              {t.onlineStore}
-            </span>
-            <span className="w-7 h-7 rounded-full bg-[#121212] text-[#f5ffe5] group-hover/btn:bg-white group-hover/btn:text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-1 duration-200">
-              <ArrowRight className="w-4 h-4" />
-            </span>
-          </a>
         </div>
       </div>
     </section>

@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { WorkItem, Language } from '../../types';
-import { I18N, WORKS_LIST } from '../../data/triggerData';
+import { I18N } from '../../data/triggerData';
 import { catalog } from '../../lib/catalog';
 import { repository } from '../../lib/repository';
 import { TRIGGER_EASE } from '../../lib/motion';
@@ -24,7 +24,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
   onOpenAllWorks,
 }) => {
   const sliderRef = useRef<HTMLDivElement>(null);
-  const [films, setFilms] = useState<WorkItem[]>(() => WORKS_LIST.slice(0, 12));
+  const [films, setFilms] = useState<WorkItem[]>([]);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -36,9 +36,11 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
     catalog
       .featured()
       .then((rows) => {
-        if (alive && rows.length > 0) setFilms(rows);
+        if (alive) setFilms(rows);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (alive) setFilms([]);
+      });
     return () => {
       alive = false;
     };
@@ -102,7 +104,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
           <img
             fetchPriority="high"
             src={repository.heroImage()}
-            alt="TRIGGER Main Visual"
+            alt="Anoix 放映会"
             className="w-full h-full object-cover object-center lg:object-right transform hover:scale-105 transition-transform duration-700 ease-out select-none"
             draggable={false}
           />
@@ -110,7 +112,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
 
         {/* Dynamic Studio Trigger watermark badge on mobile */}
         <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-black tracking-widest text-[#f5ffe5] border border-white/20 uppercase">
-          TRIGGER 2026
+          ANOIX
         </div>
       </motion.div>
 

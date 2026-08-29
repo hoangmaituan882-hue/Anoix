@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Language, WorkItem } from '../../types';
+import { Language, OpenSiteModal, WorkItem } from '../../types';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Screening } from '../../types/screening';
-import { SCREENINGS_DATA } from '../../data/screeningData';
+import { presentLiveScreenings } from '../../lib/screeningsArchive.js';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
 import { ScreeningPosterModal } from '../../features/screenings/ScreeningPosterModal';
@@ -79,7 +79,7 @@ export function TabButton({ isActive, label, onClick, icon: Icon }: TabButtonPro
 interface ScreeningsPageProps {
   lang: Language;
   setLang: (l: Language) => void;
-  onOpenModal: (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (modalName: OpenSiteModal) => void;
 }
 
 export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, onOpenModal }) => {
@@ -100,32 +100,10 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((data: Screening[]) => {
         if (!alive) return;
-        if (data && data.length > 0) {
-          const merged = data.map((apiItem) => {
-            const richItem = SCREENINGS_DATA.find(
-              (s) => s.id === apiItem.id || s.title === apiItem.title
-            );
-            return {
-              ...richItem,
-              ...apiItem,
-              demo_poster_url:
-                richItem?.demo_poster_url ||
-                apiItem.gallery?.[0] ||
-                'https://www.st-trigger.co.jp/wp-content/uploads/2026/07/CPER2-2.jpg',
-              format_tags: richItem?.format_tags || ['Dolby Atmos', 'Special Sound'],
-              special_guests: richItem?.special_guests || ['TRIGGER Staff'],
-              ticket_perks: richItem?.ticket_perks || '入场特典：限定纪念票根与海报',
-            };
-          });
-          const existingIds = new Set(data.map((d) => d.id));
-          const additions = SCREENINGS_DATA.filter((s) => !existingIds.has(s.id));
-          setRows([...merged, ...additions]);
-        } else {
-          setRows(SCREENINGS_DATA);
-        }
+        setRows(presentLiveScreenings(data) as Screening[]);
       })
       .catch(() => {
-        if (alive) setRows(SCREENINGS_DATA);
+        if (alive) setRows([]);
       });
     return () => {
       alive = false;
@@ -269,7 +247,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
           {/* Unified Clean Page Hero adhering to 24px Main Title & 14px Subtitle */}
           <PageHero
             title="放映会档案与特设物料"
-            subtitle="记录 TRIGGER 历年影院特设放映现场、演示海报、全景声/IMAX 场次与登台主创纪事。"
+            subtitle="只记社内放过的夜：海报、场地与当场片子。接口失败则空列表，不混工作室首映种子。"
           />
 
           {/* Concise Unified Controls HUD Toolbar */}

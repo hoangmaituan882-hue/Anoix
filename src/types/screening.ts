@@ -25,34 +25,3 @@ export interface Screening {
   ticket_price?: string | null;
   ticket_link?: string | null;
 }
-
-export interface NominationFilm {
-  id: string;
-  title: string;
-  title_zh: string | null;
-  title_en: string | null;
-  year: string | null;
-  category: string | null;
-  image: string | null;
-}
-
-export interface NominationOption {
-  id: number;
-  round_id: string;
-  film_id: string | null;
-  nominator: string | null;
-  note: string | null;
-  votes_count: number;
-  film: NominationFilm | null;
-}
-
-export type NominationStatus = 'collecting' | 'voting' | 'revealed';
-
-export interface NominationRound {
-  id: string;
-  title: string;
-  status: NominationStatus;
-  deadline: string | null;
-  created_at: string;
-  options: NominationOption[];
-}

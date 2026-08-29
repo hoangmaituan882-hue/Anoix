@@ -24,7 +24,7 @@
 | `DynamicContextMenu` | `src/components/ui/DynamicContextMenu.tsx` | TRIGGER 风格右键智能上下文菜单（感知作品卡片与全局空白处） |
 | `TriggerLogo` | `src/components/ui/TriggerLogo.tsx` | 矢量 SVG 扳机社官方标志，支持 Hover 变色与主题自适应 |
 | `Toast` / `ToastProvider` | `src/components/ui/Toast.tsx` | 全局 Toast 容器与 `useToast()` hook（支持 success / error / info） |
-| `StatusBadge` | `src/components/ui/StatusBadge.tsx` | 轮次 6 态与放映状态标准化彩色药丸徽章 |
+| `StatusBadge` | `src/components/ui/StatusBadge.tsx` | 放映已放映 / 本场 / 未放映等状态药丸 |
 | `ThemeToggle` | `src/components/ui/ThemeToggle.tsx` | 暗黑 / 纸质浅色模式无缝切换器 |
 | `ConfirmDialog` | `src/components/ui/ConfirmDialog.tsx` | 模态二次确认弹窗 |
 | `VideoModal` | `src/components/ui/VideoModal.tsx` | 统一的 PV 与预告片弹出播放器 |

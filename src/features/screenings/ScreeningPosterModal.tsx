@@ -139,7 +139,7 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
                 </div>
 
                 <p className="mt-2 text-center text-[12px] text-white/40">
-                  TRIGGER 官方特设放映海报物料
+                  放映海报
                 </p>
               </div>
 

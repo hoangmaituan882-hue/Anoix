@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TriggerLogo } from '../ui/TriggerLogo';
-import { Language } from '../../types';
+import { Language, OpenSiteModal } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { Menu, X, Lock, User, LogOut, UserRound, Vote, Search, Award } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
@@ -25,7 +25,7 @@ interface HeaderProps {
   lang: Language;
   setLang: (l: Language) => void;
   onNavigate: (sectionId: string) => void;
-  onOpenModal: (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (modalName: OpenSiteModal) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpenModal }) => {
@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleNavClick = (sectionId: string, modalName?: 'about' | 'works' | 'news' | 'recruit' | 'contact') => {
+  const handleNavClick = (sectionId: string, modalName?: OpenSiteModal) => {
     setMobileMenuOpen(false);
     if (modalName === 'works') {
       onOpenModal('works');
@@ -57,14 +57,6 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
     }
     if (modalName === 'about') {
       onOpenModal('about');
-      return;
-    }
-    if (modalName === 'recruit') {
-      onOpenModal('recruit');
-      return;
-    }
-    if (modalName === 'contact') {
-      onOpenModal('contact');
       return;
     }
     const el = document.getElementById(sectionId);
@@ -162,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             </button>
           </nav>
 
-          {/* Right Area: Search + Credits + Theme + Account + Hamburger */}
+          {/* Right Area: Search + Ranking + Theme + Account + Hamburger */}
           <div className="flex items-center gap-2 justify-self-end">
             <button
               type="button"
@@ -270,7 +262,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
             <button onClick={() => handleNavClick('index_header_works', 'works')} className="hover:text-[#ff3650] transition-colors py-2">
               放映库
             </button>
-            <button onClick={() => handleNavClick('cb_content_90', 'news')} className="hover:text-[#ff3650] transition-colors py-2">
+            <button onClick={() => handleNavClick('cb_content_90')} className="hover:text-[#ff3650] transition-colors py-2">
               最新动态
             </button>
             <button onClick={() => { setMobileMenuOpen(false); navigate('/screenings', { viewTransition: true }); }} className="hover:text-[#ff3650] transition-colors py-2">

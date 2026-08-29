@@ -65,7 +65,7 @@ export const GoodsDetailModal: React.FC<GoodsDetailModalProps> = ({
               <div className="space-y-2 text-xs text-white/60 mb-6">
                 <div className="flex items-center gap-1.5 text-white/80 font-semibold">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{lang === 'zh' ? 'TRIGGER 官方正品保障 · 日本原厂出库' : 'TRIGGER Official Guaranteed Authentic'}</span>
+                  <span>{lang === 'zh' ? '放映会周边' : 'Club merch'}</span>
                 </div>
               </div>
             </div>

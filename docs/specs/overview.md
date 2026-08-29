@@ -78,7 +78,7 @@ routes/* ──→ lib/identity.js ──→ lib/users.js ──→ lib/db.js �
 
 ## 6. 权限模型（两层）
 
-1. **DB 层 RLS**：`films/news/screenings/rounds/options/pool/goods` 公开读 + admin 写；`votes` 匿名可插、admin 读；`notifications/favorites/watch_log/rsvps` admin 写 + owner 自读。
+1. **DB 层 RLS**：`films/news/screenings/pool/goods` 公开读 + admin 写；`film_week_votes` 身份写；`notifications/favorites/watch_log/rsvps` admin 写 + owner 自读。遗留 `nomination_rounds` / `nomination_options` / `votes` 仍可在库里，HTTP 已拆除。
 2. **服务端 `adminGate`**：限流 + `callerRole(token)` 校验 `role='admin'`，未过返回 401/403。
 
 > 服务端写操作走 **admin session token**（`getAdminToken`），因此 RLS 对服务端透明。

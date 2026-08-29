@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Masonry } from 'masonic';
-import { Language } from '../../types';
+import { Language, OpenSiteModal } from '../../types';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
@@ -40,7 +40,7 @@ const voteErrorMessage = (raw: string, lang: Language): string => {
 export const NominationsPage: React.FC<{
   lang: Language;
   setLang: (l: Language) => void;
-  onOpenModal: (m: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (m: OpenSiteModal) => void;
 }> = ({ lang, setLang, onOpenModal }) => {
   const navigate = useNavigate();
 

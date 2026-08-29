@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Language } from '../../types';
+import { Language, OpenSiteModal } from '../../types';
 import { useToast } from '../../components/ui/Toast';
 import { getSession } from '../../lib/session';
 import { community, CalendarEvent } from '../../lib/community';
@@ -105,7 +105,7 @@ function toSchedule(e: CalendarEvent, today: string): LiveScheduleItem {
 interface CalendarPageProps {
   lang: Language;
   setLang: (l: Language) => void;
-  onOpenModal: (m: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (m: OpenSiteModal) => void;
 }
 
 export const CalendarPage: React.FC<CalendarPageProps> = () => {

@@ -5,7 +5,7 @@
 - 状态: 已上线
 
 ## 目的
-为前端各功能与页面提供统一、类型安全、响应式且具备离线静态兜底能力的数据访问层，包含内存状态订阅仓储 (`repository`)、用户会话 (`session`)、社区互动 (`community`)、选片系统 (`nominations`) 与管理端直连 SDK (`pgAdmin`)。
+为前端各功能与页面提供统一、类型安全、响应式的数据访问层。接口失败时壳数据为空，不回落 TRIGGER 种子。
 
 ## 结构 / 模块职责
 
@@ -23,7 +23,7 @@
 | `newsFeed` | `src/lib/newsFeed.ts` | 再导出首页动态过滤/排序，后台预览与 `GET /api/news` 同口径 |
 | `me` | `src/lib/me.ts` | 个人资料、改密、`/api/me/stats` |
 | `ranking` | `src/lib/ranking.ts` | 全站已看时长榜 `GET /api/ranking` |
-| `filmPreview` / `worksModal` | `src/lib/filmPreview.ts` / `src/lib/worksModal.ts` | 跨页面/跨组件的轻量级事件总线订阅器 |
+| `filmPreview` / `newsPreview` / `worksModal` | `src/lib/filmPreview.ts` / `src/lib/newsPreview.ts` / `src/lib/worksModal.ts` | 跨页面/跨组件的轻量级事件总线订阅器 |
 
 ## 数据流与响应式机制
 
@@ -56,9 +56,9 @@
 
 ## 错误处理与容灾设计
 
-1. **静态种子极速兜底**：若网络离线或 CloudBase 服务端异常，`repository` 自动保持静态数据状态，全站不会白屏。
+1. **失败给空**：`repository` 启动为空；`/api/news` 与 `/api/social-links` 失败不回落 TRIGGER 种子。
 2. **统一请求封装 (`api<T>`)**：`src/lib/api/client.ts` 附加 Bearer 与 `credentials:include`；非 200 时提取 `{ error }`。
-3. **事件总线解耦**：全局弹窗唤起（如 `openFilmPreview`, `openSearch`）通过闭包注册与 `window.dispatchEvent` 实现，避免通过 Context 层层透传 Props。
+3. **事件总线解耦**：全局弹窗唤起（如 `openFilmPreview`, `openNewsPreview`, `openSearch`）通过闭包注册与 `window.dispatchEvent` 实现，避免通过 Context 层层透传 Props。
 
 ## 边界与备注
 

@@ -80,7 +80,13 @@ export function contentRoutes(app) {
 
   app.get('/api/films/:id', asyncHandler(async (req, res) => {
     const rows = await pgGet(`/films?select=*&id=eq.${encodeURIComponent(req.params.id)}`);
-    res.json(rows[0] ?? null);
+    const film = rows[0] ?? null;
+    if (!film) return res.json(null);
+    const screenings = await pgGet('/screenings?select=screen_date,film_ids');
+    const newIds = featuredIdsFromScreenings(screenings ?? [], shanghaiDateString())
+      .slice(0, 2)
+      .map((r) => r.id);
+    res.json(stampIsNew([film], newIds)[0]);
   }));
 
   app.get('/api/news', asyncHandler(async (_req, res) => {

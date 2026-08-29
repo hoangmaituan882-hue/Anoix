@@ -8,13 +8,11 @@ import { ArrowRight, Tag } from 'lucide-react';
 interface NewsSectionProps {
   lang: Language;
   onSelectNews: (news: NewsItem) => void;
-  onOpenAllNews: () => void;
 }
 
 export const NewsSection: React.FC<NewsSectionProps> = ({
   lang,
   onSelectNews,
-  onOpenAllNews,
 }) => {
   const news = useRepo(repository.news);
   const t = I18N[lang];
@@ -101,22 +99,6 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
               </div>
             </article>
           ))}
-        </div>
-
-        {/* Action Button: ALL NEWS */}
-        <div className="mt-12 flex justify-start">
-          <button
-            id="btn-all-news"
-            onClick={onOpenAllNews}
-            className="design_button group/btn inline-flex items-center gap-3 bg-[#f5ffe5] text-[#121212] hover:bg-white px-7 py-3 rounded-full font-black text-sm md:text-base tracking-wider uppercase transition-all duration-300 shadow-xl hover:shadow-[0_8px_25px_rgba(0,0,0,0.3)] cursor-pointer"
-          >
-            <span className="label font-extrabold tracking-widest">
-              {t.allNews}
-            </span>
-            <span className="w-7 h-7 rounded-full bg-[#121212] text-[#f5ffe5] group-hover/btn:bg-[#4246ff] group-hover/btn:text-white flex items-center justify-center transition-transform group-hover/btn:translate-x-1 duration-200">
-              <ArrowRight className="w-4 h-4" />
-            </span>
-          </button>
         </div>
       </div>
     </section>

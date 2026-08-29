@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Language } from '../../types';
+import { Language, OpenSiteModal } from '../../types';
 import { AdminUser } from '../../types/user';
 import { me, EMPTY_ME_STATS, MeStats } from '../../lib/me';
 import { UserClubStats } from '../../features/credentials/UserClubStats';
@@ -51,7 +51,7 @@ import {
 export const ProfilePage: React.FC<{
   lang: Language;
   setLang: (l: Language) => void;
-  onOpenModal: (m: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (m: OpenSiteModal) => void;
 }> = ({ lang, setLang, onOpenModal }) => {
   const navigate = useNavigate();
   const [params] = useSearchParams();

@@ -43,7 +43,7 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
 
   const share = async () => {
     if (!data) return;
-    const text = `我在 TRIGGER 选片社区的 ${data.year} 年度回顾：提名 ${data.nominations} 次 · 投票 ${data.votes} 次 · 观影 ${data.watches} 部 · ${data.persona}`;
+    const text = `我在 Anoix 放映会的 ${data.year} 年度回顾：提名 ${data.nominations} 次 · 投票 ${data.votes} 次 · 观影 ${data.watches} 部 · ${data.persona}`;
     try { await navigator.clipboard.writeText(text); success('回顾已复制'); } catch { /* ignore */ }
   };
 

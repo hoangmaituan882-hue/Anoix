@@ -9,7 +9,7 @@ import { assembleNominationStats } from '../lib/nominationStats.js';
 import { socialPayload } from '../lib/socialLinks.js';
 
 /**
- * Admin endpoints (user management, nomination pool, scheduling, rounds, stats).
+ * Admin endpoints (user management, nomination pool, scheduling, stats).
  * Admin-only via adminGate (rate-limited + verified role).
  */
 export function adminRoutes(app) {
@@ -70,13 +70,6 @@ export function adminRoutes(app) {
     const uid = req.params.uid;
     await pgWrite('DELETE', `/user_roles?uid=eq.${encodeURIComponent(uid)}`);
     await tcRequest('DeleteEndUser', { EnvId: ENV_ID, UserList: [uid] });
-    res.json({ ok: true });
-  }));
-
-  app.post('/api/admin/options/:id/plan', adminGate, asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'bad_request' });
-    await pgWrite('PATCH', `/nomination_options?id=eq.${id}`, { planned: true });
     res.json({ ok: true });
   }));
 
@@ -142,17 +135,6 @@ export function adminRoutes(app) {
     const body = { screening_status };
     body.screening_date = screening_date && typeof screening_date === 'string' ? screening_date : null;
     await pgWrite('PATCH', `/films?id=eq.${encodeURIComponent(id)}`, body);
-    res.json({ ok: true });
-  }));
-
-  app.post('/api/admin/rounds/:id/status', adminGate, asyncHandler(async (req, res) => {
-    const id = req.params.id;
-    const { status, deadline } = req.body ?? {};
-    const valid = ['draft', 'collecting', 'reviewing', 'voting', 'revealed', 'archived'];
-    if (!valid.includes(status)) return res.status(400).json({ error: 'bad_status' });
-    const body = { status };
-    if (deadline !== undefined) body.deadline = deadline || null;
-    await pgWrite('PATCH', `/nomination_rounds?id=eq.${encodeURIComponent(id)}`, body);
     res.json({ ok: true });
   }));
 

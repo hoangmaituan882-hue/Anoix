@@ -23,7 +23,7 @@ const avatarCls = (u: AdminUser) =>
     ? 'bg-[#ff3650]/20 text-[#ff3650] border-[#ff3650]/40'
     : 'bg-white/10 text-white/60 border-white/15';
 
-/** Studio TRIGGER admin — user management (CloudBase accounts + roles). */
+/** Club admin — CloudBase accounts and roles. */
 export const UsersAdmin: React.FC = () => {
   const [users, setUsers] = useState<AdminUser[] | null>(null);
   const [error, setError] = useState('');
@@ -175,7 +175,7 @@ export const UsersAdmin: React.FC = () => {
               {adminCount} 管理员
             </span>
           </div>
-          <h2 className="text-2xl font-black text-white tracking-tight uppercase">TRIGGER 用户管理</h2>
+          <h2 className="text-2xl font-black text-white tracking-tight uppercase">用户管理</h2>
           <p className="text-xs text-white/50">管理登录账号、管理员角色与登录封禁（封禁即禁止登录）</p>
         </div>
 

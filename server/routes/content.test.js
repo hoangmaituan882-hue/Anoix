@@ -73,6 +73,15 @@ mock.module('../lib/db.js', {
           { id: 'soon', title: 'Soon', title_zh: '未映', year: '2026', category: 'Movie', image: 'soon.jpg' },
         ];
       }
+      if (p.startsWith('/films') && p.includes('id=eq.')) {
+        const id = decodeURIComponent(p.split('id=eq.')[1].split('&')[0]);
+        const films = {
+          a: { id: 'a', title: 'A', is_new: false },
+          b: { id: 'b', title: 'B', is_new: false },
+          c: { id: 'c', title: 'C', is_new: true },
+        };
+        return films[id] ? [films[id]] : [];
+      }
       return [
         { id: 'a', title: 'A', year: '2019', category: 'Movie', image: '' },
         { id: 'b', title: 'B', year: '2018', category: 'Movie', image: '' },
@@ -145,6 +154,16 @@ test('GET /api/films/featured fetches only ranked ids, not the whole catalog', a
   assert.equal(filmGets.length, 1);
   assert.equal(filmGets[0].includes('id=in.'), true);
   assert.equal(filmGets[0].includes('select=*'), false);
+});
+
+test('GET /api/films/:id stamps NEW from featured pair, not films.is_new', async () => {
+  await withServer(async (base) => {
+    const b = await fetch(`${base}/api/films/b`).then((r) => r.json());
+    const c = await fetch(`${base}/api/films/c`).then((r) => r.json());
+    assert.equal(b.isNew, true);
+    assert.equal(c.isNew, false);
+    assert.equal(c.is_new, true);
+  });
 });
 
 test('GET /api/films?limit= pages via pgGetPage on screening_date', async () => {

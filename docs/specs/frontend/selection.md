@@ -50,6 +50,6 @@
 ## 边界与备注
 
 - 不 cron 自动把周榜 #1 写进周六。
-- 后台不再维护命名投票轮次；一场 `screenings` 即一轮。遗留 `nomination_rounds` 接口仍在库里，前后台 UI 都不走。
+- 后台不再维护命名投票轮次；一场 `screenings` 即一轮。轮次 HTTP 已拆除，表可留库。
 - `/plaza` 重定向到 `/nominations`（已无独立 Plaza 页）。
 - 广场只展示合计提名/票数；匿名 vs 登录拆分只在后台 `GET /api/admin/stats`。

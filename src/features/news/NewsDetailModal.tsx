@@ -61,7 +61,7 @@ export const NewsDetailModal: React.FC<NewsDetailModalProps> = ({
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs text-white/50">
-          <span>ANIMATION STUDIO TRIGGER Inc. News Release</span>
+          <span>Anoix 放映会动态</span>
           <button
             onClick={() => {
               if (navigator.clipboard) {

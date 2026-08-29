@@ -22,13 +22,14 @@
 
 ### 依赖数据层
 - `src/lib/community.ts`（放映详情、RSVP 接口）
-- `src/lib/repository.ts`（影片信息联查）
-- `src/data/screeningData.ts`（本地精修离线数据）
+- `src/lib/catalog.ts`（海报弹窗片单）
+- `src/lib/screeningsArchive.js`（只接受数组，失败给空）
 
 ### 调用的后端 API
 
 | 端点 | 方法 | 鉴权 | 说明 |
 |---|---|---|---|
+| `/api/screenings` | GET | 无 | 档案页与 ⌘K 的场次数组；非数组则空 |
 | `/api/screenings/upcoming` | GET | 无 | 首页未来场次时间线（今晚 + 未放映） |
 | `/api/screenings/:id` | GET | 无 | 获取指定放映会详情 |
 | `/api/rsvp/:id` | GET | 必选 | 获取当前用户对该场次的报名状态与总报名人数 |
@@ -50,5 +51,5 @@
 
 ## 边界与备注
 
-- **单场多片关联**：单场放映会可包含多个 `film_ids`，前端自动匹配 `repository.films` 并横向渲染影片卡片。
-- **离线与弱网降级**：若后端接口超时，自动回退渲染 `src/data/screeningData.ts` 内置数据，确保浏览可用性。
+- **单场多片关联**：单场放映会可包含多个 `film_ids`，详情走 `community.screening`。
+- **无种子兜底**：`GET /api/screenings` 失败或非数组则空列表。详情 404 显示「找不到这场放映」，不转圈。

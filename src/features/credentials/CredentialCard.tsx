@@ -68,7 +68,7 @@ export const CredentialCard: React.FC<CredentialCardProps> = ({ data, onClick })
           </div>
 
           <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400 dark:text-[#666666] pt-2 border-t border-neutral-200 dark:border-[#202020]">
-            <span>TRIGGER CONSOLE</span>
+            <span>ANOIX</span>
             <span className="text-black dark:text-white font-medium group-hover:underline flex items-center gap-0.5">
               VIEW <ExternalLink className="w-2.5 h-2.5" />
             </span>

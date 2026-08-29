@@ -35,8 +35,6 @@ export const poolAdmin = {
       screening_status: screeningStatus,
       screening_date: screeningDate,
     }),
-  setRoundStatus: (roundId: string, status: string) =>
-    write<{ ok: boolean }>('POST', `/api/admin/rounds/${encodeURIComponent(roundId)}/status`, { status }),
 };
 
 export interface StatsMember {

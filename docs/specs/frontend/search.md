@@ -1,7 +1,7 @@
 # Spec: 全站搜索（Search Palette & Preview）
 
 - 类型: 前端组件 / 全局能力
-- 路径: `src/features/search/SearchPalette.tsx` / `src/lib/filmPreview.ts`
+- 路径: `src/features/search/SearchPalette.tsx` / `src/lib/filmPreview.ts` / `src/lib/newsPreview.ts`
 - 状态: 已上线
 
 ## 目的
@@ -13,7 +13,7 @@
 |---|---|---|
 | `SearchPalette` | `src/features/search/SearchPalette.tsx` | 快捷键、作品走分页检索、新闻/放映会仍为短列表 |
 | `CommandPalette` | `src/components/ui/CommandPalette.tsx` | 渲染、键盘导航、Live 预览；`onQueryChange` 回传输入 |
-| `filmPreview` | `src/lib/filmPreview.ts` | 点击作品打开详情弹窗 |
+| `filmPreview` / `newsPreview` | `src/lib/filmPreview.ts` / `src/lib/newsPreview.ts` | 点击作品 / 资讯打开详情弹窗 |
 
 ## 数据 / 状态
 
@@ -26,7 +26,7 @@
 | 端点 | 方法 | 鉴权 | 说明 |
 |---|---|---|---|
 | `/api/films?q&limit=8` | GET | 无 | 作品命中，与片库同一套排序/匹配 |
-| `/api/screenings` | GET | 无 | 弹窗唤起时拉放映会并合并精修数据 |
+| `/api/screenings` | GET | 无 | 弹窗唤起时拉放映会，只展示接口数组 |
 | `/api/films/:id` | GET | 无 | 点选作品后再拉详情 |
 
 ### 关键状态
@@ -37,7 +37,7 @@
 
 1. `⌘K` / `Ctrl+K` 或顶栏搜索图标。
 2. `↑` `↓` Enter Esc。
-3. 命中作品调用 `openFilmPreview`。
+3. 命中作品调用 `openFilmPreview`；资讯 `openNewsPreview`；场次进 `/screenings/:id`。
 
 ## 边界与备注
 

@@ -255,7 +255,7 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
               className="inline-flex items-center gap-1.5 text-xs font-bold text-white/40 hover:text-[#ff3650] transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>返回 TRIGGER 官方网站首页</span>
+              <span>返回首页</span>
             </Link>
           </div>
         </div>
@@ -397,7 +397,7 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
 
 // ---------------- Refactored Films CRUD Component ----------------
 const EMPTY_FILM: WorkItem = {
-  id: '', title: '', year: '2026', category: 'TV Series', image: '', description: '', isNew: true,
+  id: '', title: '', year: '2026', category: 'TV Series', image: '', description: '', isNew: false,
 };
 
 const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
@@ -595,13 +595,6 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
                 />
                 <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-black text-white border border-white/15">
                   {r.year}
-                </div>
-                <div className="absolute top-2 right-2 flex items-center gap-1">
-                  {r.is_new && (
-                    <span className="bg-[#ff3650] text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md">
-                      NEW
-                    </span>
-                  )}
                 </div>
                 <div className="absolute bottom-2 left-2">
                   <span className="bg-black/80 backdrop-blur-md text-[10px] font-black text-[#ff3650] uppercase px-2 py-0.5 rounded border border-[#ff3650]/40">
@@ -979,20 +972,7 @@ const FilmFormModal: React.FC<{
             />
           </div>
 
-          <div className="sm:col-span-2 pt-2">
-            <label className="flex items-center gap-2.5 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
-              <input
-                type="checkbox"
-                checked={form.isNew ?? false}
-                onChange={(e) => set('isNew', e.target.checked)}
-                className="accent-[#ff3650] w-5 h-5 rounded"
-              />
-              <div>
-                <span className="text-sm font-bold text-white block">标记为 NEW 作品</span>
-                <span className="text-xs text-white/50">将在首页与作品库打上明亮的 NEW 标志</span>
-              </div>
-            </label>
-          </div>
+          <div className="sm:col-span-2 pt-2" />
         </div>
 
         {error && (

@@ -4,7 +4,8 @@ import { Film, Newspaper, CalendarDays, Sparkles, Navigation } from 'lucide-reac
 import { repository, useRepo } from '../../lib/repository';
 import { catalog } from '../../lib/catalog';
 import { openFilmPreview } from '../../lib/filmPreview';
-import { SCREENINGS_DATA } from '../../data/screeningData';
+import { openNewsPreview } from '../../lib/newsPreview';
+import { presentLiveScreenings } from '../../lib/screeningsArchive.js';
 import { CommandPalette, CommandItem } from '../../components/ui/CommandPalette';
 import { Screening } from '../../types/screening';
 import { WorkItem } from '../../types';
@@ -25,7 +26,7 @@ export function openSearch() {
 export const SearchPalette: React.FC = () => {
   const navigate = useNavigate();
   const news = useRepo(repository.news);
-  const [screenings, setScreenings] = useState<Screening[]>(SCREENINGS_DATA);
+  const [screenings, setScreenings] = useState<Screening[]>([]);
   const [open, setOpen] = useState(false);
   const [filmHits, setFilmHits] = useState<WorkItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,19 +59,9 @@ export const SearchPalette: React.FC = () => {
   useEffect(() => {
     if (!open) return;
     fetch(`${API_BASE}/api/screenings`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (Array.isArray(d) && d.length > 0) {
-          const merged = d.map((apiItem) => {
-            const rich = SCREENINGS_DATA.find(
-              (s) => s.id === apiItem.id || s.title === apiItem.title
-            );
-            return { ...rich, ...apiItem };
-          });
-          setScreenings(merged);
-        }
-      })
-      .catch(() => setScreenings(SCREENINGS_DATA));
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => setScreenings(presentLiveScreenings(d) as Screening[]))
+      .catch(() => setScreenings([]));
   }, [open]);
 
   useEffect(() => {
@@ -112,10 +103,10 @@ export const SearchPalette: React.FC = () => {
           type: 'film',
           image: f.landscapeImage || f.image,
           title: title,
-          subtitle: `${f.year || ''}年 · 导演: ${f.director || 'TRIGGER 团队'}`,
-          description: f.descriptionZh || f.description || 'TRIGGER 官方动画作品档案。',
-          tags: [f.category || '动画', 'TRIGGER 原创'],
-          metaBadge: '动画作品',
+          subtitle: `${f.year || ''}年 · 导演: ${f.director || '未记录'}`,
+          description: f.descriptionZh || f.description || '社内片库作品。',
+          tags: [f.category || '动画'],
+          metaBadge: '片库',
         },
       });
     }
@@ -123,30 +114,26 @@ export const SearchPalette: React.FC = () => {
     // 2. Screenings (放映档案)
     for (const s of screenings) {
       const title = s.title_zh || s.title;
-      const poster =
-        s.demo_poster_url ||
-        s.poster_url ||
-        s.gallery?.[0] ||
-        'https://www.st-trigger.co.jp/wp-content/uploads/2026/07/CPER2-2.jpg';
+      const poster = s.demo_poster_url || s.poster_url || s.gallery?.[0] || '';
 
       cmds.push({
         id: `screen-${s.id}`,
         category: 'screenings',
         label: title,
         labelEn: s.title_en || s.title,
-        hint: `放映现场 · ${s.screen_date} · ${s.venue || '影院特设'}`,
+        hint: `放映现场 · ${s.screen_date} · ${s.venue || '场地待定'}`,
         icon: <CalendarDays className="w-4 h-4 text-[#ff3650]" />,
-        action: () => navigate('/screenings', { viewTransition: true }),
+        action: () => navigate(`/screenings/${s.id}`, { viewTransition: true }),
         preview: {
           type: 'screening',
           image: poster,
           title: title,
           subtitle: s.screen_date,
-          venue: s.venue || 'TOHO 影院 / 特设剧场',
+          venue: s.venue || '场地待定',
           date: s.screen_date,
-          description: s.recap_zh || s.recap || s.ticket_perks || 'TRIGGER 历年影院特设放映档案现场。',
-          tags: s.format_tags || ['杜比全景声', '特设上映'],
-          metaBadge: '特设放映',
+          description: s.recap_zh || s.recap || s.ticket_perks || '社内放映场次。',
+          tags: s.format_tags || [],
+          metaBadge: '放映',
         },
       });
     }
@@ -160,15 +147,15 @@ export const SearchPalette: React.FC = () => {
         label: title,
         hint: `官方动态 · ${n.date || '最新'}`,
         icon: <Newspaper className="w-4 h-4 text-[#e0fe3d]" />,
-        action: () => navigate('/', { viewTransition: true }),
+        action: () => openNewsPreview(n),
         preview: {
           type: 'news',
-          image: n.image || 'https://www.st-trigger.co.jp/wp-content/uploads/2026/07/CPER2-2.jpg',
+          image: n.image || '',
           title: title,
           subtitle: n.date || '最新快讯',
-          description: n.contentZh || n.content || 'TRIGGER 官方最新制作动态与展映速报。',
-          tags: ['官方快讯', '制作情报'],
-          metaBadge: '官方动态',
+          description: n.contentZh || n.content || '社内动态。',
+          tags: n.category ? [n.category] : ['动态'],
+          metaBadge: '动态',
         },
       });
     }
@@ -177,7 +164,7 @@ export const SearchPalette: React.FC = () => {
     const routes = [
       { path: '/screenings', label: '放映档案库', hint: '浏览特设海报与纪念票根', icon: CalendarDays },
       { path: '/nominations', label: '选片与投票中心', hint: '参与社区公投决定下一场放映', icon: Sparkles },
-      { path: '/calendar', label: '活动与放映日历', hint: '排期日历与直播同好会', icon: CalendarDays },
+      { path: '/calendar', label: '活动与放映日历', hint: '排期日历与 RSVP', icon: CalendarDays },
       { path: '/credentials', label: '我的放映资历', hint: '查看观影履历与通行证徽章', icon: Navigation },
     ];
 

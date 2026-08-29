@@ -1,16 +1,11 @@
 import { useSyncExternalStore } from 'react';
 import {
   HERO_IMAGE,
-  RECRUIT_IMAGE,
-  WORKS_LIST,
-  NEWS_LIST,
-  YOUTUBE_LIST,
-  SOCIAL_LINKS,
 } from '../data/triggerData';
-import { WorkItem, NewsItem, GoodsItem, YoutubeItem, SocialLink } from '../types';
+import { WorkItem, NewsItem, GoodsItem, SocialLink } from '../types';
 
 /**
- * Site chrome data: news, goods, static hero/social seeds.
+ * Site chrome data: news, goods, footer social. Empty until live fetch.
  * Film catalog is `src/lib/catalog.ts` (featured / list / get) — boot does not
  * download every film row.
  */
@@ -82,32 +77,26 @@ const subscribeRepo = (cb: () => void) => {
   };
 };
 
-let filmsCache: WorkItem[] = WORKS_LIST;
-let newsCache: NewsItem[] = NEWS_LIST;
+let filmsCache: WorkItem[] = [];
+let newsCache: NewsItem[] = [];
 let goodsCache: GoodsItem[] = [];
-let socialCache: SocialLink[] | null = null;
+let socialCache: SocialLink[] = [];
 
 export const repository = {
   /** Featured hero artwork for the landing section. */
   heroImage: (): string => HERO_IMAGE,
 
-  /** Studio atmosphere image for the recruit/about section. */
-  recruitImage: (): string => RECRUIT_IMAGE,
-
   /** Seed catalog only (homepage / library use catalog.*). */
   films: (): WorkItem[] => filmsCache,
 
-  /** Announcements (seed first, replaced by live PG rows on refresh). */
+  /** Announcements (empty until live PG rows load). */
   news: (): NewsItem[] => newsCache,
 
   /** Merchandise catalog (live PG rows; no static fallback). */
   goods: (): GoodsItem[] => goodsCache,
 
-  /** Video feed entries (static seed). */
-  videos: (): YoutubeItem[] => YOUTUBE_LIST,
-
-  /** External social/profile links for the footer. Live rows replace the seed; `[]` hides tiles. */
-  socialLinks: (): SocialLink[] => socialCache ?? SOCIAL_LINKS,
+  /** External social/profile links for the footer. Empty until live rows load. */
+  socialLinks: (): SocialLink[] => socialCache,
 
   /** Pull live news + goods + footer social tiles. Films are not part of boot — use catalog.*. */
   async refresh(): Promise<void> {
@@ -118,10 +107,10 @@ export const repository = {
       const newsRes = await fetch(`${base}/api/news`, { signal: timer.signal, credentials: 'include' });
       if (!newsRes.ok) throw new Error(`api status ${newsRes.status}`);
       const news = ((await newsRes.json()) as NewsRow[]).map(mapNews);
-      if (news.length > 0) newsCache = news;
+      newsCache = news;
       notify();
     } catch (err) {
-      console.warn('[repository] cloud fetch failed, keeping static fallback:', err);
+      console.warn('[repository] news fetch failed, leaving empty:', err);
     }
 
     // Goods is fetched separately so a failure there never blocks news.
@@ -143,7 +132,7 @@ export const repository = {
         }
       }
     } catch (err) {
-      console.warn('[repository] social-links fetch failed, keeping seed:', err);
+      console.warn('[repository] social-links fetch failed:', err);
     } finally {
       clearTimeout(timeout);
     }

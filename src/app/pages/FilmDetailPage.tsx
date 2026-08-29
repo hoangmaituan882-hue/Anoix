@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate, useLocation, useViewTransitionState } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Language, WorkItem } from '../../types';
+import { Language, OpenSiteModal, WorkItem } from '../../types';
 import { catalog } from '../../lib/catalog';
 import { TRIGGER_EASE } from '../../lib/motion';
 import { Header } from '../../components/layout/Header';
@@ -14,7 +14,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Check, Sparkles } from 'l
 interface FilmDetailPageProps {
   lang: Language;
   setLang: (l: Language) => void;
-  onOpenModal: (modalName: 'about' | 'works' | 'news' | 'recruit' | 'contact') => void;
+  onOpenModal: (modalName: OpenSiteModal) => void;
   onPlayTrailer: (url: string) => void;
 }
 
@@ -192,7 +192,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#ff3650]" />
-                    <span>{lang === 'zh' ? '更多 TRIGGER 精彩作品' : 'MORE WORKS BY TRIGGER'}</span>
+                    <span>{lang === 'zh' ? '片库里还有' : 'MORE IN THE LIBRARY'}</span>
                   </h3>
                   <button
                     onClick={() => onOpenModal('works')}

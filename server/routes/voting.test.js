@@ -93,10 +93,20 @@ test('POST /api/vote: empty body → 400 bad_request', async () => {
   });
 });
 
+test('POST /api/vote: roundId+optionId is rejected', async () => {
+  st.identity = { identityId: 'u1', kind: 'user' };
+  st.quota.remainingVotes = 6;
+  await withServer(async (base) => {
+    const r = await postVote(base, { roundId: 'r1', optionId: 1 });
+    assert.equal(r.status, 400);
+    assert.equal(r.body.error, 'bad_request');
+  });
+});
+
 test('POST /api/vote: no identity → 401', async () => {
   st.identity = null;
   await withServer(async (base) => {
-    const r = await postVote(base, { roundId: 'r1', optionId: 1 });
+    const r = await postVote(base, { filmId: 'f1' });
     assert.equal(r.status, 401);
     assert.equal(r.body.error, 'identity_required');
   });
@@ -105,42 +115,31 @@ test('POST /api/vote: no identity → 401', async () => {
 test('POST /api/vote: quota exhausted → 429', async () => {
   st.identity = { identityId: 'u1', kind: 'user' };
   st.quota.remainingVotes = 0;
+  st.film = { id: 'f1', screening_date: null };
+  st.screenings = [];
   await withServer(async (base) => {
-    const r = await postVote(base, { roundId: 'r1', optionId: 1 });
+    const r = await postVote(base, { filmId: 'f1' });
     assert.equal(r.status, 429);
     assert.equal(r.body.error, 'quota_exceeded');
   });
 });
 
-test('POST /api/vote: round not voting → 409', async () => {
-  st.identity = { identityId: 'u1', kind: 'user' };
-  st.quota.remainingVotes = 6;
-  st.round = { id: 'r1', status: 'collecting', deadline: null };
+test('GET /api/nominations (round list) is gone', async () => {
   await withServer(async (base) => {
-    const r = await postVote(base, { roundId: 'r1', optionId: 1 });
-    assert.equal(r.status, 409);
-    assert.equal(r.body.error, 'not_voting');
+    const r = await fetch(`${base}/api/nominations`);
+    assert.equal(r.status, 404);
   });
 });
 
-test('POST /api/vote: success → 200', async () => {
+test('POST /api/nominations/:roundId/nominate is gone', async () => {
   st.identity = { identityId: 'u1', kind: 'user' };
-  st.quota.remainingVotes = 6;
-  st.round = { id: 'r1', status: 'voting', deadline: null };
-  st.option = { id: 1, round_id: 'r1' };
-  st.pgWriteStatus = 200;
   await withServer(async (base) => {
-    const r = await postVote(base, { roundId: 'r1', optionId: 1 });
-    assert.equal(r.status, 200);
-    assert.deepEqual(r.body, { ok: true });
-  });
-});
-
-test('GET /api/nominations: empty → 200', async () => {
-  await withServer(async (base) => {
-    const r = await fetch(`${base}/api/nominations`).then(async (x) => ({ status: x.status, body: await x.json() }));
-    assert.equal(r.status, 200);
-    assert.ok(Array.isArray(r.body));
+    const r = await fetch(`${base}/api/nominations/r1/nominate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filmId: 'f1', note: '想看' }),
+    });
+    assert.equal(r.status, 404);
   });
 });
 

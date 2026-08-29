@@ -1,4 +1,4 @@
-# Spec: admin 路由（用户管理 / 提名池 / 排期 / 轮次 / 统计）
+# Spec: admin 路由（用户管理 / 提名池 / 排期 / 统计）
 
 - 类型: 路由模块
 - 路径: `server/routes/admin.js`
@@ -13,13 +13,11 @@
 | POST | /api/admin/users | 创建用户（CreateEndUserAccount + `insertUserRole` 分配 001 编号） |
 | PATCH | /api/admin/users/:uid | 改角色 / 封禁 / 重置密码 |
 | DELETE | /api/admin/users/:uid | 删除账号 |
-| POST | /api/admin/options/:id/plan | 候选「已通过」勾选入库（planned=true） |
 | GET | /api/admin/pool | 提名池列表 |
 | POST | /api/admin/pool/:id/promote | 勾选入库（TMDB 补建 films + 通知提名者） |
 | POST | /api/admin/pool/:id/demote | 退回提名库（可逆） |
 | POST | /api/admin/films/:id/schedule | 排期（screening_status + screening_date） |
 | POST | /api/admin/channel/resolve | 解析视频链接（Bilibili BV / YouTube），返回标题、封面、canonical URL |
-| POST | /api/admin/rounds/:id/status | 遗留：轮次 6 态流转（后台 UI 已移除） |
 | GET | /api/admin/stats | 每部提名片：匿名提名/票 + 登录用户各自提名与票数 |
 | GET | /api/admin/social-links | 页脚社交原行（含排序） |
 | POST | /api/admin/social-links | 新增格子（https + 名称） |
@@ -52,7 +50,7 @@
 - **promote 幂等**：TMDB 影片已存在则跳过创建，只 PATCH pool（重试安全）；同时给提名者发 `promoted` 通知。
 - **demote 可逆**：只把 pool status 重置回 pending，不删影片。
 - **排期三态**：unscheduled（待定）/ scheduled（已排期）/ screened（已放映）。
-- **命名投票轮次已废弃**：后台不再创建 `nomination_rounds`；`POST /api/admin/rounds/:id/status` 仅遗留。一场 `screenings` 即一轮，状态由日期自动标记。
+- **命名投票轮次已下线**：不再提供 `POST /api/admin/rounds/:id/status` 与 `POST /api/admin/options/:id/plan`。一场 `screenings` 即一轮，状态由日期自动标记。
 - 统计：`assembleNominationStats`；匿名 = 不在 `user_roles`。只读 `nomination_pool` + `film_week_votes`，不读旧 `votes` 表。数字仅此后台端点，不进公开广场。
 - 页脚社交：写成功后 `contentCache.delete('social')`，避免 15s 内仍吐旧格子。
 - 首页动态：写成功后 `contentCache.delete('news')`。首页 NEWS 区块无开关。

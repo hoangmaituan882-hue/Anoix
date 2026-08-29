@@ -177,6 +177,18 @@ test('POST /api/admin/news/flush: busts news cache', async () => {
   assert.ok(cacheDeletes.includes('news'));
 });
 
+test('POST /api/admin/rounds/:id/status is gone', async () => {
+  st.admin = true;
+  await withServer(async (base) => {
+    const r = await fetch(`${base}/api/admin/rounds/r1/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'voting' }),
+    });
+    assert.equal(r.status, 404);
+  });
+});
+
 test('POST /api/admin/news/reorder: empty ids → 400', async () => {
   st.admin = true;
   await withServer(async (base) => {

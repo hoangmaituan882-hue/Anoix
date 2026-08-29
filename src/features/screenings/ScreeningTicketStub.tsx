@@ -37,7 +37,7 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
                 <span className="bg-[#ff3650] text-white text-[11px] font-bold px-2.5 py-0.5 rounded">
-                  TRIGGER 影院特设放映
+                  Anoix 社内放映
                 </span>
                 <span className="text-[11px] font-mono text-white/50">
                   NO. {screening.id.toUpperCase()}

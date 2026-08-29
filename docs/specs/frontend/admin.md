@@ -41,9 +41,10 @@
 | `/api/admin/users` | GET | Admin | 获取全量用户列表（包含 `user_no` 与角色） |
 | `/api/admin/users/:id/role` | POST | Admin | 分配用户角色（`admin` 或 `user`） |
 | `/api/admin/users/:id/ban` | POST | Admin | 封禁 / 解封用户 |
-| `/api/admin/nomination-pool` | GET | Admin | 获取全量提名池条目 |
-| `/api/admin/nomination-pool/:id/approve` | POST | Admin | 审批提名并一键录入作品库 |
-| `/api/admin/nomination-pool/:id/schedule` | POST | Admin | 将提名作品快速排期至指定放映会 |
+| `/api/admin/pool` | GET | Admin | 提名池列表 |
+| `/api/admin/pool/:id/promote` | POST | Admin | 勾选入库 |
+| `/api/admin/pool/:id/demote` | POST | Admin | 退回提名库 |
+| `/api/admin/films/:id/schedule` | POST | Admin | 给片子写 screening_status / screening_date |
 | `/api/admin/stats` | GET | Admin | 每部提名片匿名 vs `user_roles` 的提名行数与周票 SUM |
 | `/api/admin/channel/resolve` | POST | Admin | 解析 Bilibili/YouTube 链接，返回标题与封面 |
 | `/api/admin/social-links` | GET / POST / PATCH / DELETE / reorder | Admin | 页脚社交格子 CRUD |
@@ -67,4 +68,5 @@
 ## 边界与备注
 
 - **RLS 行级安全**：服务端即便绕过前端，PostgreSQL 的 RLS 规则 (`is_admin()`) 仍会强制校验用户身份，彻底防范越权。
-- **无独立选片轮次 Tab**：不创建「TRIGGER 社区选片与投票轮次」一类名称；遗留 `nomination_rounds` 表与 `/api/admin/rounds/:id/status` 后台不再使用。
+- **无独立选片轮次 Tab**：不创建命名投票轮次；轮次 admin HTTP 已拆除。一场 `screenings` 即一轮。
+- **NEW 角标**：首页 / 片库 / 详情都按场次算出的前两张，后台作品表单不再提供「标记为 NEW」。

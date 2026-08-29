@@ -65,7 +65,7 @@ export function buildCoverflowSlides({
       title: displayTitle(film, lang) || film.title,
       author: film.director
         ? `${film.director} · ${film.year || ''}`.trim()
-        : `${film.year || ''} · Studio TRIGGER`.trim(),
+        : `${film.year || ''} · 片库`.trim(),
       image: filmImage(film) || FALLBACK_IMAGE,
       videoUrl: film.trailerUrl || undefined,
       isWatched: false,

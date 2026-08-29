@@ -13,7 +13,7 @@
 
 - **前端**:React 19 + Vite 6 + TypeScript + Tailwind CSS 4 + motion + react-router
 - **后端**:CloudBase(PostgreSQL + RLS 行级权限 + 静态托管)
-- **数据模型**:`films` / `news` / `screenings` / `nomination_rounds` / `nomination_options` / `votes` / `user_roles`(见 `migrations/`)
+- **数据模型**:`films` / `news` / `screenings` / `nomination_pool` / `film_week_votes` / `user_roles`（见 `migrations/`）。遗留 `nomination_rounds` / `nomination_options` / `votes` 不再走 HTTP。
 
 ## 本地开发
 
