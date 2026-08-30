@@ -235,7 +235,7 @@ const AppShell: React.FC = () => {
             onClose={() => setAllWorksOpen(false)}
             onSelectWork={(work) => {
               // Keep the library open underneath so closing the detail
-              // returns the user to the library (历代动画作品一览).
+              // returns the user to the library (历代放映作品一览).
               setSelectedWork(work);
             }}
           />

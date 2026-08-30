@@ -24,6 +24,9 @@
 | screening_date | date | 排期日期 |
 | release_date | date | **上映日期**（较新加） |
 | duration | integer | **时长分钟**（较新加） |
+| rating | text | **评分标签**（豆瓣/TMDB，如 `9.7`；缺失留空等 TMDB 刮削补充） |
+| watch_url | text | **观看链接**（bilibili 视频 / 网盘） |
+| watch_type | text | **链接类型**：`bilibili` / `pan` |
 | sort_order | integer | 排序 |
 | created_at / updated_at | timestamptz | 时间戳 |
 
@@ -49,7 +52,8 @@ RLS：公开读（`news_public_read`）；admin 读写（`news_admin_write` + `n
 |---|---|
 | id | text PK |
 | title | text |
-| screen_date | date NOT NULL |
+| screen_date | date NOT NULL（起始日；`~` 范围用 `screen_date_end` 表示持续放映） |
+| screen_date_end | date（**较新加**：放映结束日，单日放映为 NULL） |
 | venue / theme | text |
 | film_ids | text[]（关联 films.id） |
 | gallery | text[] |
