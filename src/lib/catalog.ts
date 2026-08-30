@@ -32,6 +32,7 @@ export function mapFilmDetail(r: Record<string, unknown>): WorkItem {
     trailerUrl: (r.trailer_url as string | null) ?? undefined,
     releaseDate: r.release_date ? String(r.release_date) : undefined,
     duration: typeof r.duration === 'number' ? r.duration : undefined,
+    screeningDate: r.screening_date ? String(r.screening_date) : undefined,
   };
 }
 

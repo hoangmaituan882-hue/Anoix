@@ -60,16 +60,22 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
                   <Calendar className="w-3.5 h-3.5 text-[#ff3650]" />
                   {work.year}
                 </span>
+                {work.screeningDate && (
+                  <span className="text-xs font-bold text-white/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/15">
+                    <Calendar className="w-3.5 h-3.5 text-[#ff3650]" />
+                    放映 {work.screeningDate}
+                  </span>
+                )}
                 {work.releaseDate && (
                   <span className="text-xs font-bold text-white/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/15">
                     <Calendar className="w-3.5 h-3.5 text-[#e0fe3d]" />
-                    {work.releaseDate}
+                    上映 {work.releaseDate}
                   </span>
                 )}
                 {work.duration != null && (
                   <span className="text-xs font-bold text-white/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/15">
                     <Tv className="w-3.5 h-3.5 text-[#e0fe3d]" />
-                    {work.duration} 分钟
+                    时长 {work.duration} 分钟
                   </span>
                 )}
                 {work.isNew && (
