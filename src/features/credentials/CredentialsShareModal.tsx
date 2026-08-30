@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Film, Vote, Share2, Check, Star, Clock } from 'lucide-react';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
@@ -62,7 +62,7 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
           initial={{ opacity: 0, scale: 0.97, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.97, y: 10 }}
-          className="relative w-full max-w-sm bg-white dark:bg-[#121212] border border-[#e5e7eb] dark:border-[#242424] rounded-2xl overflow-hidden shadow-2xl z-10 text-neutral-900 dark:text-white transition-colors"
+          className="relative w-full max-w-sm bg-white dark:bg-[#f5ffe5] border border-[#e5e7eb] dark:border-[#242424] rounded-2xl overflow-hidden shadow-2xl z-10 text-neutral-900 dark:text-white transition-colors"
         >
           {/* Close button */}
           <button
@@ -115,7 +115,7 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
                 </div>
               </div>
 
-              <div className="shrink-0 flex flex-col items-center justify-center p-2 rounded-xl bg-neutral-100 dark:bg-[#181818] border border-neutral-200 dark:border-[#2a2a2a] text-center min-w-[4.5rem]">
+              <div className="shrink-0 flex flex-col items-center justify-center p-2 rounded-xl bg-neutral-100 dark:bg-white border border-neutral-200 dark:border-[#2a2a2a] text-center min-w-[4.5rem]">
                 <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-neutral-900 dark:text-white">
                   <Vote className="w-3 h-3" />
                   <span>{votes}</span>
@@ -127,7 +127,7 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-2.5 mb-4">
-              <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
+              <div className="bg-white dark:bg-white p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
                 <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
                   已看时长
                 </span>
@@ -139,7 +139,7 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
+              <div className="bg-white dark:bg-white p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
                 <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
                   未看时长
                 </span>
@@ -151,7 +151,7 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
+              <div className="bg-white dark:bg-white p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
                 <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
                   已看片数
                 </span>
@@ -163,7 +163,7 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-[#141414] p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
+              <div className="bg-white dark:bg-white p-3 rounded-lg border border-[#e5e7eb] dark:border-[#222222] shadow-xs">
                 <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
                   提名
                 </span>
@@ -176,14 +176,14 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-neutral-100 dark:bg-[#141414] border border-neutral-200 dark:border-[#222222] text-center font-mono text-[10px] text-neutral-600 dark:text-[#888888] flex items-center justify-center gap-1.5">
+            <div className="p-2.5 rounded-lg bg-neutral-100 dark:bg-white border border-neutral-200 dark:border-[#222222] text-center font-mono text-[10px] text-neutral-600 dark:text-[#888888] flex items-center justify-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>ANOIX CINEMA CLUB // {stats.totalNominations} NOM · {votes} VOTES</span>
             </div>
           </div>
 
           {/* Action buttons */}
-          <div className="p-4 bg-white dark:bg-[#121212] flex items-center justify-between gap-2.5">
+          <div className="p-4 bg-white dark:bg-[#f5ffe5] flex items-center justify-between gap-2.5">
             <button
               onClick={handleCopy}
               className="flex-1 bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-[#e5e5e5] font-semibold text-xs py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
@@ -193,7 +193,7 @@ export const CredentialsShareModal: React.FC<CredentialsShareModalProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="px-3.5 py-2.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 dark:bg-[#1a1a1a] dark:hover:bg-[#222222] dark:text-[#888888] dark:hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+              className="px-3.5 py-2.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 dark:bg-white dark:hover:bg-white dark:text-[#888888] dark:hover:text-white text-xs font-semibold transition-colors cursor-pointer"
             >
               关闭
             </button>

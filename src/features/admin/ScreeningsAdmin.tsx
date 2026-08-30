@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+﻿import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { adminFilms, adminScreenings, ScreeningRow, FilmRow } from '../../lib/pgAdmin';
 import {
   shanghaiDateString,
@@ -12,14 +12,14 @@ import { Loader } from '../../components/motion/loader';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 const ROUND_BADGE: Record<string, { label: string; cls: string }> = {
-  screened: { label: '已放映', cls: 'bg-white/10 text-white/70 border-white/15' },
+  screened: { label: '已放映', cls: 'bg-white/10 text-black/70 border-black/15' },
   tonight: { label: '本场', cls: 'bg-[#ff3650]/20 text-[#ff3650] border-[#ff3650]/40' },
   upcoming: { label: '未放映', cls: 'bg-[#e0fe3d]/15 text-[#e0fe3d] border-[#e0fe3d]/40' },
-  unscheduled: { label: '未排期', cls: 'bg-white/10 text-white/40 border-white/10' },
+  unscheduled: { label: '未排期', cls: 'bg-white/10 text-black/40 border-black/10' },
 };
 
-const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
-const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
+const FIELD = 'w-full bg-black/50 border border-black/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-black/30';
+const LABEL = 'text-xs font-black text-black/60 uppercase tracking-wider block mb-1';
 
 const EMPTY: ScreeningRow = { id: '', title: '', screen_date: '', venue: null, theme: null, film_ids: [], recap: null };
 
@@ -89,19 +89,19 @@ export const ScreeningsAdmin: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-black/10 shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
               SCREENING ARCHIVES
             </span>
-            <span className="bg-white/10 text-white/80 px-2 py-0.5 rounded-full text-xs font-mono font-bold">
+            <span className="bg-white/10 text-black/80 px-2 py-0.5 rounded-full text-xs font-mono font-bold">
               {rows.length} 场放映
             </span>
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight uppercase">放映档案</h2>
-          <p className="text-xs text-white/50">每一场放映即一轮。状态按日期自动标记，不必另起轮次名称。</p>
+          <p className="text-xs text-black/50">每一场放映即一轮。状态按日期自动标记，不必另起轮次名称。</p>
         </div>
 
         <button
@@ -126,15 +126,15 @@ export const ScreeningsAdmin: React.FC = () => {
       <ScheduleBoard films={films} screenings={rows} onSaved={() => void reload()} />
 
       {/* Search Filter */}
-      <div className="flex items-center justify-between gap-3 bg-[#181818] p-3 rounded-2xl border border-white/10">
+      <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-black/10">
         <div className="relative flex-1 max-w-sm">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-black/40" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="搜索放映标题、场地或主题..."
-            className="w-full bg-black/40 border border-white/15 rounded-xl pl-9 pr-4 py-1.5 text-xs text-white placeholder:text-white/40 focus:border-[#ff3650] focus:outline-none"
+            className="w-full bg-black/40 border border-black/15 rounded-xl pl-9 pr-4 py-1.5 text-xs text-white placeholder:text-black/40 focus:border-[#ff3650] focus:outline-none"
           />
         </div>
       </div>
@@ -142,9 +142,9 @@ export const ScreeningsAdmin: React.FC = () => {
       {/* Screenings Cards List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredRows.length === 0 ? (
-          <div className="col-span-2 bg-[#1a1a1a] border border-white/10 rounded-3xl p-16 text-center space-y-2">
-            <Video className="w-12 h-12 text-white/20 mx-auto" />
-            <p className="text-sm font-bold text-white/60">暂无符合条件的放映会记录</p>
+          <div className="col-span-2 bg-white border border-black/10 rounded-3xl p-16 text-center space-y-2">
+            <Video className="w-12 h-12 text-black/20 mx-auto" />
+            <p className="text-sm font-bold text-black/60">暂无符合条件的放映会记录</p>
           </div>
         ) : (
           filteredRows.map((r) => {
@@ -154,7 +154,7 @@ export const ScreeningsAdmin: React.FC = () => {
             return (
               <div
                 key={r.id}
-                className="bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650]/60 rounded-3xl p-6 space-y-4 transition-all hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex flex-col justify-between"
+                className="bg-white border border-black/10 hover:border-[#ff3650]/60 rounded-3xl p-6 space-y-4 transition-all hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
@@ -175,13 +175,13 @@ export const ScreeningsAdmin: React.FC = () => {
                       <h3 className="text-lg font-black text-white">{label}</h3>
                     </div>
 
-                    <span className="text-[10px] font-mono text-white/30 truncate max-w-[80px]">
+                    <span className="text-[10px] font-mono text-black/30 truncate max-w-[80px]">
                       {r.id}
                     </span>
                   </div>
 
                   {r.venue && (
-                    <div className="flex items-center gap-1.5 text-xs text-white/60">
+                    <div className="flex items-center gap-1.5 text-xs text-black/60">
                       <MapPin className="w-3.5 h-3.5 text-[#ff3650]" />
                       <span>{r.venue}</span>
                     </div>
@@ -189,17 +189,17 @@ export const ScreeningsAdmin: React.FC = () => {
 
                   {/* Films list */}
                   <div className="space-y-1.5 pt-1">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-wider block">
+                    <span className="text-[10px] font-black text-black/40 uppercase tracking-wider block">
                       放映片单 ({selectedFilms.length} 部):
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedFilms.length === 0 ? (
-                        <span className="text-xs text-white/30 italic">未添加放映片目</span>
+                        <span className="text-xs text-black/30 italic">未添加放映片目</span>
                       ) : (
                         selectedFilms.map((f) => (
                           <span
                             key={f.id}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-white/80"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-black/10 text-xs font-bold text-black/80"
                           >
                             <Film className="w-3 h-3 text-[#ff3650]" />
                             {f.title_zh ?? f.title}
@@ -210,13 +210,13 @@ export const ScreeningsAdmin: React.FC = () => {
                   </div>
 
                   {r.recap && (
-                    <p className="text-xs text-white/50 bg-black/30 p-3 rounded-xl border border-white/5 line-clamp-2">
+                    <p className="text-xs text-black/50 bg-black/30 p-3 rounded-xl border border-black/5 line-clamp-2">
                       {r.recap}
                     </p>
                   )}
                 </div>
 
-                <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-2">
+                <div className="pt-4 border-t border-black/10 flex items-center justify-end gap-2">
                   <button
                     onClick={() => {
                       setEditingIsNew(false);
@@ -231,7 +231,7 @@ export const ScreeningsAdmin: React.FC = () => {
                   </button>
                   <button
                     onClick={() => remove(r.id, label)}
-                    className="p-1.5 rounded-xl bg-white/5 hover:bg-[#ff3650] text-white/40 hover:text-white transition-colors cursor-pointer"
+                    className="p-1.5 rounded-xl bg-white/5 hover:bg-[#ff3650] text-black/40 hover:text-white transition-colors cursor-pointer"
                     title="删除此放映会"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -307,8 +307,8 @@ const ScreeningForm: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in" onClick={onClose}>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#181818] border border-white/20 rounded-3xl p-6 sm:p-8 space-y-6 text-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-black/20 rounded-3xl p-6 sm:p-8 space-y-6 text-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-black/10 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/30 flex items-center justify-center text-[#ff3650]">
               <Calendar className="w-5 h-5" />
@@ -324,7 +324,7 @@ const ScreeningForm: React.FC<{
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10"
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-black/10"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -348,7 +348,7 @@ const ScreeningForm: React.FC<{
               className={FIELD}
             />
             {form.screen_date && (
-              <p className="text-[10px] font-mono text-white/40 pt-1">
+              <p className="text-[10px] font-mono text-black/40 pt-1">
                 自动标记：{ROUND_BADGE[screeningRoundStatus(form.screen_date, shanghaiDateString())]?.label}
                 {' · '}
                 {displayScreeningTitle({ title: form.title, screen_date: form.screen_date }) || screeningAutoTitle(form.screen_date)}
@@ -402,7 +402,7 @@ const ScreeningForm: React.FC<{
               <label className={LABEL}>选入放映片单 (点选以添加/移除)</label>
               <span className="text-xs font-mono text-[#ff3650] font-bold">已选 {form.film_ids?.length ?? 0} 部</span>
             </div>
-            <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto bg-black/40 border border-white/10 rounded-2xl p-3">
+            <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto bg-black/40 border border-black/10 rounded-2xl p-3">
               {films.map((f) => {
                 const on = (form.film_ids ?? []).includes(f.id);
                 return (
@@ -413,7 +413,7 @@ const ScreeningForm: React.FC<{
                     className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 border ${
                       on
                         ? 'bg-[#ff3650] text-white border-[#ff3650] shadow-md'
-                        : 'bg-white/5 text-white/60 hover:text-white border-white/10 hover:bg-white/10'
+                        : 'bg-white/5 text-black/60 hover:text-white border-black/10 hover:bg-white/10'
                     }`}
                   >
                     <Film className="w-3 h-3" />
@@ -442,10 +442,10 @@ const ScreeningForm: React.FC<{
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+        <div className="flex justify-end gap-3 pt-4 border-t border-black/10">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-xl font-bold text-xs text-black/60 hover:text-white border border-black/15 transition-colors cursor-pointer"
           >
             取消
           </button>

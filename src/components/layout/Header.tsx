@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TriggerLogo } from '../ui/TriggerLogo';
 import { Language, OpenSiteModal } from '../../types';
@@ -68,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
   };
 
   const pillItem =
-    'px-3.5 py-1.5 rounded-full text-white/80 hover:text-[#ff3650] hover:bg-white/10 transition-colors duration-150 cursor-pointer whitespace-nowrap';
+    'px-3.5 py-1.5 rounded-full text-black/80 hover:text-[#ff3650] hover:bg-white/10 transition-colors duration-150 cursor-pointer whitespace-nowrap';
 
   return (
     <>
@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
           isScrolled ? 'py-2 px-3 md:px-6' : 'py-3 px-3 md:px-6'
         }`}
       >
-        <div className="max-w-[1720px] mx-auto bg-[#1c1c1c]/95 backdrop-blur-md text-[#f5ffe5] rounded-b-2xl md:rounded-b-3xl px-4 md:px-6 py-3 border-b border-white/10 shadow-2xl grid grid-cols-[auto_1fr_auto] items-center gap-4">
+        <div className="max-w-[1720px] mx-auto bg-[#1c1c1c]/95 backdrop-blur-md text-[#1e1f21] rounded-b-2xl md:rounded-b-3xl px-4 md:px-6 py-3 border-b border-black/10 shadow-2xl grid grid-cols-[auto_1fr_auto] items-center gap-4">
           {/* Logo */}
           <h1 id="header_logo" className="flex items-center">
             <TriggerLogo
@@ -160,12 +160,12 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
               type="button"
               id="header-search-btn"
               onClick={() => openSearch()}
-              className="inline-flex items-center gap-2 h-7 px-2.5 sm:px-3 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white text-xs font-bold transition-colors cursor-pointer border border-white/10"
+              className="inline-flex items-center gap-2 h-7 px-2.5 sm:px-3 rounded-full bg-white/10 hover:bg-white/20 text-black/80 hover:text-white text-xs font-bold transition-colors cursor-pointer border border-black/10"
               title="搜索档案与作品 (⌘K)"
             >
               <Search className="w-3.5 h-3.5 text-[#ff3650]" />
               <span className="hidden min-[480px]:inline">搜索</span>
-              <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[9px] font-bold text-white/40 border border-white/15 rounded px-1 py-0.5">⌘K</kbd>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[9px] font-bold text-black/40 border border-black/15 rounded px-1 py-0.5">⌘K</kbd>
             </button>
             <RankingDropdown lang={lang} />
             <ThemeToggle />
@@ -175,7 +175,7 @@ export const Header: React.FC<HeaderProps> = ({ lang, setLang, onNavigate, onOpe
                 <DropdownMenuTrigger asChild>
                   <button
                     id="account_button"
-                    className="inline-flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5 h-7 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap text-[#f5ffe5] bg-white/10 hover:bg-white/20 outline-none focus-visible:ring-2 focus-visible:ring-[#ff3650] max-w-[110px]"
+                    className="inline-flex items-center gap-1.5 rounded-full pl-1 pr-2.5 py-0.5 h-7 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap text-[#1e1f21] bg-white/10 hover:bg-white/20 outline-none focus-visible:ring-2 focus-visible:ring-[#ff3650] max-w-[110px]"
                     title={user.name}
                   >
                     <Avatar className="h-5.5 w-5.5 shrink-0">

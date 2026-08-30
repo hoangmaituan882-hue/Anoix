@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,7 +24,7 @@ export const AvatarGroup: React.FC<{ count: number; size?: number; className?: s
       </div>
       {count > show && (
         <div
-          className="rounded-full ring-2 ring-[#151515] bg-white/10 text-white/60 flex items-center justify-center font-black shrink-0 -ml-2.5"
+          className="rounded-full ring-2 ring-[#151515] bg-white/10 text-black/60 flex items-center justify-center font-black shrink-0 -ml-2.5"
           style={{ width: size, height: size, fontSize: size * 0.32 }}
         >
           +{count - show}

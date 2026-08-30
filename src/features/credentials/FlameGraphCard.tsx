@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RotateCw, Sparkles } from 'lucide-react';
 
@@ -281,7 +281,7 @@ export const FlameGraphCard: React.FC<FlameGraphCardProps> = ({ className = '' }
 
   return (
     <div
-      className={`w-full max-w-[700px] mx-auto rounded-[32px] p-6 sm:p-7 bg-[#f2f2f5] dark:bg-[#141414] border border-black/[0.06] dark:border-white/10 shadow-lg transition-colors select-none ${className}`}
+      className={`w-full max-w-[700px] mx-auto rounded-[32px] p-6 sm:p-7 bg-[#f2f2f5] dark:bg-white border border-black/[0.06] dark:border-black/10 shadow-lg transition-colors select-none ${className}`}
     >
       {/* Top Header */}
       <div className="flex items-center justify-between mb-4 px-1">
@@ -310,13 +310,13 @@ export const FlameGraphCard: React.FC<FlameGraphCardProps> = ({ className = '' }
       </div>
 
       {/* Inner White Stage / Graph Canvas */}
-      <div className="rounded-2xl bg-white dark:bg-[#0a0a0a] p-6 border border-black/[0.04] dark:border-white/5 shadow-xs relative overflow-hidden transition-colors">
+      <div className="rounded-2xl bg-white dark:bg-white p-6 border border-black/[0.04] dark:border-black/5 shadow-xs relative overflow-hidden transition-colors">
         {/* Breadcrumbs & Dashed Line */}
         <div className="mb-4">
           <div className="flex items-center gap-1.5 text-xs font-mono text-[#737373] dark:text-[#888888] overflow-x-auto pb-0.5 scrollbar-none">
             {breadcrumbs.map((crumb, idx) => (
               <React.Fragment key={idx}>
-                {idx > 0 && <span className="text-neutral-400 dark:text-white/30">/</span>}
+                {idx > 0 && <span className="text-neutral-400 dark:text-black/30">/</span>}
                 <button
                   type="button"
                   onClick={() => {
@@ -498,13 +498,13 @@ export const FlameGraphCard: React.FC<FlameGraphCardProps> = ({ className = '' }
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 3, scale: 0.96 }}
               transition={{ duration: 0.22, ease: RESIZE_EASE }}
-              className="absolute bottom-2.5 left-4 right-4 bg-black/90 dark:bg-[#161616]/95 backdrop-blur-md text-white px-3.5 py-2 rounded-xl text-xs flex items-center justify-between pointer-events-none z-30 shadow-xl border border-white/10"
+              className="absolute bottom-2.5 left-4 right-4 bg-black/90 dark:bg-[#161616]/95 backdrop-blur-md text-white px-3.5 py-2 rounded-xl text-xs flex items-center justify-between pointer-events-none z-30 shadow-xl border border-black/10"
             >
               <div className="flex items-center gap-2">
                 <span className="font-bold text-[#f59e0b] font-mono">{hoveredFrame.name}</span>
-                <span className="text-white/40">({hoveredFrame.codeName})</span>
-                <span className="text-white/40">·</span>
-                <span className="text-white/80">{hoveredFrame.category}</span>
+                <span className="text-black/40">({hoveredFrame.codeName})</span>
+                <span className="text-black/40">·</span>
+                <span className="text-black/80">{hoveredFrame.category}</span>
               </div>
               <div className="font-mono text-white font-semibold flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />

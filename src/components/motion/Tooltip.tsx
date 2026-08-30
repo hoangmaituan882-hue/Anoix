@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface TooltipProps {
@@ -42,7 +42,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
             animate={pos.animate}
             exit={{ opacity: 0, y: side === 'top' ? 6 : -6 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className={`absolute ${pos.className} left-1/2 -translate-x-1/2 z-50 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#262626] text-white/90 border border-white/10 shadow-xl`}
+            className={`absolute ${pos.className} left-1/2 -translate-x-1/2 z-50 pointer-events-none whitespace-nowrap px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#262626] text-white/90 border border-black/10 shadow-xl`}
           >
             {label}
           </motion.span>

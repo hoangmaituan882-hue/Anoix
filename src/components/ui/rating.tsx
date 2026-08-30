@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -60,7 +60,7 @@ export const Rating: React.FC<RatingProps> = ({
               strokeWidth={1.5}
               className={cn(
                 'transition-colors duration-150',
-                filled ? 'fill-[#ff3650] text-[#ff3650] drop-shadow-[0_0_6px_rgba(255,54,80,0.5)]' : 'fill-transparent text-white/25',
+                filled ? 'fill-[#ff3650] text-[#ff3650] drop-shadow-[0_0_6px_rgba(255,54,80,0.5)]' : 'fill-transparent text-black/25',
                 hover && i <= hover && !filled && 'fill-[#e0fe3d] text-[#e0fe3d]',
               )}
             />

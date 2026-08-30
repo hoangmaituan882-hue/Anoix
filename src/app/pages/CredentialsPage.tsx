@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { CredentialsCoverflow, RiffleRecipeSlide } from '../../features/credentials/CredentialsCoverflow';
@@ -205,7 +205,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#fbfbfb] dark:bg-[#050505] text-neutral-900 dark:text-[#e5e5e5] font-sans antialiased selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-300">
+    <div className="min-h-screen bg-[#fbfbfb] dark:bg-white text-neutral-900 dark:text-[#e5e5e5] font-sans antialiased selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-300">
       {/* Website Universal Header */}
       <Header
         lang={lang}
@@ -218,7 +218,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
       <main className="flex-1 min-h-0 pt-20">
         <div className="relative flex h-full flex-col">
           {/* Sub-Header HUD Bar with Light & Dark adaptation */}
-          <section className="w-full bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md border-b border-neutral-200 dark:border-[#1f1f1f] sticky top-16 z-40 transition-colors duration-300">
+          <section className="w-full bg-white/90 dark:bg-white/90 backdrop-blur-md border-b border-neutral-200 dark:border-[#1f1f1f] sticky top-16 z-40 transition-colors duration-300">
             <div className="container mx-auto px-4 md:px-6">
               <div className="relative flex flex-wrap items-center justify-between gap-3 h-16 md:flex-nowrap">
                 {/* Left: System code & Status */}
@@ -236,7 +236,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
 
                 {/* Center: Boards vs Drops switcher */}
                 <div className="flex items-center justify-center">
-                  <div className="p-1 bg-neutral-100 dark:bg-[#141414] rounded-lg border border-neutral-200 dark:border-[#242424] flex items-center gap-1">
+                  <div className="p-1 bg-neutral-100 dark:bg-white rounded-lg border border-neutral-200 dark:border-[#242424] flex items-center gap-1">
                     <button
                       type="button"
                       onClick={() => setTopTab('boards')}
@@ -286,7 +286,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                       onFocus={() => setSearchFocused(true)}
                       onBlur={() => setSearchFocused(false)}
                       placeholder={lang === 'zh' ? '搜索放映看板...' : 'Search boards...'}
-                      className={`relative h-8 w-full bg-neutral-100 dark:bg-[#141414] border border-neutral-200 dark:border-[#242424] rounded-lg pl-7 pr-6 text-xs text-black dark:text-white placeholder:text-neutral-400 dark:placeholder:text-[#666666] focus:outline-none focus:border-neutral-500 dark:focus:border-[#404040] transition-all ${
+                      className={`relative h-8 w-full bg-neutral-100 dark:bg-white border border-neutral-200 dark:border-[#242424] rounded-lg pl-7 pr-6 text-xs text-black dark:text-white placeholder:text-neutral-400 dark:placeholder:text-[#666666] focus:outline-none focus:border-neutral-500 dark:focus:border-[#404040] transition-all ${
                         searchFocused || searchQuery
                           ? 'opacity-100 pointer-events-auto'
                           : 'opacity-0 pointer-events-none'
@@ -306,7 +306,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                   {/* Export Passport / Share Button */}
                   <button
                     onClick={() => setShareModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-neutral-100 border border-neutral-200 hover:bg-neutral-200 dark:bg-[#141414] dark:border-[#242424] dark:hover:bg-[#1f1f1f] dark:hover:border-[#383838] text-neutral-700 hover:text-black dark:text-[#cccccc] dark:hover:text-white text-xs font-medium transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-neutral-100 border border-neutral-200 hover:bg-neutral-200 dark:bg-white dark:border-[#242424] dark:hover:bg-[#1f1f1f] dark:hover:border-[#383838] text-neutral-700 hover:text-black dark:text-[#cccccc] dark:hover:text-white text-xs font-medium transition-all cursor-pointer"
                     title="生成并导出放映资历通行证"
                   >
                     <Share2 className="w-3.5 h-3.5 text-neutral-500 dark:text-[#888888]" />
@@ -351,7 +351,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                 <div className="mx-auto w-full max-w-[976px] mt-6">
                   <div className="w-full min-w-0">
                     {/* Sticky Sub-tabs bar */}
-                    <div className="sticky top-32 z-30 -mx-6 bg-[#fbfbfb]/90 dark:bg-[#050505]/90 backdrop-blur-md px-6 pt-3 pb-2 border-b border-neutral-200 dark:border-[#1f1f1f] transition-colors">
+                    <div className="sticky top-32 z-30 -mx-6 bg-[#fbfbfb]/90 dark:bg-white/90 backdrop-blur-md px-6 pt-3 pb-2 border-b border-neutral-200 dark:border-[#1f1f1f] transition-colors">
                       <div className="flex items-center justify-between">
                         <div className="flex space-x-6 text-sm font-medium">
                           <button
@@ -420,7 +420,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                                   >
                                     <div className="group relative flex flex-col cursor-pointer">
                                       <div className="block">
-                                        <div className="w-36 h-36 sm:w-44 sm:h-44 bg-neutral-100 dark:bg-[#141414] rounded-xl overflow-hidden mb-3 relative border border-neutral-200 dark:border-[#202020] group-hover:border-neutral-400 dark:group-hover:border-[#383838] shadow-md transition-all duration-500 ease-out">
+                                        <div className="w-36 h-36 sm:w-44 sm:h-44 bg-neutral-100 dark:bg-white rounded-xl overflow-hidden mb-3 relative border border-neutral-200 dark:border-[#202020] group-hover:border-neutral-400 dark:group-hover:border-[#383838] shadow-md transition-all duration-500 ease-out">
                                           <img
                                             alt={b.title}
                                             className="w-full h-full object-cover"
@@ -450,7 +450,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                                             />
                                             {b.tag && (
                                               <div className="absolute top-2 left-2">
-                                                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-white/80 dark:bg-black/70 backdrop-blur-md text-neutral-800 dark:text-[#d4d4d4] border border-black/10 dark:border-white/10">
+                                                <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-white/80 dark:bg-black/70 backdrop-blur-md text-neutral-800 dark:text-[#d4d4d4] border border-black/10 dark:border-black/10">
                                                   {b.tag}
                                                 </span>
                                               </div>
@@ -462,7 +462,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                                       <div className="w-36 sm:w-44 text-left relative">
                                         <div className="flex items-center justify-between gap-2 h-6">
                                           <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-semibold text-neutral-900 dark:text-white truncate group-hover:text-neutral-700 dark:group-hover:text-white/80 transition-colors">
+                                            <p className="text-xs font-semibold text-neutral-900 dark:text-white truncate group-hover:text-neutral-700 dark:group-hover:text-black/80 transition-colors">
                                               {b.title}
                                             </p>
                                           </div>
@@ -491,7 +491,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                               >
                                 <div className="group relative flex flex-col cursor-pointer">
                                   <div className="block">
-                                    <div className="w-36 h-36 sm:w-44 sm:h-44 bg-neutral-100 dark:bg-[#141414] rounded-xl overflow-hidden mb-3 relative border border-neutral-200 dark:border-[#202020] group-hover:border-neutral-400 dark:group-hover:border-[#383838] shadow-md transition-all duration-500 ease-out">
+                                    <div className="w-36 h-36 sm:w-44 sm:h-44 bg-neutral-100 dark:bg-white rounded-xl overflow-hidden mb-3 relative border border-neutral-200 dark:border-[#202020] group-hover:border-neutral-400 dark:group-hover:border-[#383838] shadow-md transition-all duration-500 ease-out">
                                       <img
                                         alt={b.title}
                                         className="w-full h-full object-cover"
@@ -521,7 +521,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                                         />
                                         {b.tag && (
                                           <div className="absolute top-2 left-2">
-                                            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-white/80 dark:bg-black/70 backdrop-blur-md text-neutral-800 dark:text-[#d4d4d4] border border-black/10 dark:border-white/10">
+                                            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-white/80 dark:bg-black/70 backdrop-blur-md text-neutral-800 dark:text-[#d4d4d4] border border-black/10 dark:border-black/10">
                                               {b.tag}
                                             </span>
                                           </div>
@@ -533,7 +533,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                                   <div className="w-36 sm:w-44 text-left relative">
                                     <div className="flex items-center justify-between gap-2 h-6">
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-semibold text-neutral-900 dark:text-white truncate group-hover:text-neutral-700 dark:group-hover:text-white/80 transition-colors">
+                                        <p className="text-xs font-semibold text-neutral-900 dark:text-white truncate group-hover:text-neutral-700 dark:group-hover:text-black/80 transition-colors">
                                           {b.title}
                                         </p>
                                       </div>
@@ -549,7 +549,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                         ) : (
                           /* Empty State for Shared */
                           <div className="flex flex-col items-center justify-center py-20 px-6">
-                            <div className="w-14 h-14 bg-neutral-100 dark:bg-[#141414] border border-neutral-200 dark:border-[#242424] rounded-xl flex items-center justify-center mb-4">
+                            <div className="w-14 h-14 bg-neutral-100 dark:bg-white border border-neutral-200 dark:border-[#242424] rounded-xl flex items-center justify-center mb-4">
                               <Film className="w-6 h-6 text-neutral-400 dark:text-[#737373]" />
                             </div>
                             <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-1">
@@ -568,7 +568,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
             ) : (
               /* Drops Tab */
               <div className="mx-auto w-full max-w-[800px] py-16 text-center">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-neutral-100 dark:bg-[#141414] border border-neutral-200 dark:border-[#242424] flex items-center justify-center mb-5">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-neutral-100 dark:bg-white border border-neutral-200 dark:border-[#242424] flex items-center justify-center mb-5">
                   <Layers className="w-8 h-8 text-neutral-700 dark:text-[#d4d4d4]" />
                 </div>
                 <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-2 tracking-tight">
@@ -613,7 +613,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
               exit={{ opacity: 0, scale: 0.97, y: 10 }}
               transition={{ duration: 0.2 }}
               onSubmit={handleCreateBoard}
-              className="relative w-full max-w-md bg-white dark:bg-[#121212] border border-neutral-200 dark:border-[#242424] rounded-2xl p-6 shadow-2xl z-10 space-y-4 text-neutral-900 dark:text-white"
+              className="relative w-full max-w-md bg-white dark:bg-[#f5ffe5] border border-neutral-200 dark:border-[#242424] rounded-2xl p-6 shadow-2xl z-10 space-y-4 text-neutral-900 dark:text-white"
             >
               <h3 className="text-base font-bold text-neutral-900 dark:text-white">
                 {lang === 'zh' ? '创建新的放映看板' : 'Create a new board'}
@@ -629,7 +629,7 @@ export const CredentialsPage: React.FC<CredentialsPageProps> = ({
                 value={newBoardTitle}
                 onChange={(e) => setNewBoardTitle(e.target.value)}
                 placeholder={lang === 'zh' ? '例如：赛博朋克夜之城原声特设' : 'e.g. midnight cyberpunk tapes'}
-                className="w-full bg-neutral-50 dark:bg-[#181818] border border-neutral-200 dark:border-[#2a2a2a] rounded-lg px-3.5 py-2.5 text-xs text-black dark:text-white focus:outline-none focus:border-neutral-500 dark:focus:border-white/50 transition-colors"
+                className="w-full bg-neutral-50 dark:bg-white border border-neutral-200 dark:border-[#2a2a2a] rounded-lg px-3.5 py-2.5 text-xs text-black dark:text-white focus:outline-none focus:border-neutral-500 dark:focus:border-black/50 transition-colors"
               />
               <div className="flex items-center justify-end gap-2.5 pt-2">
                 <button

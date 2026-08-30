@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Home, SearchX } from 'lucide-react';
@@ -22,7 +22,7 @@ export const NotFound: React.FC<NotFoundProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#f5ffe5] flex flex-col items-center justify-center px-6 text-center selection:bg-[#ff3650] selection:text-white">
+    <div className="min-h-screen bg-[#f5ffe5] text-[#1e1f21] flex flex-col items-center justify-center px-6 text-center selection:bg-[#ff3650] selection:text-white">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -50,7 +50,7 @@ export const NotFound: React.FC<NotFoundProps> = ({
         <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-3">
           Page Not Found
         </h1>
-        <p className="text-sm sm:text-base text-white/60 max-w-md leading-relaxed mb-8">
+        <p className="text-sm sm:text-base text-black/60 max-w-md leading-relaxed mb-8">
           {description}
         </p>
 
@@ -64,7 +64,7 @@ export const NotFound: React.FC<NotFoundProps> = ({
           </button>
         )}
       </motion.div>
-      <BeianLink className="mt-16 text-xs text-white/40 hover:text-white/70 transition-colors" />
+      <BeianLink className="mt-16 text-xs text-black/40 hover:text-black/70 transition-colors" />
     </div>
   );
 };

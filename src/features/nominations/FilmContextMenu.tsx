@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Plus, Copy, Heart } from 'lucide-react';
 import {
@@ -47,7 +47,7 @@ export const FilmContextMenu: React.FC<{
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-      <ContextMenuContent className="w-52 bg-[#1d1d1f] border-white/10 text-white">
+      <ContextMenuContent className="w-52 bg-[#1d1d1f] border-black/10 text-white">
         {filmId && (
           <ContextMenuItem
             onClick={() => navigate(`/films/${filmId}`, { viewTransition: true })}
@@ -69,7 +69,7 @@ export const FilmContextMenu: React.FC<{
         {extra}
         <ContextMenuSeparator />
         <ContextMenuItem onClick={copyTitle} className="focus:bg-white/10 focus:text-white">
-          <Copy className="text-white/50" /> 复制标题
+          <Copy className="text-black/50" /> 复制标题
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

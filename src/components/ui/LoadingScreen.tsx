@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { TriggerLogo } from './TriggerLogo';
 
 interface LoadingScreenProps {
@@ -33,14 +33,14 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onComplete }) => {
   return (
     <div
       id="loading_screen"
-      className={`fixed inset-0 z-[100] bg-[#121212] flex flex-col items-center justify-center transition-opacity duration-600 ${
+      className={`fixed inset-0 z-[100] bg-[#f5ffe5] flex flex-col items-center justify-center transition-opacity duration-600 ${
         fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
       <div className="flex flex-col items-center gap-6 max-w-xs w-full px-6">
         <TriggerLogo className="w-48 text-[#ff3650] animate-pulse" />
 
-        <div className="w-full flex items-center justify-between font-mono text-sm font-black text-[#f5ffe5]">
+        <div className="w-full flex items-center justify-between font-mono text-sm font-black text-[#1e1f21]">
           <span>LOADING</span>
           <span className="loading_text text-[#ff3650]">{percent}%</span>
         </div>

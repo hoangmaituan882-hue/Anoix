@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion } from 'motion/react';
 import { Screening } from '../../types/screening';
 import { Language, WorkItem } from '../../types';
@@ -38,7 +38,7 @@ export const ScreeningPosterCard: React.FC<ScreeningPosterCardProps> = ({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-30px' }}
       transition={{ duration: 0.35, delay: index * 0.04, ease: TRIGGER_EASE }}
-      className="group flex flex-col bg-[#181818] border border-white/10 hover:border-[#ff3650]/60 rounded-2xl overflow-hidden transition-colors duration-200"
+      className="group flex flex-col bg-white border border-black/10 hover:border-[#ff3650]/60 rounded-2xl overflow-hidden transition-colors duration-200"
     >
       {/* Poster Image Frame */}
       <div 
@@ -54,7 +54,7 @@ export const ScreeningPosterCard: React.FC<ScreeningPosterCardProps> = ({
 
         {/* Top Badges */}
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2 z-10">
-          <span className="bg-black/85 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-mono font-bold text-white border border-white/15">
+          <span className="bg-black/85 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-mono font-bold text-white border border-black/15">
             {screening.screen_date}
           </span>
 
@@ -75,7 +75,7 @@ export const ScreeningPosterCard: React.FC<ScreeningPosterCardProps> = ({
 
         {/* Bottom Venue Strip */}
         <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10">
-          <p className="text-[11px] font-medium text-white/90 line-clamp-1 flex items-center gap-1 bg-black/80 backdrop-blur-sm px-2 py-1 rounded border border-white/10">
+          <p className="text-[11px] font-medium text-white/90 line-clamp-1 flex items-center gap-1 bg-black/80 backdrop-blur-sm px-2 py-1 rounded border border-black/10">
             <MapPin className="w-3 h-3 text-[#ff3650] shrink-0" />
             <span className="truncate">{screening.venue ?? 'Tokyo Theater'}</span>
           </p>
@@ -98,8 +98,8 @@ export const ScreeningPosterCard: React.FC<ScreeningPosterCardProps> = ({
           )}
         </div>
 
-        <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2 text-xs">
-          <div className="text-[11px] font-mono text-white/50">
+        <div className="pt-2 border-t border-black/10 flex items-center justify-between gap-2 text-xs">
+          <div className="text-[11px] font-mono text-black/50">
             {screening.film_ids?.length ?? 0} {lang === 'zh' ? '部作品' : 'TITLES'}
           </div>
 

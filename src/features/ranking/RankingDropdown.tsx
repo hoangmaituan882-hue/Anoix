@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Share2, LogIn } from 'lucide-react';
@@ -115,7 +115,7 @@ export const RankingDropdown: React.FC<RankingDropdownProps> = () => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/10 hover:bg-white/20 text-[#f5ffe5] dark:text-white text-xs font-bold transition-all cursor-pointer outline-none border border-white/10 shadow-xs"
+        className="relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/10 hover:bg-white/20 text-[#1e1f21] dark:text-white text-xs font-bold transition-all cursor-pointer outline-none border border-black/10 shadow-xs"
         aria-label="放映排行榜位"
         title={capsuleTitle}
       >
@@ -158,7 +158,7 @@ export const RankingDropdown: React.FC<RankingDropdownProps> = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-[310px] sm:w-[330px] p-4.5 rounded-2xl bg-white dark:bg-[#141414] text-neutral-900 dark:text-white border border-[#e5e7eb] dark:border-[#242424] shadow-2xl transition-colors"
+            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 w-[310px] sm:w-[330px] p-4.5 rounded-2xl bg-white dark:bg-white text-neutral-900 dark:text-white border border-[#e5e7eb] dark:border-[#242424] shadow-2xl transition-colors"
           >
             <div className="grid grid-cols-3 gap-2 pb-3.5 border-b border-[#e5e7eb] dark:border-[#202020]">
               <div>

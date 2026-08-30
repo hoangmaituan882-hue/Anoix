@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+﻿import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Language, OpenSiteModal, WorkItem } from '../../types';
@@ -66,7 +66,7 @@ export function TabButton({ isActive, label, onClick, icon: Icon }: TabButtonPro
         className={`relative z-10 flex items-center gap-1.5 text-[12px] font-bold transition-colors ${
           isActive
             ? 'text-white font-black'
-            : 'text-white/60 hover:text-white'
+            : 'text-black/60 hover:text-white'
         }`}
       >
         <Icon className="w-3.5 h-3.5" />
@@ -212,7 +212,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#f5ffe5] font-sans antialiased selection:bg-[#ff3650] selection:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-[#f5ffe5] text-[#1e1f21] font-sans antialiased selection:bg-[#ff3650] selection:text-white transition-colors duration-300">
       {/* Top Floating Action Loading Toast */}
       <AnimatePresence>
         {rows === null && (
@@ -223,7 +223,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
             transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
             className="fixed top-5 left-1/2 z-[2147483647] pointer-events-none select-none"
           >
-            <div className="flex items-center gap-2.5 px-6 py-2 rounded-full bg-[#181818] text-white shadow-xl border border-white/10 text-[12px] font-bold tracking-wide">
+            <div className="flex items-center gap-2.5 px-6 py-2 rounded-full bg-white text-white shadow-xl border border-black/10 text-[12px] font-bold tracking-wide">
               <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin shrink-0" />
               <span>正在载解放映档案...</span>
             </div>
@@ -241,7 +241,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
 
       <main
         id="screening_container"
-        className="w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#f5ffe5]"
+        className="w-full min-h-screen bg-[#f5ffe5] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#1e1f21]"
       >
         <div className="max-w-5xl mx-auto relative z-10">
           {/* Unified Clean Page Hero adhering to 24px Main Title & 14px Subtitle */}
@@ -251,11 +251,11 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
           />
 
           {/* Concise Unified Controls HUD Toolbar */}
-          <div className="my-4 sm:my-5 p-2 bg-[#181818]/90 backdrop-blur-md rounded-2xl border border-white/10 sticky top-16 sm:top-20 z-30 transition-colors space-y-2.5">
+          <div className="my-4 sm:my-5 p-2 bg-white/90 backdrop-blur-md rounded-2xl border border-black/10 sticky top-16 sm:top-20 z-30 transition-colors space-y-2.5">
             {/* Top Toolbar Row: Switcher + Search + Year Chips */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               {/* View Mode Switcher with Morphing Pill */}
-              <div className="flex items-center gap-1 p-1 bg-black/40 rounded-full border border-white/10">
+              <div className="flex items-center gap-1 p-1 bg-black/40 rounded-full border border-black/10">
                 {tabOptions.map((item) => (
                   <TabButton
                     key={item.id}
@@ -271,18 +271,18 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
               <div className="flex flex-wrap items-center gap-2">
                 {/* Search Bar */}
                 <div className="relative flex-1 sm:w-52">
-                  <Search className="w-3.5 h-3.5 text-white/40 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3.5 h-3.5 text-black/40 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="搜索放映 / 影院 / 嘉宾..."
-                    className="w-full bg-black/40 border border-white/10 focus:border-[#ff3650] rounded-full pl-8 pr-3 py-1.5 text-[12px] text-white placeholder-white/40 focus:outline-none transition-colors"
+                    className="w-full bg-black/40 border border-black/10 focus:border-[#ff3650] rounded-full pl-8 pr-3 py-1.5 text-[12px] text-white placeholder-white/40 focus:outline-none transition-colors"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-white/40 hover:text-white"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-black/40 hover:text-white"
                     >
                       ✕
                     </button>
@@ -296,7 +296,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                     className={`px-3 py-1 rounded-full text-[12px] font-bold transition-all cursor-pointer shrink-0 ${
                       selectedYear === 'all' && filterConditions.length === 0
                         ? 'bg-[#ff3650] text-white shadow-sm'
-                        : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10'
+                        : 'bg-white/5 text-black/60 hover:text-white hover:bg-white/10 border border-black/10'
                     }`}
                   >
                     全部年份
@@ -308,7 +308,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                       className={`px-3 py-1 rounded-full text-[12px] font-bold transition-all cursor-pointer shrink-0 ${
                         selectedYear === year
                           ? 'bg-[#ff3650] text-white shadow-sm'
-                          : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10'
+                          : 'bg-white/5 text-black/60 hover:text-white hover:bg-white/10 border border-black/10'
                       }`}
                     >
                       {year}年
@@ -319,7 +319,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
             </div>
 
             {/* Bottom Row: Pure Chinese Filter Pills Bar */}
-            <div className="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+            <div className="pt-2 border-t border-black/10 flex flex-wrap items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <ScreeningFilterPills
                   conditions={filterConditions}
@@ -330,7 +330,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
 
               {/* Quick Preset Badges when no condition is active */}
               {filterConditions.length === 0 && (
-                <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-white/40">
+                <div className="hidden lg:flex items-center gap-1.5 text-[11px] text-black/40">
                   <span>快捷预设：</span>
                   <button
                     onClick={() =>
@@ -341,7 +341,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                         value: '2023',
                       })
                     }
-                    className="px-2.5 py-0.5 rounded-md bg-white/5 hover:bg-white/15 text-white/70 hover:text-white transition-colors cursor-pointer border border-white/10"
+                    className="px-2.5 py-0.5 rounded-md bg-white/5 hover:bg-white/15 text-black/70 hover:text-white transition-colors cursor-pointer border border-black/10"
                   >
                     📅 晚于 2023年
                   </button>
@@ -354,7 +354,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                         value: '杜比全景声',
                       })
                     }
-                    className="px-2.5 py-0.5 rounded-md bg-white/5 hover:bg-white/15 text-white/70 hover:text-white transition-colors cursor-pointer border border-white/10"
+                    className="px-2.5 py-0.5 rounded-md bg-white/5 hover:bg-white/15 text-black/70 hover:text-white transition-colors cursor-pointer border border-black/10"
                   >
                     🔊 杜比全景声
                   </button>
@@ -383,8 +383,8 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
             </div>
           ) : filteredRows.length === 0 ? (
             /* Empty State */
-            <div className="bg-[#181818] border border-white/10 rounded-3xl p-10 text-center max-w-md mx-auto my-8">
-              <Film className="w-10 h-10 text-white/30 mx-auto mb-3" />
+            <div className="bg-white border border-black/10 rounded-3xl p-10 text-center max-w-md mx-auto my-8">
+              <Film className="w-10 h-10 text-black/30 mx-auto mb-3" />
               <h3 className="text-[18px] font-bold text-white mb-1">
                 未找到符合条件的放映记录
               </h3>
@@ -425,12 +425,12 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                       <div
                         key={item.id}
                         onClick={() => openPoster(item)}
-                        className="group flex justify-between items-center p-3.5 rounded-2xl bg-[#181818] border border-white/10 hover:border-[#ff3650]/50 transition-colors cursor-pointer shadow-xs"
+                        className="group flex justify-between items-center p-3.5 rounded-2xl bg-white border border-black/10 hover:border-[#ff3650]/50 transition-colors cursor-pointer shadow-xs"
                       >
                         <div className="flex gap-3.5 items-center min-w-0 flex-1">
                           <motion.div
                             layoutId={`app_motion_stack_profile_${item.id}`}
-                            className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-black/60 shrink-0 border border-white/10"
+                            className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-black/60 shrink-0 border border-black/10"
                             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                           >
                             <img
@@ -468,7 +468,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                               </motion.div>
 
                               {item.format_tags?.[0] && (
-                                <span className="text-[11px] text-white/60 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+                                <span className="text-[11px] text-black/60 bg-white/5 px-2 py-0.5 rounded-full border border-black/10">
                                   {item.format_tags[0]}
                                 </span>
                               )}
@@ -479,7 +479,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                         <motion.div
                           layoutId={`app_motion_stack_nos_${item.id}`}
                           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                          className="text-[12px] text-white/50 flex items-center gap-1 shrink-0 ml-4"
+                          className="text-[12px] text-black/50 flex items-center gap-1 shrink-0 ml-4"
                         >
                           <MapPin className="w-3.5 h-3.5 text-[#ff3650]" />
                           <span className="truncate max-w-[160px] sm:max-w-[220px]">{item.venue}</span>
@@ -511,11 +511,11 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                       <div
                         key={item.id}
                         onClick={() => openPoster(item)}
-                        className="group flex-1 flex flex-col gap-3 w-full p-3.5 rounded-2xl bg-[#181818] border border-white/10 hover:border-[#ff3650]/50 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden t-tilt-card"
+                        className="group flex-1 flex flex-col gap-3 w-full p-3.5 rounded-2xl bg-white border border-black/10 hover:border-[#ff3650]/50 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden t-tilt-card"
                       >
                         <motion.div
                           layoutId={`app_motion_stack_profile_${item.id}`}
-                          className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/60 border border-white/10"
+                          className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/60 border border-black/10"
                           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                         >
                           <img
@@ -543,7 +543,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                             </h3>
                           </motion.div>
 
-                          <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                          <div className="flex items-center justify-between pt-1 border-t border-black/5">
                             <motion.div
                               layoutId={`app_motion_stack_price_${item.id}`}
                               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
@@ -557,7 +557,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                             <motion.div
                               layoutId={`app_motion_stack_nos_${item.id}`}
                               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                              className="text-[12px] text-white/50 flex items-center gap-1 truncate max-w-[130px]"
+                              className="text-[12px] text-black/50 flex items-center gap-1 truncate max-w-[130px]"
                             >
                               <MapPin className="w-3 h-3 shrink-0 text-[#ff3650]" />
                               <span className="truncate">{item.venue}</span>
@@ -605,7 +605,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                         >
                           <motion.div
                             layoutId={`app_motion_stack_profile_${item.id}`}
-                            className="absolute left-0 top-0 w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 bg-black/90 group-hover:border-[#ff3650]"
+                            className="absolute left-0 top-0 w-full h-full rounded-2xl overflow-hidden shadow-2xl border-2 border-black/20 bg-black/90 group-hover:border-[#ff3650]"
                             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                           >
                             <img
@@ -648,7 +648,7 @@ export const ScreeningsPage: React.FC<ScreeningsPageProps> = ({ lang, setLang, o
                           layoutId={`app_motion_stack_nos_${filteredRows[0].id}`}
                           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                         >
-                          <span className="text-[12px] text-white/50">
+                          <span className="text-[12px] text-black/50">
                             共收录 {filteredRows.length} 部放映典藏
                           </span>
                         </motion.div>

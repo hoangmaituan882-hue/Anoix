@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language, OpenSiteModal } from '../../types';
@@ -286,12 +286,12 @@ export const CalendarPage: React.FC<CalendarPageProps> = () => {
                       onClick={() => setIsTimezoneOpen(!isTimezoneOpen)}
                       className="flex items-center gap-1.5 text-[#4b5563] hover:text-black dark:text-[#999999] dark:hover:text-white transition-colors cursor-pointer group"
                     >
-                      <Globe className="w-3.5 h-3.5 text-[#6b7280] dark:text-[#737373] group-hover:text-black dark:group-hover:text-white/70 shrink-0" />
+                      <Globe className="w-3.5 h-3.5 text-[#6b7280] dark:text-[#737373] group-hover:text-black dark:group-hover:text-black/70 shrink-0" />
                       <span className="truncate max-w-[155px]">{timezone}</span>
                       <ChevronDown className={`w-3 h-3 text-[#6b7280] dark:text-[#737373] group-hover:text-black dark:group-hover:text-white transition-transform ${isTimezoneOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isTimezoneOpen && (
-                      <div className="absolute left-0 top-full mt-2 w-64 bg-white dark:bg-[#141414] border border-[#e5e7eb] dark:border-[#262626] rounded-xl shadow-2xl py-1 z-30 overflow-hidden">
+                      <div className="absolute left-0 top-full mt-2 w-64 bg-white dark:bg-white border border-[#e5e7eb] dark:border-[#262626] rounded-xl shadow-2xl py-1 z-30 overflow-hidden">
                         {TIMEZONES.map((tz) => (
                           <button
                             type="button"
@@ -461,7 +461,7 @@ export const CalendarPage: React.FC<CalendarPageProps> = () => {
                     return (
                       <div
                         key={plan.id}
-                        className={`p-3.5 rounded-lg border border-[#e5e7eb] dark:border-[#222222] bg-white dark:bg-[#141414] hover:border-[#d1d5db] dark:hover:border-[#333333] transition-all space-y-2 border-l-2 ${toneStyle.borderAccent}`}
+                        className={`p-3.5 rounded-lg border border-[#e5e7eb] dark:border-[#222222] bg-white dark:bg-white hover:border-[#d1d5db] dark:hover:border-[#333333] transition-all space-y-2 border-l-2 ${toneStyle.borderAccent}`}
                       >
                         <button
                           type="button"
@@ -485,7 +485,7 @@ export const CalendarPage: React.FC<CalendarPageProps> = () => {
                                 type="button"
                                 key={f.id}
                                 onClick={() => void openFilm(f.id)}
-                                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-white/10 text-neutral-600 dark:text-white/70 hover:text-black dark:hover:text-white cursor-pointer"
+                                className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-white/10 text-neutral-600 dark:text-black/70 hover:text-black dark:hover:text-white cursor-pointer"
                               >
                                 {f.title}
                               </button>
@@ -498,7 +498,7 @@ export const CalendarPage: React.FC<CalendarPageProps> = () => {
                           onClick={() => void handleToggleRsvp(plan.id, plan.title)}
                           className={`w-full py-1.5 px-2.5 rounded text-[11px] font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 ${
                             isRsvped
-                              ? 'bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb] border border-[#e5e7eb] dark:bg-[#222222] dark:text-[#cccccc] dark:hover:bg-[#2c2c2c] dark:border-[#333333]'
+                              ? 'bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb] border border-[#e5e7eb] dark:bg-white dark:text-[#cccccc] dark:hover:bg-[#2c2c2c] dark:border-[#333333]'
                               : 'bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-[#e5e5e5]'
                           }`}
                         >

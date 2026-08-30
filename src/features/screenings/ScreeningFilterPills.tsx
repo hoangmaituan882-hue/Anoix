@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, Volume2, MapPin, Ticket, Plus, X, ChevronDown, Check, Sparkles } from 'lucide-react';
 import { Screening } from '../../types/screening';
@@ -163,7 +163,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.85, y: -4 }}
               transition={{ duration: 0.2 }}
-              className="relative inline-flex items-center text-[12px] font-medium rounded-full bg-white/10 dark:bg-white/10 hover:bg-white/15 border border-white/15 dark:border-white/20 text-white shadow-xs transition-colors backdrop-blur-xs"
+              className="relative inline-flex items-center text-[12px] font-medium rounded-full bg-white/10 dark:bg-white/10 hover:bg-white/15 border border-black/15 dark:border-black/20 text-white shadow-xs transition-colors backdrop-blur-xs"
             >
               {/* Segment 1: Field Name */}
               <div className="flex items-center gap-1.5 pl-3 pr-2 py-1 text-white/90 font-bold">
@@ -172,7 +172,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
               </div>
 
               {/* Vertical Segment Divider */}
-              <span className="text-white/20 select-none">|</span>
+              <span className="text-black/20 select-none">|</span>
 
               {/* Segment 2: Operator */}
               <button
@@ -181,14 +181,14 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                   setActiveEditingPillId(isEditingThis && editingSegment === 'operator' ? null : cond.id);
                   setEditingSegment('operator');
                 }}
-                className="px-2 py-1 text-white/70 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+                className="px-2 py-1 text-black/70 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
               >
                 <span>{displayOp}</span>
                 <ChevronDown className="w-2.5 h-2.5 opacity-50" />
               </button>
 
               {/* Vertical Segment Divider */}
-              <span className="text-white/20 select-none">|</span>
+              <span className="text-black/20 select-none">|</span>
 
               {/* Segment 3: Target Value */}
               <button
@@ -210,13 +210,13 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
               </button>
 
               {/* Vertical Segment Divider */}
-              <span className="text-white/20 select-none">|</span>
+              <span className="text-black/20 select-none">|</span>
 
               {/* Segment 4: Clear Button (×) */}
               <button
                 type="button"
                 onClick={() => removeFilter(cond.id)}
-                className="pl-2 pr-3 py-1 text-white/50 hover:text-white transition-colors cursor-pointer hover:bg-white/10 rounded-r-full"
+                className="pl-2 pr-3 py-1 text-black/50 hover:text-white transition-colors cursor-pointer hover:bg-white/10 rounded-r-full"
                 aria-label="移除筛选条件"
               >
                 <X className="w-3.5 h-3.5" />
@@ -224,7 +224,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
 
               {/* Dropdown Popover for Operator Selection */}
               {isEditingThis && editingSegment === 'operator' && (
-                <div className="absolute top-full left-12 mt-1 z-50 min-w-36 bg-[#1c1c1c] border border-white/20 rounded-xl p-1.5 shadow-2xl backdrop-blur-md text-[12px]">
+                <div className="absolute top-full left-12 mt-1 z-50 min-w-36 bg-[#1c1c1c] border border-black/20 rounded-xl p-1.5 shadow-2xl backdrop-blur-md text-[12px]">
                   {isDate ? (
                     ['处于', '晚于', '早于', '介于区间', '时间周期'].map((op) => (
                       <button
@@ -237,7 +237,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                           setActiveEditingPillId(null);
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between hover:bg-white/10 cursor-pointer ${
-                          displayOp === op ? 'text-[#ff3650] font-bold bg-white/5' : 'text-white/80'
+                          displayOp === op ? 'text-[#ff3650] font-bold bg-white/5' : 'text-black/80'
                         }`}
                       >
                         <span>{op}</span>
@@ -253,7 +253,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                           setActiveEditingPillId(null);
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between hover:bg-white/10 cursor-pointer ${
-                          displayOp === op ? 'text-[#ff3650] font-bold bg-white/5' : 'text-white/80'
+                          displayOp === op ? 'text-[#ff3650] font-bold bg-white/5' : 'text-black/80'
                         }`}
                       >
                         <span>{op}</span>
@@ -266,7 +266,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
 
               {/* Dropdown Popover for Target Value Selection */}
               {isEditingThis && editingSegment === 'value' && (
-                <div className="absolute top-full right-4 mt-1 z-50 min-w-44 bg-[#1c1c1c] border border-white/20 rounded-xl p-2 shadow-2xl backdrop-blur-md text-[12px] max-h-60 overflow-y-auto">
+                <div className="absolute top-full right-4 mt-1 z-50 min-w-44 bg-[#1c1c1c] border border-black/20 rounded-xl p-2 shadow-2xl backdrop-blur-md text-[12px] max-h-60 overflow-y-auto">
                   {isDate ? (
                     cond.operator === '时间周期' || cond.operator === 'is within' ? (
                       ['未来90天特映', '近1年放映', '全历史场次'].map((val) => (
@@ -277,7 +277,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                             setActiveEditingPillId(null);
                           }}
                           className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between hover:bg-white/10 cursor-pointer ${
-                            cond.value === val ? 'text-[#ff3650] font-bold bg-white/5' : 'text-white/80'
+                            cond.value === val ? 'text-[#ff3650] font-bold bg-white/5' : 'text-black/80'
                           }`}
                         >
                           <span>{val}</span>
@@ -286,21 +286,21 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                       ))
                     ) : cond.operator === '介于区间' || cond.operator === 'is between' ? (
                       <div className="space-y-2 p-1">
-                        <div className="text-[10px] text-white/50">起始年份:</div>
+                        <div className="text-[10px] text-black/50">起始年份:</div>
                         <div className="grid grid-cols-3 gap-1">
                           {availableYears.map((yr) => (
                             <button
                               key={`from_${yr}`}
                               onClick={() => updateCondition(cond.id, { value: yr })}
                               className={`px-2 py-1 rounded text-center cursor-pointer ${
-                                cond.value === yr ? 'bg-[#ff3650] text-white font-bold' : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                cond.value === yr ? 'bg-[#ff3650] text-white font-bold' : 'bg-white/5 text-black/70 hover:bg-white/10'
                               }`}
                             >
                               {yr}
                             </button>
                           ))}
                         </div>
-                        <div className="text-[10px] text-white/50 pt-1 border-t border-white/10">截止年份:</div>
+                        <div className="text-[10px] text-black/50 pt-1 border-t border-black/10">截止年份:</div>
                         <div className="grid grid-cols-3 gap-1">
                           {availableYears.map((yr) => (
                             <button
@@ -310,7 +310,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                                 setActiveEditingPillId(null);
                               }}
                               className={`px-2 py-1 rounded text-center cursor-pointer ${
-                                cond.secondValue === yr ? 'bg-[#ff3650] text-white font-bold' : 'bg-white/5 text-white/70 hover:bg-white/10'
+                                cond.secondValue === yr ? 'bg-[#ff3650] text-white font-bold' : 'bg-white/5 text-black/70 hover:bg-white/10'
                               }`}
                             >
                               {yr}
@@ -327,7 +327,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                             setActiveEditingPillId(null);
                           }}
                           className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between hover:bg-white/10 cursor-pointer ${
-                            cond.value === yr ? 'text-[#ff3650] font-bold bg-white/5' : 'text-white/80'
+                            cond.value === yr ? 'text-[#ff3650] font-bold bg-white/5' : 'text-black/80'
                           }`}
                         >
                           <span>{yr}年</span>
@@ -344,7 +344,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                           setActiveEditingPillId(null);
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between hover:bg-white/10 cursor-pointer ${
-                          cond.value === spec.split(' ')[0] ? 'text-[#ff3650] font-bold bg-white/5' : 'text-white/80'
+                          cond.value === spec.split(' ')[0] ? 'text-[#ff3650] font-bold bg-white/5' : 'text-black/80'
                         }`}
                       >
                         <span>{spec}</span>
@@ -363,7 +363,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                           setActiveEditingPillId(null);
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between hover:bg-white/10 cursor-pointer ${
-                          cond.value === item.val ? 'text-[#ff3650] font-bold bg-white/5' : 'text-white/80'
+                          cond.value === item.val ? 'text-[#ff3650] font-bold bg-white/5' : 'text-black/80'
                         }`}
                       >
                         <span>{item.label}</span>
@@ -379,7 +379,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
                           setActiveEditingPillId(null);
                         }}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between hover:bg-white/10 cursor-pointer ${
-                          cond.value === v.replace(/影院|特设剧场|巡展现场/g, '') ? 'text-[#ff3650] font-bold bg-white/5' : 'text-white/80'
+                          cond.value === v.replace(/影院|特设剧场|巡展现场/g, '') ? 'text-[#ff3650] font-bold bg-white/5' : 'text-black/80'
                         }`}
                       >
                         <span>{v}</span>
@@ -399,7 +399,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
         <button
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 hover:bg-white/15 text-white/80 hover:text-white border border-white/10 text-[12px] font-bold transition-all cursor-pointer shadow-xs"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 hover:bg-white/15 text-black/80 hover:text-white border border-black/10 text-[12px] font-bold transition-all cursor-pointer shadow-xs"
         >
           <Plus className="w-3.5 h-3.5 text-[#ff3650]" />
           <span>添加筛选条件</span>
@@ -407,35 +407,35 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
 
         {/* Add Filter Menu Popover */}
         {menuOpen && (
-          <div className="absolute top-full left-0 mt-1.5 z-50 w-48 bg-[#1c1c1c] border border-white/20 rounded-2xl p-2 shadow-2xl backdrop-blur-md text-[12px]">
-            <div className="px-2 py-1 text-[10px] uppercase font-bold text-white/40 tracking-wider">
+          <div className="absolute top-full left-0 mt-1.5 z-50 w-48 bg-[#1c1c1c] border border-black/20 rounded-2xl p-2 shadow-2xl backdrop-blur-md text-[12px]">
+            <div className="px-2 py-1 text-[10px] uppercase font-bold text-black/40 tracking-wider">
               选择筛选维度
             </div>
             <div className="space-y-0.5 mt-1">
               <button
                 onClick={() => addFilter('date')}
-                className="w-full px-2.5 py-2 rounded-xl flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                className="w-full px-2.5 py-2 rounded-xl flex items-center gap-2 text-black/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
               >
                 <Calendar className="w-3.5 h-3.5 text-[#ff3650]" />
                 <span>放映日期</span>
               </button>
               <button
                 onClick={() => addFilter('audio')}
-                className="w-full px-2.5 py-2 rounded-xl flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                className="w-full px-2.5 py-2 rounded-xl flex items-center gap-2 text-black/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
               >
                 <Volume2 className="w-3.5 h-3.5 text-[#ff3650]" />
                 <span>音响规格</span>
               </button>
               <button
                 onClick={() => addFilter('status')}
-                className="w-full px-2.5 py-2 rounded-xl flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                className="w-full px-2.5 py-2 rounded-xl flex items-center gap-2 text-black/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
               >
                 <Ticket className="w-3.5 h-3.5 text-[#ff3650]" />
                 <span>活动状态</span>
               </button>
               <button
                 onClick={() => addFilter('venue')}
-                className="w-full px-2.5 py-2 rounded-xl flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
+                className="w-full px-2.5 py-2 rounded-xl flex items-center gap-2 text-black/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer text-left"
               >
                 <MapPin className="w-3.5 h-3.5 text-[#ff3650]" />
                 <span>影院地区</span>
@@ -450,7 +450,7 @@ export const ScreeningFilterPills: React.FC<ScreeningFilterPillsProps> = ({
         <button
           type="button"
           onClick={clearAll}
-          className="text-[12px] text-white/40 hover:text-[#ff3650] px-2 py-1 transition-colors cursor-pointer font-bold"
+          className="text-[12px] text-black/40 hover:text-[#ff3650] px-2 py-1 transition-colors cursor-pointer font-bold"
         >
           清空筛选
         </button>

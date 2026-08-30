@@ -4,6 +4,25 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
+   官方 TRIGGER 站字体（st-trigger.co.jp 参考）
+   - Fjordic-Heavy：标题/展示字体（280px 大标题、WORKS 等）
+   - Gen Interface JP：官方正文（128 unicode-range 子集，日文为主）
+   正文用中文系统字体栈兜底（Noto Sans SC / PingFang SC / 微软雅黑）
+   ============================================================ */
+@font-face {
+  font-family: 'Fjordic-Heavy';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Fjordic-Heavy.woff') format('woff');
+}
+
+@utility font-headline {
+  font-family: 'Fjordic-Heavy', 'Arial Black', 'Noto Sans SC', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
    shadcn-style theme tokens for beUI components (Select, etc.)
    Dark is the default; overridden under html.light below.
    ============================================================ */

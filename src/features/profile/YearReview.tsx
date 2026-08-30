@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { community, YearReviewData } from '../../lib/community';
 import { Rating } from '../../components/ui/rating';
@@ -10,9 +10,9 @@ import { Sparkles, Trophy, CheckCircle2, ChevronRight, ChevronLeft, X, Share2 } 
 const TOTAL = 5;
 
 const StatChip: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => (
-  <div className="flex-1 min-w-[80px] rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-center">
+  <div className="flex-1 min-w-[80px] rounded-2xl border border-black/10 bg-white/5 px-3 py-3 text-center">
     <p className={`text-2xl font-black ${color}`}><AnimatedNumber value={value} /></p>
-    <p className="text-[11px] font-bold text-white/40 mt-0.5">{label}</p>
+    <p className="text-[11px] font-bold text-black/40 mt-0.5">{label}</p>
   </div>
 );
 
@@ -62,7 +62,7 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
 
           {/* top bar: close + progress */}
           <div className="relative z-10 flex items-center justify-between px-5 sm:px-8 py-4">
-            <span className="text-xs font-black text-white/40">{step + 1} / {TOTAL}</span>
+            <span className="text-xs font-black text-black/40">{step + 1} / {TOTAL}</span>
             <div className="flex-1 mx-4 h-1 rounded-full bg-white/10 overflow-hidden">
               <motion.div className="h-full bg-[#ff3650]" initial={false} animate={{ width: `${((step + 1) / TOTAL) * 100}%` }} transition={{ duration: 0.35, ease: TRIGGER_EASE }} />
             </div>
@@ -73,7 +73,7 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
           <div className="relative z-10 flex-1 flex items-center justify-center px-5 sm:px-8 overflow-y-auto">
             <AnimatePresence mode="wait">
               {data === null ? (
-                <motion.p key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-white/40 font-bold">加载中…</motion.p>
+                <motion.p key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-black/40 font-bold">加载中…</motion.p>
               ) : (
                 <motion.div
                   key={step}
@@ -89,7 +89,7 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
                       <div>
                         <p className="text-7xl sm:text-8xl font-black leading-none bg-gradient-to-r from-[#ff3650] to-[#e0fe3d] bg-clip-text text-transparent">{data.year}</p>
                         <p className="text-2xl sm:text-3xl font-black mt-3">我的放映之年</p>
-                        <p className="text-white/50 font-bold mt-2">{userName}</p>
+                        <p className="text-black/50 font-bold mt-2">{userName}</p>
                       </div>
                       <button onClick={() => setStep(1)} className="inline-flex items-center gap-2 bg-[#ff3650] hover:bg-[#ff203c] text-white font-black text-sm px-7 py-3 rounded-2xl shadow-[0_8px_24px_rgba(255,54,80,0.4)] transition-colors cursor-pointer">▶ 开始回顾</button>
                     </div>
@@ -99,11 +99,11 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
                     <div className="space-y-5">
                       <p className="text-xs font-black text-[#ff3650] uppercase tracking-widest">Nominate · 你的选片</p>
                       <p className="text-6xl font-black text-white"><AnimatedNumber value={data.nominations} /></p>
-                      <p className="text-white/40 font-bold">次提名</p>
+                      <p className="text-black/40 font-bold">次提名</p>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         {data.nominatedFilms.slice(0, 8).map((f, i) => (
-                          <motion.div key={i} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.06, ease: TRIGGER_EASE }} className="relative rounded-xl overflow-hidden border border-white/10 bg-black/30 aspect-[27/40]">
-                            {f.image ? <img src={f.image} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-white/20 font-black">{f.title.slice(0, 1)}</div>}
+                          <motion.div key={i} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.06, ease: TRIGGER_EASE }} className="relative rounded-xl overflow-hidden border border-black/10 bg-black/30 aspect-[27/40]">
+                            {f.image ? <img src={f.image} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-black/20 font-black">{f.title.slice(0, 1)}</div>}
                             <p className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 to-transparent px-1.5 py-1 text-[10px] font-bold text-white truncate">{f.title}</p>
                             {f.planned && <span className="absolute top-1.5 left-1.5 bg-emerald-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-0.5"><CheckCircle2 className="w-2.5 h-2.5" />已通过</span>}
                           </motion.div>
@@ -117,9 +117,9 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
                       <p className="text-xs font-black text-[#e0fe3d] uppercase tracking-widest">Vote · 你的眼光</p>
                       <div className="flex items-end justify-center gap-2">
                         <p className="text-6xl font-black text-white"><AnimatedNumber value={data.votes} /></p>
-                        <p className="text-white/40 font-bold pb-2">次投票</p>
+                        <p className="text-black/40 font-bold pb-2">次投票</p>
                       </div>
-                      <div className="flex items-center justify-center gap-2 text-white/50 font-bold">
+                      <div className="flex items-center justify-center gap-2 text-black/50 font-bold">
                         <Trophy className="w-5 h-5 text-[#e0fe3d]" /> 为 {data.rounds} 部片子叠过票
                       </div>
                     </div>
@@ -130,20 +130,20 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
                       <p className="text-xs font-black text-[#ff3650] uppercase tracking-widest">Watch · 你的放映</p>
                       <div className="flex items-end justify-center gap-2">
                         <p className="text-6xl font-black text-white"><AnimatedNumber value={data.watches} /></p>
-                        <p className="text-white/40 font-bold pb-2">部</p>
+                        <p className="text-black/40 font-bold pb-2">部</p>
                       </div>
                       <div className="flex items-center justify-center gap-2">
                         <Rating value={Math.round(data.avgRating)} readOnly size={20} />
-                        <span className="text-white/50 font-bold">{data.avgRating}/5</span>
+                        <span className="text-black/50 font-bold">{data.avgRating}/5</span>
                       </div>
                       {fiveStar.length > 0 && (
                         <div className="space-y-2">
-                          <p className="text-xs font-bold text-white/40">你给满分的作品</p>
+                          <p className="text-xs font-bold text-black/40">你给满分的作品</p>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                             {fiveStar.map((f, i) => (
-                              <motion.div key={i} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.06, ease: TRIGGER_EASE }} className="rounded-xl overflow-hidden border border-white/10 bg-black/30">
+                              <motion.div key={i} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: i * 0.06, ease: TRIGGER_EASE }} className="rounded-xl overflow-hidden border border-black/10 bg-black/30">
                                 <div className="aspect-[27/40] overflow-hidden bg-black/40">
-                                  {f.image ? <img src={f.image} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-white/20 font-black">{f.title.slice(0, 1)}</div>}
+                                  {f.image ? <img src={f.image} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-black/20 font-black">{f.title.slice(0, 1)}</div>}
                                 </div>
                                 <p className="px-2 py-1.5 text-[10px] font-bold text-white truncate">{f.title}</p>
                               </motion.div>
@@ -180,7 +180,7 @@ export const YearReview: React.FC<{ open: boolean; onClose: () => void; userName
 
           {/* bottom nav */}
           <div className="relative z-10 flex items-center justify-between px-5 sm:px-8 py-4">
-            <button onClick={() => setStep((s) => Math.max(s - 1, 0))} disabled={step === 0} className="inline-flex items-center gap-1 text-white/50 hover:text-white disabled:opacity-20 font-black text-sm transition-colors cursor-pointer"><ChevronLeft className="w-4 h-4" /> 上一幕</button>
+            <button onClick={() => setStep((s) => Math.max(s - 1, 0))} disabled={step === 0} className="inline-flex items-center gap-1 text-black/50 hover:text-white disabled:opacity-20 font-black text-sm transition-colors cursor-pointer"><ChevronLeft className="w-4 h-4" /> 上一幕</button>
             <button onClick={() => step === TOTAL - 1 ? onClose() : setStep((s) => Math.min(s + 1, TOTAL - 1))} className="inline-flex items-center gap-1 text-[#ff3650] hover:text-white font-black text-sm transition-colors cursor-pointer">{step === TOTAL - 1 ? '完成' : '下一幕'} <ChevronRight className="w-4 h-4" /></button>
           </div>
         </motion.div>

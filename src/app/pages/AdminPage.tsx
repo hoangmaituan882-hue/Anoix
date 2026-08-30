@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+﻿import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { auth } from '../../lib/cloudbase';
 import { repository } from '../../lib/repository';
@@ -75,7 +75,7 @@ export const AdminPage: React.FC = () => {
 
   if (authState === 'checking') {
     return (
-      <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center gap-4 text-white">
+      <div className="min-h-screen bg-[#f5ffe5] flex flex-col items-center justify-center gap-4 text-white">
         <TriggerLogo className="w-40 text-[#ff3650] animate-pulse" />
         <Loader variant="comet" size={40} label="TRIGGER CONSOLE · INITIALIZING" className="text-[#ff3650]" />
       </div>
@@ -95,14 +95,14 @@ export const AdminPage: React.FC = () => {
 
 // ---------------- Unauthorized screen (logged in, but not an admin) ----------------
 const Unauthorized: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => (
-  <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4 selection:bg-[#ff3650] selection:text-white">
-    <div className="w-full max-w-md bg-[#181818] border border-white/10 rounded-3xl p-8 text-center space-y-5">
+  <div className="min-h-screen bg-[#f5ffe5] flex items-center justify-center p-4 selection:bg-[#ff3650] selection:text-white">
+    <div className="w-full max-w-md bg-white border border-black/10 rounded-3xl p-8 text-center space-y-5">
       <div className="w-14 h-14 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/30 flex items-center justify-center text-[#ff3650] mx-auto">
         <ShieldCheck className="w-7 h-7" />
       </div>
       <div>
         <h1 className="text-xl font-black text-white">无管理员权限</h1>
-        <p className="text-xs text-white/50 mt-1">当前账号已登录，但不在管理员名单 (user_roles) 中。</p>
+        <p className="text-xs text-black/50 mt-1">当前账号已登录，但不在管理员名单 (user_roles) 中。</p>
       </div>
       <div className="flex justify-center gap-3 pt-2">
         <Link to="/" className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors">
@@ -147,7 +147,7 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4 relative overflow-hidden selection:bg-[#ff3650] selection:text-white">
+    <div className="min-h-screen bg-[#f5ffe5] flex items-center justify-center p-4 relative overflow-hidden selection:bg-[#ff3650] selection:text-white">
       {/* Background Graphic Accents */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-[#ff3650]/15 via-transparent to-transparent pointer-events-none" />
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#ff3650]/10 rounded-full blur-3xl pointer-events-none" />
@@ -167,18 +167,18 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
               CONSOLE OS 2.0
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-[#e0fe3d] animate-ping" />
-            <span className="text-[10px] font-mono text-white/40 uppercase">
+            <span className="text-[10px] font-mono text-black/40 uppercase">
               STUDIO TRIGGER ADMIN
             </span>
           </div>
         </div>
 
         {/* Login Box */}
-        <div className="bg-[#181818]/90 backdrop-blur-xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-6">
-          <div className="border-b border-white/10 pb-4 flex items-center justify-between">
+        <div className="bg-white/90 backdrop-blur-xl border border-black/15 rounded-3xl p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.8)] space-y-6">
+          <div className="border-b border-black/10 pb-4 flex items-center justify-between">
             <div>
               <h1 className="text-xl font-black text-white tracking-tight uppercase">管理后台登录</h1>
-              <p className="text-xs text-white/50 mt-0.5">控制台系统维护与内容发布</p>
+              <p className="text-xs text-black/50 mt-0.5">控制台系统维护与内容发布</p>
             </div>
             <div className="w-10 h-10 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/30 flex items-center justify-center text-[#ff3650]">
               <ShieldCheck className="w-5 h-5" />
@@ -187,7 +187,7 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
 
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-black text-white/60 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-black text-black/60 uppercase tracking-wider flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-[#ff3650]" />
                 管理员账号
               </label>
@@ -196,13 +196,13 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="输入管理员用户名 (如 admin)"
                 autoComplete="username"
-                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-white text-sm font-bold focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none placeholder:text-white/30 transition-all"
+                className="w-full bg-black/50 border border-black/15 rounded-2xl px-4 py-3 text-white text-sm font-bold focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none placeholder:text-black/30 transition-all"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-black text-white/60 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-black text-black/60 uppercase tracking-wider flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-[#ff3650]" />
                 安全密码
               </label>
@@ -213,13 +213,13 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="输入密码"
                   autoComplete="current-password"
-                  className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 pr-11 text-white text-sm font-bold focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none placeholder:text-white/30 transition-all"
+                  className="w-full bg-black/50 border border-black/15 rounded-2xl px-4 py-3 pr-11 text-white text-sm font-bold focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none placeholder:text-black/30 transition-all"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-black/40 hover:text-white transition-colors"
                 >
                   <Eye className="w-4 h-4" />
                 </button>
@@ -252,7 +252,7 @@ const AdminLogin: React.FC<{ onSignedIn: () => void }> = ({ onSignedIn }) => {
           <div className="text-center pt-2">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-white/40 hover:text-[#ff3650] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-black/40 hover:text-[#ff3650] transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>返回首页</span>
@@ -341,13 +341,13 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
       category: 'actions',
       label: '退出控制台登录',
       hint: 'Sign out',
-      icon: <LogOut className="w-4 h-4 text-white/50" />,
+      icon: <LogOut className="w-4 h-4 text-black/50" />,
       action: () => signOut(),
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#f5ffe5] selection:bg-[#ff3650] selection:text-white flex flex-col">
+    <div className="min-h-screen bg-[#f5ffe5] text-[#1e1f21] selection:bg-[#ff3650] selection:text-white flex flex-col">
       {/* Studio Cyber-Cockpit Navigation Header */}
       <AdminHeader
         tab={tab}
@@ -373,11 +373,11 @@ const AdminPanel: React.FC<{ onSignOut: () => void }> = ({ onSignOut }) => {
       </main>
 
       {/* Footer System Status */}
-      <footer className="border-t border-white/10 bg-[#141414] py-4 px-4 sm:px-8 text-center text-xs text-white/40">
+      <footer className="border-t border-black/10 bg-white py-4 px-4 sm:px-8 text-center text-xs text-black/40">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 font-mono">
           <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <span>© 2026 TRIGGER INC. ALL RIGHTS RESERVED. / ANOIX CONSOLE</span>
-            <BeianLink className="text-white/40 hover:text-white/70 transition-colors" />
+            <BeianLink className="text-black/40 hover:text-black/70 transition-colors" />
           </p>
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
@@ -400,8 +400,8 @@ const EMPTY_FILM: WorkItem = {
   id: '', title: '', year: '2026', category: 'TV Series', image: '', description: '', isNew: false,
 };
 
-const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
-const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
+const FIELD = 'w-full bg-black/50 border border-black/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-black/30';
+const LABEL = 'text-xs font-black text-black/60 uppercase tracking-wider block mb-1';
 
 const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onCountChange }) => {
   const [rows, setRows] = useState<FilmRow[] | null>(null);
@@ -480,25 +480,25 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
   return (
     <div className="space-y-6">
       {/* Top Banner & Quick Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-black/10 shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest flex items-center gap-1">
               <Film className="w-3.5 h-3.5" />
               WORKS REPOSITORY
             </span>
-            <span className="bg-white/10 text-white/80 px-2 py-0.5 rounded-full text-xs font-mono font-bold">
+            <span className="bg-white/10 text-black/80 px-2 py-0.5 rounded-full text-xs font-mono font-bold">
               <AnimatedNumber value={rows.length} /> 部作品
             </span>
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight uppercase">TRIGGER 动画作品管理</h2>
-          <p className="text-xs text-white/50">管理官网全量影视库、海报、制作主创与预告片链接</p>
+          <p className="text-xs text-black/50">管理官网全量影视库、海报、制作主创与预告片链接</p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setTmdbOpen(true)}
-            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-black text-sm px-5 py-3 rounded-2xl transition-all cursor-pointer border border-white/15"
+            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-black text-sm px-5 py-3 rounded-2xl transition-all cursor-pointer border border-black/15"
           >
             <Search className="w-4 h-4" />
             <span>TMDB 刮削导入</span>
@@ -521,7 +521,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
       )}
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#181818] p-4 rounded-2xl border border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-black/10">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
           {(['all', 'TV Series', 'Movie', 'Original Animation'] as const).map((cat) => (
             <button
@@ -530,7 +530,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
               className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer ${
                 categoryFilter === cat
                   ? 'bg-[#ff3650] text-white shadow-md'
-                  : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                  : 'bg-white/5 text-black/60 hover:text-white hover:bg-white/10'
               }`}
             >
               {cat === 'all' ? `全部 (${rows.length})` : cat}
@@ -540,21 +540,21 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
 
         <div className="flex items-center gap-2.5">
           <div className="relative flex-1 sm:w-64">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-black/40" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="搜索作品名、监督或年份..."
-              className="w-full bg-black/40 border border-white/15 rounded-xl pl-9 pr-4 py-1.5 text-xs text-white placeholder:text-white/40 focus:border-[#ff3650] focus:outline-none"
+              className="w-full bg-black/40 border border-black/15 rounded-xl pl-9 pr-4 py-1.5 text-xs text-white placeholder:text-black/40 focus:border-[#ff3650] focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center bg-black/40 border border-white/15 rounded-xl p-0.5">
+          <div className="flex items-center bg-black/40 border border-black/15 rounded-xl p-0.5">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                viewMode === 'grid' ? 'bg-[#ff3650] text-white' : 'text-white/40 hover:text-white'
+                viewMode === 'grid' ? 'bg-[#ff3650] text-white' : 'text-black/40 hover:text-white'
               }`}
               title="卡片矩阵视图"
             >
@@ -563,7 +563,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
             <button
               onClick={() => setViewMode('table')}
               className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                viewMode === 'table' ? 'bg-[#ff3650] text-white' : 'text-white/40 hover:text-white'
+                viewMode === 'table' ? 'bg-[#ff3650] text-white' : 'text-black/40 hover:text-white'
               }`}
               title="列表视图"
             >
@@ -575,17 +575,17 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
 
       {/* Content Rendering: Grid vs Table */}
       {filteredRows.length === 0 ? (
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-3xl p-16 text-center space-y-3">
-          <Film className="w-12 h-12 text-white/20 mx-auto" />
-          <p className="text-base font-bold text-white/70">未找到匹配的作品</p>
-          <p className="text-xs text-white/40">可尝试重置搜索词或添加一部全新作品</p>
+        <div className="bg-white border border-black/10 rounded-3xl p-16 text-center space-y-3">
+          <Film className="w-12 h-12 text-black/20 mx-auto" />
+          <p className="text-base font-bold text-black/70">未找到匹配的作品</p>
+          <p className="text-xs text-black/40">可尝试重置搜索词或添加一部全新作品</p>
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredRows.map((r) => (
             <div
               key={r.id}
-              className="bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col group hover:shadow-[0_10px_25px_rgba(255,54,80,0.2)]"
+              className="bg-white border border-black/10 hover:border-[#ff3650] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col group hover:shadow-[0_10px_25px_rgba(255,54,80,0.2)]"
             >
               {/* Poster Thumbnail */}
               <div className="relative aspect-[16/10] bg-black overflow-hidden">
@@ -594,7 +594,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
                   alt={r.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-black text-white border border-white/15">
+                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-black text-white border border-black/15">
                   {r.year}
                 </div>
                 <div className="absolute bottom-2 left-2">
@@ -610,18 +610,18 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
                   <h3 className="text-sm font-black text-white line-clamp-1 group-hover:text-[#ff3650] transition-colors">
                     {r.title_zh ?? r.title}
                   </h3>
-                  <p className="text-[11px] text-white/40 font-mono line-clamp-1 mt-0.5">
+                  <p className="text-[11px] text-black/40 font-mono line-clamp-1 mt-0.5">
                     {r.title}
                   </p>
                   {r.director && (
-                    <p className="text-xs text-white/60 mt-2 flex items-center gap-1.5">
+                    <p className="text-xs text-black/60 mt-2 flex items-center gap-1.5">
                       <span className="text-[#ff3650] font-bold">监督:</span> {r.director}
                     </p>
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                  <span className="font-mono text-[10px] text-white/30 truncate max-w-[100px]">{r.id}</span>
+                <div className="pt-3 border-t border-black/10 flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-black/30 truncate max-w-[100px]">{r.id}</span>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setEnrichTarget({ id: r.id, title: r.title_zh ?? r.title })}
@@ -641,7 +641,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
                     <button
                       disabled={busy}
                       onClick={() => remove(r.id, r.title_zh ?? r.title)}
-                      className="p-1.5 rounded-xl bg-white/5 hover:bg-[#ff3650] text-white/40 hover:text-white transition-colors cursor-pointer"
+                      className="p-1.5 rounded-xl bg-white/5 hover:bg-[#ff3650] text-black/40 hover:text-white transition-colors cursor-pointer"
                       title="删除作品"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -653,10 +653,10 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
           ))}
         </div>
       ) : (
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-white border border-black/10 rounded-2xl overflow-hidden shadow-xl">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-white/40 border-b border-white/10 bg-black/30">
+              <tr className="text-left text-black/40 border-b border-black/10 bg-black/30">
                 <th className="px-4 py-3.5 font-black text-xs uppercase">封面</th>
                 <th className="px-4 py-3.5 font-black text-xs uppercase">作品标题</th>
                 <th className="px-4 py-3.5 font-black text-xs uppercase">年份</th>
@@ -672,20 +672,20 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
                     <img
                       src={r.image || 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600'}
                       alt=""
-                      className="w-12 h-16 rounded-lg object-cover border border-white/10"
+                      className="w-12 h-16 rounded-lg object-cover border border-black/10"
                     />
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-black text-white">{r.title_zh ?? r.title}</div>
-                    <div className="text-xs text-white/40 font-mono">{r.title}</div>
+                    <div className="text-xs text-black/40 font-mono">{r.title}</div>
                   </td>
-                  <td className="px-4 py-3 font-mono text-white/70">{r.year}</td>
+                  <td className="px-4 py-3 font-mono text-black/70">{r.year}</td>
                   <td className="px-4 py-3">
                     <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/10 text-[#ff3650]">
                       {r.category}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-white/70 text-xs">{r.director || '—'}</td>
+                  <td className="px-4 py-3 text-black/70 text-xs">{r.director || '—'}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-2">
                       <button
@@ -697,7 +697,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
                       <button
                         disabled={busy}
                         onClick={() => remove(r.id, r.title_zh ?? r.title)}
-                        className="p-1.5 rounded-lg text-white/40 hover:text-[#ff3650] transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg text-black/40 hover:text-[#ff3650] transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -801,11 +801,11 @@ const FilmFormModal: React.FC<{
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in" onClick={onClose}>
       <div
-        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-[#181818] border border-white/20 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl text-white"
+        className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white border border-black/20 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="flex items-center justify-between border-b border-black/10 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/30 flex items-center justify-center text-[#ff3650]">
               <Film className="w-5 h-5" />
@@ -821,7 +821,7 @@ const FilmFormModal: React.FC<{
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10"
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-black/10"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -926,7 +926,7 @@ const FilmFormModal: React.FC<{
                 <img
                   src={form.image}
                   alt="preview"
-                  className="w-10 h-14 rounded-lg object-cover border border-white/20 flex-shrink-0"
+                  className="w-10 h-14 rounded-lg object-cover border border-black/20 flex-shrink-0"
                 />
               )}
             </div>
@@ -1013,10 +1013,10 @@ const FilmFormModal: React.FC<{
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/10">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl font-bold text-xs text-white/60 hover:text-white border border-white/15 transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-xl font-bold text-xs text-black/60 hover:text-white border border-black/15 transition-colors cursor-pointer"
           >
             取消关闭
           </button>

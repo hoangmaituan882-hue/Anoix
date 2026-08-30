@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WorkItem, Language } from '../../types';
 import { FilmPoster } from '../../components/ui/FilmPoster';
@@ -203,11 +203,11 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.3, ease: TRIGGER_EASE }}
-        className="relative w-full max-w-6xl bg-[#181818] border border-white/20 rounded-3xl overflow-hidden shadow-2xl my-8 text-[#f5ffe5] max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-6xl bg-white border border-black/20 rounded-3xl overflow-hidden shadow-2xl my-8 text-[#1e1f21] max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 sm:p-8 border-b border-white/10 flex items-center justify-between bg-[#151515]">
+        <div className="p-6 sm:p-8 border-b border-black/10 flex items-center justify-between bg-[#151515]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#ff3650]/15 border border-[#ff3650]/40 flex items-center justify-center text-[#ff3650]">
               <Film className="w-5 h-5" />
@@ -237,7 +237,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
                 isBatchMode
                   ? 'bg-[#ff3650] text-white border-[#ff3650] shadow-md'
-                  : 'bg-white/10 hover:bg-white/20 text-white/90 border-white/15'
+                  : 'bg-white/10 hover:bg-white/20 text-white/90 border-black/15'
               }`}
             >
               <CheckSquare className="w-3.5 h-3.5" />
@@ -246,7 +246,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
 
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10"
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-black/10"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
@@ -255,7 +255,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="px-6 sm:px-8 py-4 bg-[#1e1e1e] border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="px-6 sm:px-8 py-4 bg-[#1e1e1e] border-b border-black/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
             <Filter className="w-4 h-4 text-[#ff3650] flex-shrink-0" />
@@ -264,7 +264,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
               className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase transition-all whitespace-nowrap cursor-pointer ${
                 filter === 'all'
                   ? 'bg-[#ff3650] text-white shadow-md'
-                  : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                  : 'bg-white/10 text-black/70 hover:text-white hover:bg-white/15'
               }`}
             >
               {lang === 'zh' ? (filter === 'all' ? `全部 (${total})` : '全部') : (filter === 'all' ? `ALL (${total})` : 'ALL')}
@@ -274,7 +274,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
               className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase transition-all whitespace-nowrap cursor-pointer ${
                 filter === 'TV Series'
                   ? 'bg-[#ff3650] text-white shadow-md'
-                  : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                  : 'bg-white/10 text-black/70 hover:text-white hover:bg-white/15'
               }`}
             >
               {lang === 'zh' ? '电视动画 (TV Series)' : 'TV Series'}
@@ -284,7 +284,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
               className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase transition-all whitespace-nowrap cursor-pointer ${
                 filter === 'Movie'
                   ? 'bg-[#ff3650] text-white shadow-md'
-                  : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                  : 'bg-white/10 text-black/70 hover:text-white hover:bg-white/15'
               }`}
             >
               {lang === 'zh' ? '剧场版电影 (Movie)' : 'Theatrical Movie'}
@@ -294,7 +294,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
               className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase transition-all whitespace-nowrap cursor-pointer ${
                 filter === 'Original Animation'
                   ? 'bg-[#ff3650] text-white shadow-md'
-                  : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15'
+                  : 'bg-white/10 text-black/70 hover:text-white hover:bg-white/15'
               }`}
             >
               {lang === 'zh' ? '原创/网播动画 (Original)' : 'Original / Streaming'}
@@ -304,7 +304,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
           {/* Search Input & Sort Button */}
           <div className="flex items-center gap-2.5">
             <div className="relative flex-1 sm:w-64">
-              <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+              <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-black/40" />
               <input
                 type="text"
                 value={searchQuery}
@@ -316,12 +316,12 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                     ? '作品名・監督・年代で検索...'
                     : 'Search titles, staff, year...'
                 }
-                className="w-full bg-white/5 border border-white/15 rounded-full pl-9 pr-4 py-1.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff3650] transition-colors"
+                className="w-full bg-white/5 border border-black/15 rounded-full pl-9 pr-4 py-1.5 text-xs text-white placeholder:text-black/40 focus:outline-none focus:border-[#ff3650] transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white text-xs"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40 hover:text-white text-xs"
                 >
                   ✕
                 </button>
@@ -330,7 +330,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
 
             <button
               onClick={() => setSortKey((prev) => (prev === 'screened' ? 'year' : 'screened'))}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white/80 transition-colors cursor-pointer whitespace-nowrap border border-white/10"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-black/80 transition-colors cursor-pointer whitespace-nowrap border border-black/10"
               title={sortKey === 'screened' ? '按社内放映日' : '按制作年份'}
             >
               <span>{sortKey === 'screened' ? (lang === 'zh' ? '放映日' : 'Screened') : (lang === 'zh' ? '年份' : 'Year')}</span>
@@ -338,7 +338,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
             {sortKey === 'year' && (
               <button
                 onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-white/80 transition-colors cursor-pointer whitespace-nowrap border border-white/10"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold text-black/80 transition-colors cursor-pointer whitespace-nowrap border border-black/10"
                 title={sortOrder === 'desc' ? '最新在前' : '早期在前'}
               >
                 <ArrowUpDown className="w-3.5 h-3.5 text-[#ff3650]" />
@@ -363,7 +363,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="px-6 sm:px-8 py-2.5 bg-[#141414] border-b border-white/10 flex items-center justify-between text-xs"
+              className="px-6 sm:px-8 py-2.5 bg-white border-b border-black/10 flex items-center justify-between text-xs"
             >
               <div className="flex items-center gap-3">
                 <button
@@ -373,19 +373,19 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                   {isAllSelected ? (
                     <CheckSquare className="w-4 h-4 text-[#ff3650]" />
                   ) : (
-                    <Square className="w-4 h-4 text-white/50" />
+                    <Square className="w-4 h-4 text-black/50" />
                   )}
                   <span>{isAllSelected ? '取消全选' : `全选当前页 (${filteredWorks.length})`}</span>
                 </button>
 
-                <span className="text-white/40">|</span>
+                <span className="text-black/40">|</span>
 
-                <span className="font-mono text-white/80">
+                <span className="font-mono text-black/80">
                   已勾选 <span className="font-bold text-[#ff3650]">{selectedIds.size}</span> 部作品
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 text-white/50 text-[11px]">
+              <div className="flex items-center gap-2 text-black/50 text-[11px]">
                 <span>点击任意卡片即可快速勾选/取消</span>
               </div>
             </motion.div>
@@ -406,7 +406,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.25 }}
-                className="py-16 text-center text-white/60"
+                className="py-16 text-center text-black/60"
               >
                 <p className="text-lg font-bold mb-2">
                   {lang === 'zh'
@@ -415,7 +415,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                     ? '該当する作品が見つかりませんでした'
                     : 'No matching titles found'}
                 </p>
-                <p className="text-xs text-white/40 mb-4">
+                <p className="text-xs text-black/40 mb-4">
                   {lang === 'zh'
                     ? '请尝试切换分类或更换搜索关键词'
                     : 'Try adjusting your search or category filter.'}
@@ -461,10 +461,10 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                               void catalog.get(work.id).then((full) => onSelectWork(full ?? work)).catch(() => onSelectWork(work));
                             }
                           }}
-                          className={`group/item cursor-pointer flex flex-col bg-[#222222] rounded-2xl overflow-hidden border transition-all duration-300 relative ${
+                          className={`group/item cursor-pointer flex flex-col bg-white rounded-2xl overflow-hidden border transition-all duration-300 relative ${
                             isSelected
                               ? 'border-[#ff3650] ring-2 ring-[#ff3650] shadow-[0_12px_30px_rgba(255,54,80,0.35)]'
-                              : 'border-white/10 hover:border-[#ff3650] hover:shadow-[0_12px_30px_rgba(255,54,80,0.25)]'
+                              : 'border-black/10 hover:border-[#ff3650] hover:shadow-[0_12px_30px_rgba(255,54,80,0.25)]'
                           }`}
                         >
                           <div className="relative aspect-[27/40] overflow-hidden bg-black/40">
@@ -496,7 +496,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                                 className={`absolute top-2.5 right-2.5 z-20 w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
                                   isSelected
                                     ? 'bg-[#ff3650] text-white shadow-lg ring-2 ring-white'
-                                    : 'bg-black/60 backdrop-blur-md text-white/40 border border-white/30 hover:border-white'
+                                    : 'bg-black/60 backdrop-blur-md text-black/40 border border-white/30 hover:border-white'
                                 }`}
                               >
                                 {isSelected ? (
@@ -516,7 +516,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                             )}
 
                             {/* Year Badge */}
-                            <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-black text-white border border-white/15">
+                            <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-md px-2.5 py-0.5 rounded-md text-[10px] font-black text-white border border-black/15">
                               {work.year}{work.releaseDate ? ` · ${work.releaseDate}` : ''}
                             </div>
 
@@ -544,7 +544,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                                   : work.title}
                               </h3>
                               {(work.director || work.duration != null) && (
-                                <p className="text-[11px] text-white/50 line-clamp-1 mt-1 font-medium">
+                                <p className="text-[11px] text-black/50 line-clamp-1 mt-1 font-medium">
                                   {work.director}{work.director && work.duration != null ? ' · ' : ''}{work.duration != null ? `${work.duration} 分钟` : ''}
                                 </p>
                               )}
@@ -561,7 +561,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                   <button
                     type="button"
                     onClick={loadMore}
-                    className="px-5 py-2 rounded-full bg-white/10 hover:bg-[#ff3650] text-xs font-black text-white border border-white/15 transition-colors cursor-pointer"
+                    className="px-5 py-2 rounded-full bg-white/10 hover:bg-[#ff3650] text-xs font-black text-white border border-black/15 transition-colors cursor-pointer"
                   >
                     {lang === 'zh' ? `加载更多（${films.length}/${total}）` : `Load more (${films.length}/${total})`}
                   </button>
@@ -580,7 +580,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 40 }}
               transition={{ duration: 0.25, ease: TRIGGER_EASE }}
-              className="absolute bottom-6 left-6 right-6 z-30 bg-[#151515]/95 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-white"
+              className="absolute bottom-6 left-6 right-6 z-30 bg-[#151515]/95 backdrop-blur-xl border border-black/20 rounded-2xl p-4 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-white"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#ff3650] text-white flex items-center justify-center font-bold text-xs">
@@ -590,7 +590,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                   <p className="text-xs font-bold text-white">
                     已勾选 {selectedIds.size} 部作品
                   </p>
-                  <p className="text-[11px] text-white/50">
+                  <p className="text-[11px] text-black/50">
                     可一键批量记录为「已看过」并同步至资历档案
                   </p>
                 </div>
@@ -601,7 +601,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                   type="button"
                   onClick={handleBatchRemoveWatched}
                   disabled={isSubmitting}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-white/70 hover:text-white bg-white/10 hover:bg-white/15 transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-black/70 hover:text-white bg-white/10 hover:bg-white/15 transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <EyeOff className="w-3.5 h-3.5" />
                   <span>批量清除已看</span>

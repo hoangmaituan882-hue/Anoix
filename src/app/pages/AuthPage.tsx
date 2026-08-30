@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getSession, signIn, signUpEmail, signOut, SessionUser } from '../../lib/session';
 import { KeyRound, LogIn, Mail, UserPlus } from 'lucide-react';
@@ -82,15 +82,15 @@ export const AuthPage: React.FC<{ onAuthed?: (u: SessionUser) => void }> = ({ on
     navigate('/', { replace: true });
   };
 
-  const field = 'w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white font-bold focus:border-[#ff3650] focus:outline-none';
-  const label = 'text-xs font-bold text-white/50 uppercase tracking-wider';
+  const field = 'w-full bg-black/40 border border-black/15 rounded-xl px-4 py-3 text-white font-bold focus:border-[#ff3650] focus:outline-none';
+  const label = 'text-xs font-bold text-black/50 uppercase tracking-wider';
 
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col items-center justify-center px-4 selection:bg-[#ff3650] selection:text-white">
-      <div className="w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-3xl p-8 space-y-6 shadow-2xl">
+    <div className="min-h-screen bg-[#f5ffe5] flex flex-col items-center justify-center px-4 selection:bg-[#ff3650] selection:text-white">
+      <div className="w-full max-w-md bg-white border border-black/10 rounded-3xl p-8 space-y-6 shadow-2xl">
         <div className="text-center">
           <p className="text-xs font-black text-[#ff3650] uppercase tracking-widest mb-1">Anoix Account</p>
-          <h1 className="text-2xl font-black text-[#f5ffe5]">账号</h1>
+          <h1 className="text-2xl font-black text-[#1e1f21]">账号</h1>
         </div>
 
         {!verifyState ? (
@@ -101,7 +101,7 @@ export const AuthPage: React.FC<{ onAuthed?: (u: SessionUser) => void }> = ({ on
                   key={t}
                   onClick={() => { setTab(t); setError(''); setNotice(''); }}
                   className={`flex-1 py-2 rounded-full text-sm font-black transition-colors cursor-pointer ${
-                    tab === t ? 'bg-[#ff3650] text-white' : 'text-white/60 hover:text-white'
+                    tab === t ? 'bg-[#ff3650] text-white' : 'text-black/60 hover:text-white'
                   }`}
                 >
                   {t === 'login' ? '登录' : '注册'}
@@ -154,11 +154,11 @@ export const AuthPage: React.FC<{ onAuthed?: (u: SessionUser) => void }> = ({ on
         {notice && <p className="text-sm font-bold text-[#e0fe3d]">{notice}</p>}
         {error && <p className="text-sm font-bold text-[#ff3650]">{error}</p>}
 
-        <button onClick={doLogout} className="w-full text-center text-xs font-bold text-white/40 hover:text-[#ff3650] transition-colors cursor-pointer">
+        <button onClick={doLogout} className="w-full text-center text-xs font-bold text-black/40 hover:text-[#ff3650] transition-colors cursor-pointer">
           退出当前账号
         </button>
       </div>
-      <BeianLink className="mt-8 text-xs text-white/40 hover:text-white/70 transition-colors" />
+      <BeianLink className="mt-8 text-xs text-black/40 hover:text-black/70 transition-colors" />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Language, WorkItem, NewsItem, GoodsItem, OpenSiteModal } from '../types';
@@ -34,7 +34,7 @@ import { NotFound } from '../components/ui/NotFound';
 export default function App() {
   return (
     <ToastProvider>
-      <div className="relative min-h-screen overflow-x-clip bg-[#121212] text-[#f5ffe5] font-sans antialiased selection:bg-[#ff3650] selection:text-white">
+      <div className="relative min-h-screen overflow-x-clip bg-[#f5ffe5] text-[#1e1f21] font-sans antialiased selection:bg-[#ff3650] selection:text-white">
         <BrowserRouter>
           <AppShell />
         </BrowserRouter>
@@ -199,7 +199,7 @@ const AppShell: React.FC = () => {
         {/* Floating Scroll-to-Top Button */}
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-[#ff3650] text-white flex items-center justify-center shadow-2xl hover:scale-110 hover:bg-[#e02640] transition-all duration-300 cursor-pointer border-2 border-white/20"
+          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-[#ff3650] text-white flex items-center justify-center shadow-2xl hover:scale-110 hover:bg-[#e02640] transition-all duration-300 cursor-pointer border-2 border-black/20"
           title="Scroll to Top"
           aria-label="Scroll to Top"
         >

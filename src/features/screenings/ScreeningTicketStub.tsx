@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Screening } from '../../types/screening';
 import { Language, WorkItem } from '../../types';
 import { 
@@ -26,7 +26,7 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
   return (
     <div className="w-full select-none">
       {/* Authentic Cinema Roadshow Ticket Card */}
-      <div className="relative flex flex-col sm:flex-row bg-[#181818] border border-white/15 rounded-2xl overflow-hidden shadow-lg transition-colors">
+      <div className="relative flex flex-col sm:flex-row bg-white border border-black/15 rounded-2xl overflow-hidden shadow-lg transition-colors">
         {/* Red Accent Header Line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-[#ff3650]" />
 
@@ -39,11 +39,11 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
                 <span className="bg-[#ff3650] text-white text-[11px] font-bold px-2.5 py-0.5 rounded">
                   Anoix 社内放映
                 </span>
-                <span className="text-[11px] font-mono text-white/50">
+                <span className="text-[11px] font-mono text-black/50">
                   NO. {screening.id.toUpperCase()}
                 </span>
               </div>
-              <div className="text-[12px] text-white/60 font-bold">
+              <div className="text-[12px] text-black/60 font-bold">
                 特设放映入场券
               </div>
             </div>
@@ -61,9 +61,9 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
             )}
 
             {/* Key-Value Ticket Details Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-black/40 p-3 rounded-xl border border-white/10 text-xs mb-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-black/40 p-3 rounded-xl border border-black/10 text-xs mb-3">
               <div>
-                <span className="block text-[11px] font-normal text-white/40 mb-0.5">
+                <span className="block text-[11px] font-normal text-black/40 mb-0.5">
                   放映日期
                 </span>
                 <span className="font-bold text-white flex items-center gap-1 text-[12px]">
@@ -73,17 +73,17 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
               </div>
 
               <div>
-                <span className="block text-[11px] font-normal text-white/40 mb-0.5">
+                <span className="block text-[11px] font-normal text-black/40 mb-0.5">
                   开映时间
                 </span>
                 <span className="font-bold text-white flex items-center gap-1 text-[12px]">
-                  <Clock className="w-3 h-3 text-white/50" />
+                  <Clock className="w-3 h-3 text-black/50" />
                   {screening.time ? screening.time.split(' ')[0] : '19:00'}
                 </span>
               </div>
 
               <div>
-                <span className="block text-[11px] font-normal text-white/40 mb-0.5">
+                <span className="block text-[11px] font-normal text-black/40 mb-0.5">
                   音响规格
                 </span>
                 <span className="font-bold text-white/90 flex items-center gap-1 text-[12px]">
@@ -93,7 +93,7 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
               </div>
 
               <div>
-                <span className="block text-[11px] font-normal text-white/40 mb-0.5">
+                <span className="block text-[11px] font-normal text-black/40 mb-0.5">
                   座位规则
                 </span>
                 <span className="font-bold text-white text-[12px]">
@@ -104,7 +104,7 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
           </div>
 
           {/* Venue & Featured Films Row */}
-          <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-[12px] text-white/70">
+          <div className="pt-3 border-t border-black/10 flex flex-wrap items-center justify-between gap-3 text-[12px] text-black/70">
             <div className="flex items-center gap-1.5 font-medium">
               <MapPin className="w-3.5 h-3.5 text-[#ff3650] shrink-0" />
               <span>{screening.venue ?? 'TOHO 影院新宿'}</span>
@@ -122,7 +122,7 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
                     <button
                       key={fid}
                       onClick={() => onSelectFilm && onSelectFilm(fid)}
-                      className="text-[11px] font-medium text-white/80 bg-white/5 hover:bg-[#ff3650] hover:text-white px-2 py-0.5 rounded transition-colors cursor-pointer border border-white/10"
+                      className="text-[11px] font-medium text-black/80 bg-white/5 hover:bg-[#ff3650] hover:text-white px-2 py-0.5 rounded transition-colors cursor-pointer border border-black/10"
                     >
                       {filmTitle}
                     </button>
@@ -135,15 +135,15 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
 
         {/* Perforated Stub Line Divider */}
         <div className="relative flex sm:flex-col items-center justify-between py-0 sm:py-2 px-2 sm:px-0">
-          <div className="w-4 h-4 rounded-full bg-[#121212] -ml-2 sm:ml-0 sm:-mt-2" />
-          <div className="flex-1 border-t sm:border-t-0 sm:border-l border-dashed border-white/20 my-1 sm:my-0 w-full sm:w-auto" />
-          <div className="w-4 h-4 rounded-full bg-[#121212] -mr-2 sm:mr-0 sm:-mb-2" />
+          <div className="w-4 h-4 rounded-full bg-[#f5ffe5] -ml-2 sm:ml-0 sm:-mt-2" />
+          <div className="flex-1 border-t sm:border-t-0 sm:border-l border-dashed border-black/20 my-1 sm:my-0 w-full sm:w-auto" />
+          <div className="w-4 h-4 rounded-full bg-[#f5ffe5] -mr-2 sm:mr-0 sm:-mb-2" />
         </div>
 
         {/* Right / Stub Section */}
         <div className="w-full sm:w-44 bg-black/50 p-5 sm:p-6 flex flex-col items-center justify-between text-center shrink-0">
           <div className="w-full">
-            <span className="text-[11px] font-bold text-white/40 block mb-2">
+            <span className="text-[11px] font-bold text-black/40 block mb-2">
               入场核销二维码
             </span>
             <div className="w-24 h-24 bg-white p-2 rounded-xl mx-auto shadow-md flex items-center justify-center">
@@ -151,8 +151,8 @@ export const ScreeningTicketStub: React.FC<ScreeningTicketStubProps> = ({
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/10 w-full">
-            <span className="text-[10px] text-white/40 block">
+          <div className="mt-4 pt-3 border-t border-black/10 w-full">
+            <span className="text-[10px] text-black/40 block">
               扫码登记放映资历
             </span>
             <span className="text-[12px] font-bold text-[#ff3650] font-mono">

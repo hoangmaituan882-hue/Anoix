@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Eye,
@@ -228,7 +228,7 @@ export const DynamicContextMenu: React.FC = () => {
             top: `${state.y}px`,
             zIndex: 9999,
           }}
-          className="w-56 p-1.5 rounded-2xl bg-[#1c1c1f]/95 dark:bg-[#121212]/95 backdrop-blur-2xl border border-black/10 dark:border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.6)] text-neutral-100 text-xs select-none"
+          className="w-56 p-1.5 rounded-2xl bg-[#1c1c1f]/95 dark:bg-[#f5ffe5]/95 backdrop-blur-2xl border border-black/10 dark:border-black/15 shadow-[0_20px_50px_rgba(0,0,0,0.6)] text-neutral-100 text-xs select-none"
           onClick={(e) => e.stopPropagation()}
         >
           {state.type === 'film' && state.film ? (
@@ -237,8 +237,8 @@ export const DynamicContextMenu: React.FC = () => {
                ==================================================================== */
             <div>
               {/* Film Title Header */}
-              <div className="px-3 py-1.5 mb-1 border-b border-white/10">
-                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest block">
+              <div className="px-3 py-1.5 mb-1 border-b border-black/10">
+                <span className="text-[10px] font-mono text-black/40 uppercase tracking-widest block">
                   ANIMATION WORK
                 </span>
                 <p className="font-bold text-white text-xs truncate">
@@ -260,7 +260,7 @@ export const DynamicContextMenu: React.FC = () => {
                   )}
                   <span>{state.isWatched ? '取消标记已看' : '⚡ 标记为已看过'}</span>
                 </div>
-                <span className="text-[10px] font-mono text-white/40">W</span>
+                <span className="text-[10px] font-mono text-black/40">W</span>
               </button>
 
               {/* Action 2: Favorite / Unfavorite */}
@@ -271,16 +271,16 @@ export const DynamicContextMenu: React.FC = () => {
               >
                 <div className="flex items-center gap-2.5">
                   {state.isFavorite ? (
-                    <HeartOff className="w-4 h-4 text-white/60" />
+                    <HeartOff className="w-4 h-4 text-black/60" />
                   ) : (
                     <Heart className="w-4 h-4 text-[#ff3650]" />
                   )}
                   <span>{state.isFavorite ? '移初心愿单' : '💖 收藏至心愿单'}</span>
                 </div>
-                <span className="text-[10px] font-mono text-white/40">F</span>
+                <span className="text-[10px] font-mono text-black/40">F</span>
               </button>
 
-              <div className="w-full border-t border-white/10 my-1" />
+              <div className="w-full border-t border-black/10 my-1" />
 
               {/* Action 3: Quick View Detail */}
               <button
@@ -289,10 +289,10 @@ export const DynamicContextMenu: React.FC = () => {
                 className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <Play className="w-4 h-4 text-white/80" />
+                  <Play className="w-4 h-4 text-black/80" />
                   <span>查看作品详情</span>
                 </div>
-                <span className="text-[10px] font-mono text-white/40">Space</span>
+                <span className="text-[10px] font-mono text-black/40">Space</span>
               </button>
 
               {/* Action 4: Copy Share Link */}
@@ -302,10 +302,10 @@ export const DynamicContextMenu: React.FC = () => {
                 className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <Share2 className="w-4 h-4 text-white/80" />
+                  <Share2 className="w-4 h-4 text-black/80" />
                   <span>复制作品专属链接</span>
                 </div>
-                <span className="text-[10px] font-mono text-white/40">⌘C</span>
+                <span className="text-[10px] font-mono text-black/40">⌘C</span>
               </button>
             </div>
           ) : (
@@ -314,8 +314,8 @@ export const DynamicContextMenu: React.FC = () => {
                ==================================================================== */
             <div>
               {/* Header Label */}
-              <div className="px-3 py-1.5 mb-1 border-b border-white/10">
-                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest block">
+              <div className="px-3 py-1.5 mb-1 border-b border-black/10">
+                <span className="text-[10px] font-mono text-black/40 uppercase tracking-widest block">
                   QUICK NAVIGATION
                 </span>
               </div>
@@ -330,7 +330,7 @@ export const DynamicContextMenu: React.FC = () => {
                   <Film className="w-4 h-4 text-[#ff3650]" />
                   <span>🏆 打开动画库</span>
                 </div>
-                <span className="text-[10px] font-mono text-white/40">All</span>
+                <span className="text-[10px] font-mono text-black/40">All</span>
               </button>
 
               {/* Action 2: Toggle Dark / Light Theme */}
@@ -347,7 +347,7 @@ export const DynamicContextMenu: React.FC = () => {
                   )}
                   <span>{isCurrentDark ? '🌓 切换浅色模式' : '🌓 切换深色模式'}</span>
                 </div>
-                <span className="text-[10px] font-mono text-white/40">T</span>
+                <span className="text-[10px] font-mono text-black/40">T</span>
               </button>
 
               {/* Action 3: Open Global Search */}
@@ -360,10 +360,10 @@ export const DynamicContextMenu: React.FC = () => {
                   <Search className="w-4 h-4 text-[#e0fe3d]" />
                   <span>🔍 唤起全局搜索</span>
                 </div>
-                <span className="text-[10px] font-mono text-white/40">⌘K</span>
+                <span className="text-[10px] font-mono text-black/40">⌘K</span>
               </button>
 
-              <div className="w-full border-t border-white/10 my-1" />
+              <div className="w-full border-t border-black/10 my-1" />
 
               {/* Action 4: Smooth Scroll to Top */}
               <button
@@ -372,10 +372,10 @@ export const DynamicContextMenu: React.FC = () => {
                 className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <ArrowUp className="w-4 h-4 text-white/80" />
+                  <ArrowUp className="w-4 h-4 text-black/80" />
                   <span>⬆️ 平滑返回顶部</span>
                 </div>
-                <span className="text-[10px] font-mono text-white/40">Top</span>
+                <span className="text-[10px] font-mono text-black/40">Top</span>
               </button>
             </div>
           )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight, CalendarDays, Sparkles } from 'lucide-react';
@@ -153,13 +153,13 @@ export const UpcomingSection: React.FC<UpcomingSectionProps> = ({ lang }) => {
         </div>
 
         {nights === null ? (
-          <p className="px-4 sm:px-8 lg:px-16 text-white/40 text-sm">加载未来场次…</p>
+          <p className="px-4 sm:px-8 lg:px-16 text-black/40 text-sm">加载未来场次…</p>
         ) : nights.length === 0 ? (
           <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-16">
             <div className="rounded-3xl border border-dashed border-[#e0fe3d]/30 bg-[#e0fe3d]/5 px-6 py-12 text-center">
               <CalendarDays className="w-8 h-8 text-[#e0fe3d] mx-auto mb-3" />
               <p className="text-white font-bold">近期暂无排期</p>
-              <p className="text-white/50 text-sm mt-1">排期确定后，时间线上会出现当晚的海报。</p>
+              <p className="text-black/50 text-sm mt-1">排期确定后，时间线上会出现当晚的海报。</p>
             </div>
           </div>
         ) : (
@@ -197,7 +197,7 @@ export const UpcomingSection: React.FC<UpcomingSectionProps> = ({ lang }) => {
                         >
                           {parts.md}
                         </p>
-                        <p className="text-xs font-bold text-white/50 mt-1 truncate max-w-[280px]">{night.title}</p>
+                        <p className="text-xs font-bold text-black/50 mt-1 truncate max-w-[280px]">{night.title}</p>
                       </button>
 
                       <span
@@ -229,7 +229,7 @@ export const UpcomingSection: React.FC<UpcomingSectionProps> = ({ lang }) => {
                                 cursor: finePointer ? 'none' : 'pointer',
                               }}
                             >
-                              <span className="block aspect-[27/40] rounded-2xl overflow-hidden border-2 border-white/15 bg-black shadow-[0_12px_40px_rgba(0,0,0,0.45)] transition-transform duration-500 ease-out group-hover/poster:-translate-y-4 group-hover/poster:scale-105 group-hover/poster:border-[#e0fe3d] group-hover/poster:z-20">
+                              <span className="block aspect-[27/40] rounded-2xl overflow-hidden border-2 border-black/15 bg-black shadow-[0_12px_40px_rgba(0,0,0,0.45)] transition-transform duration-500 ease-out group-hover/poster:-translate-y-4 group-hover/poster:scale-105 group-hover/poster:border-[#e0fe3d] group-hover/poster:z-20">
                                 {film.image ? (
                                   <img
                                     src={film.image}
@@ -270,7 +270,7 @@ export const UpcomingSection: React.FC<UpcomingSectionProps> = ({ lang }) => {
             <span className="label font-extrabold tracking-widest">
               {lang === 'en' ? 'All screenings' : '放映档案'}
             </span>
-            <span className="w-7 h-7 rounded-full bg-[#121212] text-[#e0fe3d] group-hover/btn:bg-[#e0fe3d] group-hover/btn:text-[#121212] flex items-center justify-center transition-transform group-hover/btn:translate-x-1 duration-200">
+            <span className="w-7 h-7 rounded-full bg-[#f5ffe5] text-[#e0fe3d] group-hover/btn:bg-[#e0fe3d] group-hover/btn:text-[#121212] flex items-center justify-center transition-transform group-hover/btn:translate-x-1 duration-200">
               <ArrowRight className="w-4 h-4" />
             </span>
           </button>

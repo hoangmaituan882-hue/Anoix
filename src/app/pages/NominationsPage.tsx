@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+﻿import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Masonry } from 'masonic';
@@ -174,7 +174,7 @@ export const NominationsPage: React.FC<{
       <Header lang={lang} setLang={setLang} onNavigate={() => navigate('/')} onOpenModal={onOpenModal} />
 
       <main
-        className="relative w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#f5ffe5] overflow-hidden"
+        className="relative w-full min-h-screen bg-[#f5ffe5] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#1e1f21] overflow-hidden"
       >
         <div className="max-w-6xl mx-auto relative z-10">
           <PageHero
@@ -182,7 +182,7 @@ export const NominationsPage: React.FC<{
             subtitle="把票叠给想看的片；排期以日历为准，不会自动把榜首写进周六。"
           />
 
-          <div className="bg-[#181818] border border-white/10 rounded-2xl p-4 sm:p-5 mb-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-white border border-black/10 rounded-2xl p-4 sm:p-5 mb-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex flex-col gap-1.5 min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 {user ? (
@@ -191,7 +191,7 @@ export const NominationsPage: React.FC<{
                     已认证成员：{user.name}
                   </span>
                 ) : (
-                  <span className="text-white/60 bg-white/5 px-3 py-1 rounded-full border border-white/10 text-[12px]">
+                  <span className="text-black/60 bg-white/5 px-3 py-1 rounded-full border border-black/10 text-[12px]">
                     当前为匿名参与 ·{' '}
                     <button
                       onClick={() => navigate('/auth?redirect=/nominations')}
@@ -202,17 +202,17 @@ export const NominationsPage: React.FC<{
                   </span>
                 )}
               </div>
-              <p className="text-[12px] text-white/50">
+              <p className="text-[12px] text-black/50">
                 每位社区影迷每周拥有专属提名与投票配额，每周一凌晨自动重置。同一部片本周可以把票全部叠上去。
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto shrink-0">
               {quota && (
-                <div className={`flex items-center gap-4 bg-black/40 px-4 py-2.5 rounded-xl border transition-all t-shake ${quotaShake ? 'is-shaking border-[#ff3650] shadow-[0_0_20px_rgba(255,54,80,0.4)]' : 'border-white/10'}`}>
+                <div className={`flex items-center gap-4 bg-black/40 px-4 py-2.5 rounded-xl border transition-all t-shake ${quotaShake ? 'is-shaking border-[#ff3650] shadow-[0_0_20px_rgba(255,54,80,0.4)]' : 'border-black/10'}`}>
                   <div className="w-28 space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-white/60 flex items-center gap-1">
+                      <span className="text-black/60 flex items-center gap-1">
                         <Plus className="w-3 h-3 text-[#ff3650]" /> 周提名
                       </span>
                       <span className="text-[#ff3650] font-bold font-mono">
@@ -235,7 +235,7 @@ export const NominationsPage: React.FC<{
 
                   <div className="w-28 space-y-1">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-white/60 flex items-center gap-1">
+                      <span className="text-black/60 flex items-center gap-1">
                         <Vote className="w-3 h-3 text-[#e0fe3d]" /> 周投票
                       </span>
                       <span className="text-[#e0fe3d] font-bold font-mono">
@@ -296,9 +296,9 @@ export const NominationsPage: React.FC<{
                     <TabsTrigger value="all">总榜</TabsTrigger>
                   </TabsList>
                 </Tabs>
-                <div className="flex items-center bg-black/40 border border-white/15 rounded-xl p-0.5">
-                  <button onClick={() => setView('masonry')} className={`p-1.5 rounded-lg transition-colors cursor-pointer ${view === 'masonry' ? 'bg-[#ff3650] text-white' : 'text-white/50 hover:text-white'}`} title="瀑布流"><LayoutGrid className="w-4 h-4" /></button>
-                  <button onClick={() => setView('ranking')} className={`p-1.5 rounded-lg transition-colors cursor-pointer ${view === 'ranking' ? 'bg-[#ff3650] text-white' : 'text-white/50 hover:text-white'}`} title="排行"><ListOrdered className="w-4 h-4" /></button>
+                <div className="flex items-center bg-black/40 border border-black/15 rounded-xl p-0.5">
+                  <button onClick={() => setView('masonry')} className={`p-1.5 rounded-lg transition-colors cursor-pointer ${view === 'masonry' ? 'bg-[#ff3650] text-white' : 'text-black/50 hover:text-white'}`} title="瀑布流"><LayoutGrid className="w-4 h-4" /></button>
+                  <button onClick={() => setView('ranking')} className={`p-1.5 rounded-lg transition-colors cursor-pointer ${view === 'ranking' ? 'bg-[#ff3650] text-white' : 'text-black/50 hover:text-white'}`} title="排行"><ListOrdered className="w-4 h-4" /></button>
                 </div>
               </div>
             </div>
@@ -306,8 +306,8 @@ export const NominationsPage: React.FC<{
             {plazaItems === null ? (
               <div className="py-16 flex justify-center"><Loader variant="comet" size={32} label="加载提名广场" className="text-[#ff3650]" /></div>
             ) : plazaItems.length === 0 ? (
-              <div className="py-14 text-center text-white/40">
-                <Flame className="w-10 h-10 mx-auto mb-3 text-white/20" />
+              <div className="py-14 text-center text-black/40">
+                <Flame className="w-10 h-10 mx-auto mb-3 text-black/20" />
                 <p className="font-bold">{lang === 'zh' ? '还没有提名影片，成为第一个提名的人吧' : 'No nominations yet — be the first'}</p>
               </div>
             ) : view === 'masonry' ? (
@@ -318,12 +318,12 @@ export const NominationsPage: React.FC<{
                 overscanBy={4}
                 render={({ data }) => (
                   <FilmContextMenu filmId={data.filmId} title={data.title} onNominate={() => openNominate(data.filmId)}>
-                  <div className="mb-4 bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650]/50 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(255,54,80,0.15)] rounded-2xl overflow-hidden transition-all duration-300 group">
+                  <div className="mb-4 bg-white border border-black/10 hover:border-[#ff3650]/50 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(255,54,80,0.15)] rounded-2xl overflow-hidden transition-all duration-300 group">
                     <div className="relative aspect-[2/3] overflow-hidden bg-black/40">
                       {data.image ? (
                         <img src={data.image} alt={data.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/20 font-black text-3xl">{data.title.slice(0, 1)}</div>
+                        <div className="w-full h-full flex items-center justify-center text-black/20 font-black text-3xl">{data.title.slice(0, 1)}</div>
                       )}
                       {data.planned && <span className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">已通过</span>}
                       <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
@@ -333,13 +333,13 @@ export const NominationsPage: React.FC<{
                     </div>
                     <div className="p-3">
                       <p className="text-sm font-bold text-white truncate">{data.title}</p>
-                      <p className="text-xs text-white/40 font-mono mb-2">{data.year}{data.category ? ` · ${data.category}` : ''}</p>
+                      <p className="text-xs text-black/40 font-mono mb-2">{data.year}{data.category ? ` · ${data.category}` : ''}</p>
                       <div className="flex items-center justify-between gap-2">
                         <VoteStepper filmId={data.filmId} />
                         <button
                           onClick={() => openNominate(data.filmId)}
                           disabled={quota !== null && quota.remainingNominations <= 0}
-                          className="inline-flex items-center justify-center gap-1 text-xs font-black py-1.5 px-2 rounded-lg bg-white/5 hover:bg-[#ff3650] hover:text-white text-white/70 transition-colors cursor-pointer disabled:opacity-30"
+                          className="inline-flex items-center justify-center gap-1 text-xs font-black py-1.5 px-2 rounded-lg bg-white/5 hover:bg-[#ff3650] hover:text-white text-black/70 transition-colors cursor-pointer disabled:opacity-30"
                         >
                           <Plus className="w-3.5 h-3.5" /> {lang === 'zh' ? '提名' : 'Nom'}
                         </button>
@@ -352,7 +352,7 @@ export const NominationsPage: React.FC<{
             ) : (
               <div className="space-y-3 max-w-3xl">
                 {ranking.map((item, i) => {
-                  const style = RANK_STYLES[i] ?? { ring: 'border-white/10 bg-[#1a1a1a]', chip: 'bg-white/10 text-white/60', bar: 'bg-white/40' };
+                  const style = RANK_STYLES[i] ?? { ring: 'border-black/10 bg-white', chip: 'bg-white/10 text-black/60', bar: 'bg-white/40' };
                   const share = maxVotes > 0 ? item.votes / maxVotes : 0;
                   return (
                     <FilmContextMenu key={item.filmId} filmId={item.filmId} title={item.title} onNominate={() => openNominate(item.filmId)}>
@@ -360,13 +360,13 @@ export const NominationsPage: React.FC<{
                       <motion.span layout className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${style.chip}`}>
                         {i === 0 ? <Crown className="w-4 h-4" /> : i <= 2 ? <Trophy className="w-4 h-4" /> : i + 1}
                       </motion.span>
-                      {item.image ? <img src={item.image} alt="" className="w-10 h-14 rounded-lg object-cover shrink-0 border border-white/10" /> : <div className="w-10 h-14 rounded-lg bg-white/5 shrink-0 flex items-center justify-center text-white/20 font-black">{item.title.slice(0, 1)}</div>}
+                      {item.image ? <img src={item.image} alt="" className="w-10 h-14 rounded-lg object-cover shrink-0 border border-black/10" /> : <div className="w-10 h-14 rounded-lg bg-white/5 shrink-0 flex items-center justify-center text-black/20 font-black">{item.title.slice(0, 1)}</div>}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className="font-bold text-white truncate">{item.title}</p>
                           {item.planned && <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/40 shrink-0">已通过</Badge>}
                         </div>
-                        <p className="text-xs text-white/40 mb-1.5">提名 {item.nominations} 次</p>
+                        <p className="text-xs text-black/40 mb-1.5">提名 {item.nominations} 次</p>
                         <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
                           <motion.div className={`h-full rounded-full ${style.bar}`} initial={false} animate={{ width: `${share * 100}%` }} transition={{ type: 'spring', stiffness: 120, damping: 22 }} />
                         </div>
@@ -374,9 +374,9 @@ export const NominationsPage: React.FC<{
                       <div className="text-right shrink-0 min-w-[64px]">
                         <div className="flex items-baseline justify-end gap-1">
                           <AnimatedNumber value={item.votes} className="text-xl font-black text-white tabular-nums" />
-                          <span className="text-[11px] font-bold text-white/40">{lang === 'zh' ? '票' : 'votes'}</span>
+                          <span className="text-[11px] font-bold text-black/40">{lang === 'zh' ? '票' : 'votes'}</span>
                         </div>
-                        <p className="text-[10px] font-mono text-white/30">{Math.round(share * 100)}%</p>
+                        <p className="text-[10px] font-mono text-black/30">{Math.round(share * 100)}%</p>
                       </div>
                       <VoteStepper filmId={item.filmId} />
                     </motion.div>

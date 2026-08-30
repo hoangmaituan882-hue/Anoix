@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 interface SectionWatermarkProps {
   text: string;
@@ -22,11 +22,11 @@ export const SectionWatermark: React.FC<SectionWatermarkProps> = ({
     >
       <div className="flex flex-col items-end opacity-[0.035] dark:opacity-[0.045] transition-opacity duration-300">
         {subText && (
-          <span className="font-mono text-[2.5vw] font-black tracking-[0.3em] uppercase text-black dark:text-[#f5ffe5]">
+          <span className="font-mono text-[2.5vw] font-black tracking-[0.3em] uppercase text-black dark:text-[#1e1f21]">
             // {subText}
           </span>
         )}
-        <span className="font-black italic uppercase text-[15vw] tracking-tighter text-black dark:text-[#f5ffe5] -mr-4 -mt-2">
+        <span className="font-black italic uppercase text-[15vw] tracking-tighter text-black dark:text-[#1e1f21] -mr-4 -mt-2">
           {text}
         </span>
       </div>

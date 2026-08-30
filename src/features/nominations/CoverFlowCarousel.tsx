@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React, { useEffect, useRef } from 'react';
 
 export interface CoverFlowItem {
   id: string;
@@ -161,7 +161,7 @@ export const CoverFlowCarousel: React.FC<{
               ) : (
                 <div
                   style={{ width: C.cw, height: C.ch }}
-                  className="flex items-center justify-center bg-gradient-to-b from-[#2a2a2c] to-[#121212] text-white/30 font-black text-4xl"
+                  className="flex items-center justify-center bg-gradient-to-b from-[#2a2a2c] to-[#121212] text-black/30 font-black text-4xl"
                 >
                   {cover.title.slice(0, 1)}
                 </div>
@@ -189,7 +189,7 @@ export const CoverFlowCarousel: React.FC<{
                 <div style={{ width: C.cw, height: C.ch }} className="bg-gradient-to-b from-[#2a2a2c] to-[#121212]" />
               )}
             </div>
-            <p className="pointer-events-none absolute -bottom-3 left-0 right-0 text-center text-[10px] font-bold uppercase tracking-widest text-white/50 drop-shadow">
+            <p className="pointer-events-none absolute -bottom-3 left-0 right-0 text-center text-[10px] font-bold uppercase tracking-widest text-black/50 drop-shadow">
               {cover.title}
             </p>
           </div>

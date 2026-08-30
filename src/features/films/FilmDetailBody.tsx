@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { FilmPoster } from '../../components/ui/FilmPoster';
 import { WorkItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
@@ -56,24 +56,24 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
                 <span className="bg-[#ff3650] text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
                   {work.category}
                 </span>
-                <span className="text-xs font-bold text-white/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/15">
+                <span className="text-xs font-bold text-black/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-black/15">
                   <Calendar className="w-3.5 h-3.5 text-[#ff3650]" />
                   {work.year}
                 </span>
                 {work.screeningDate && (
-                  <span className="text-xs font-bold text-white/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/15">
+                  <span className="text-xs font-bold text-black/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-black/15">
                     <Calendar className="w-3.5 h-3.5 text-[#ff3650]" />
                     放映 {work.screeningDate}
                   </span>
                 )}
                 {work.releaseDate && (
-                  <span className="text-xs font-bold text-white/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/15">
+                  <span className="text-xs font-bold text-black/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-black/15">
                     <Calendar className="w-3.5 h-3.5 text-[#e0fe3d]" />
                     上映 {work.releaseDate}
                   </span>
                 )}
                 {work.duration != null && (
-                  <span className="text-xs font-bold text-white/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/15">
+                  <span className="text-xs font-bold text-black/80 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 border border-black/15">
                     <Tv className="w-3.5 h-3.5 text-[#e0fe3d]" />
                     时长 {work.duration} 分钟
                   </span>
@@ -89,7 +89,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
                 {title}
               </h2>
               {work.tagline && (
-                <p className="text-xs sm:text-sm text-[#f5ffe5]/85 italic mt-1.5 font-medium line-clamp-2">
+                <p className="text-xs sm:text-sm text-[#1e1f21]/85 italic mt-1.5 font-medium line-clamp-2">
                   {work.tagline}
                 </p>
               )}
@@ -113,7 +113,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
 
         {/* Streaming Platforms (if available) */}
         {work.streamingPlatforms && work.streamingPlatforms.length > 0 && (
-          <div className="bg-white/5 p-4 sm:p-5 rounded-2xl border border-white/10">
+          <div className="bg-white/5 p-4 sm:p-5 rounded-2xl border border-black/10">
             <div className="flex items-center gap-2 text-xs text-[#ff3650] font-black uppercase tracking-wider mb-2.5">
               <Tv className="w-4 h-4" />
               <span>{lang === 'zh' ? '播放与上线平台' : lang === 'ja' ? '配信・放送プラットフォーム' : 'Streaming Platforms'}</span>
@@ -122,7 +122,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
               {work.streamingPlatforms.map((platform, idx) => (
                 <span
                   key={idx}
-                  className="bg-white/10 hover:bg-white/15 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white border border-white/10 transition-colors"
+                  className="bg-white/10 hover:bg-white/15 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white border border-black/10 transition-colors"
                 >
                   {platform}
                 </span>
@@ -134,7 +134,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
         {/* Credits Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2">
           {work.director && (
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
+            <div className="bg-white/5 p-4 rounded-2xl border border-black/10">
               <div className="flex items-center gap-1.5 text-xs text-[#ff3650] font-black uppercase tracking-wider mb-1">
                 <User className="w-3.5 h-3.5" />
                 <span>{t.directorLabel}</span>
@@ -144,7 +144,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
           )}
 
           {work.characterDesign && (
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
+            <div className="bg-white/5 p-4 rounded-2xl border border-black/10">
               <div className="flex items-center gap-1.5 text-xs text-[#ff3650] font-black uppercase tracking-wider mb-1">
                 <Film className="w-3.5 h-3.5" />
                 <span>{t.designLabel}</span>
@@ -154,7 +154,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
           )}
 
           {work.seriesComposition && (
-            <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
+            <div className="bg-white/5 p-4 rounded-2xl border border-black/10">
               <div className="flex items-center gap-1.5 text-xs text-[#ff3650] font-black uppercase tracking-wider mb-1">
                 <Film className="w-3.5 h-3.5" />
                 <span>{t.seriesLabel}</span>
@@ -166,14 +166,14 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
 
         {/* Cast */}
         {work.cast && work.cast.length > 0 && (
-          <div className="bg-white/5 p-4 sm:p-5 rounded-2xl border border-white/10">
+          <div className="bg-white/5 p-4 sm:p-5 rounded-2xl border border-black/10">
             <div className="flex items-center gap-1.5 text-xs text-[#ff3650] font-black uppercase tracking-wider mb-2.5">
               <Users className="w-4 h-4" />
               <span>{t.castLabel}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {work.cast.map((actor, idx) => (
-                <span key={idx} className="bg-white/10 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white border border-white/10">
+                <span key={idx} className="bg-white/10 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white border border-black/10">
                   {actor}
                 </span>
               ))}
@@ -182,7 +182,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
         )}
 
         {/* Actions Row */}
-        <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-white/10">
+        <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-black/10">
           {work.trailerUrl && (
             <button
               onClick={() => {
@@ -204,7 +204,7 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
               href={work.officialUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-full font-bold text-sm uppercase tracking-wider transition-colors border border-white/20"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-full font-bold text-sm uppercase tracking-wider transition-colors border border-black/20"
             >
               <span>{t.officialSite}</span>
               <ExternalLink className="w-4 h-4" />

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+﻿import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { WorkItem, Language } from '../../types';
 import { FilmPoster } from '../../components/ui/FilmPoster';
@@ -112,7 +112,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
         </picture>
 
         {/* Dynamic Studio Trigger watermark badge on mobile */}
-        <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-black tracking-widest text-[#f5ffe5] border border-white/20 uppercase">
+        <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-black tracking-widest text-[#1e1f21] border border-black/20 uppercase">
           ANOIX
         </div>
       </motion.div>
@@ -175,7 +175,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
                 >
                   {/* Hover lift/shadow lives on this inner frame so CSS transitions
                       never overlap with the motion entrance above. */}
-                  <div className="relative aspect-[27/40] rounded-2xl overflow-hidden bg-black/40 border-2 border-white/10 group-hover/card:border-[#ff3650] group-hover/card:-translate-y-2 group-hover/card:shadow-[0_12px_30px_rgba(255,54,80,0.35)] transition-all duration-300">
+                  <div className="relative aspect-[27/40] rounded-2xl overflow-hidden bg-black/40 border-2 border-black/10 group-hover/card:border-[#ff3650] group-hover/card:-translate-y-2 group-hover/card:shadow-[0_12px_30px_rgba(255,54,80,0.35)] transition-all duration-300">
                     <FilmPoster
                       image={work.image}
                       alt={lang === 'zh' && work.titleZh ? work.titleZh : lang === 'en' && work.titleEn ? work.titleEn : work.title}
@@ -208,7 +208,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
             <Tooltip label={lang === 'zh' ? '上一个' : 'Previous'} wrapperClassName="absolute -left-4 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/list:opacity-100 transition-opacity">
               <button
                 onClick={() => scrollBy(-260)}
-                className="hidden md:flex w-10 h-10 rounded-full bg-black/80 border border-white/20 text-white items-center justify-center hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl cursor-pointer"
+                className="hidden md:flex w-10 h-10 rounded-full bg-black/80 border border-black/20 text-white items-center justify-center hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl cursor-pointer"
                 aria-label="Previous Work"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -217,7 +217,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
             <Tooltip label={lang === 'zh' ? '下一个' : 'Next'} wrapperClassName="absolute -right-4 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/list:opacity-100 transition-opacity">
               <button
                 onClick={() => scrollBy(260)}
-                className="hidden md:flex w-10 h-10 rounded-full bg-black/80 border border-white/20 text-white items-center justify-center hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl cursor-pointer"
+                className="hidden md:flex w-10 h-10 rounded-full bg-black/80 border border-black/20 text-white items-center justify-center hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl cursor-pointer"
                 aria-label="Next Work"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -246,7 +246,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
               <span className="label font-extrabold tracking-widest">
                 {t.allWorks}
               </span>
-              <span className="w-7 h-7 rounded-full bg-[#121212] text-[#f5ffe5] group-hover/btn:bg-white group-hover/btn:text-[#ff3650] flex items-center justify-center">
+              <span className="w-7 h-7 rounded-full bg-[#f5ffe5] text-[#1e1f21] group-hover/btn:bg-white group-hover/btn:text-[#ff3650] flex items-center justify-center">
                 <ExpandArrow className="w-4 h-4" />
               </span>
             </button>

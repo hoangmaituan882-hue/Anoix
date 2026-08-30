@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { NewsItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { X, Calendar, Tag, Share2 } from 'lucide-react';
@@ -23,7 +23,7 @@ export const NewsDetailModal: React.FC<NewsDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl animate-fade-in">
       <div 
-        className="relative w-full max-w-2xl bg-[#1c1c1c] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-[#f5ffe5] p-6 sm:p-8"
+        className="relative w-full max-w-2xl bg-[#1c1c1c] border border-black/20 rounded-3xl overflow-hidden shadow-2xl text-[#1e1f21] p-6 sm:p-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -36,7 +36,7 @@ export const NewsDetailModal: React.FC<NewsDetailModalProps> = ({
         </button>
 
         {/* Date & Category */}
-        <div className="flex items-center gap-3 mb-4 text-xs sm:text-sm font-bold text-white/70">
+        <div className="flex items-center gap-3 mb-4 text-xs sm:text-sm font-bold text-black/70">
           <span className="flex items-center gap-1.5 font-mono text-white">
             <Calendar className="w-4 h-4 text-[#ff3650]" />
             {news.date}
@@ -50,7 +50,7 @@ export const NewsDetailModal: React.FC<NewsDetailModalProps> = ({
         </div>
 
         {/* Title */}
-        <h2 className="text-xl sm:text-2xl font-black text-white leading-snug mb-6 pb-4 border-b border-white/10">
+        <h2 className="text-xl sm:text-2xl font-black text-white leading-snug mb-6 pb-4 border-b border-black/10">
           {title}
         </h2>
 
@@ -60,7 +60,7 @@ export const NewsDetailModal: React.FC<NewsDetailModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs text-white/50">
+        <div className="flex items-center justify-between pt-4 border-t border-black/10 text-xs text-black/50">
           <span>Anoix 放映会动态</span>
           <button
             onClick={() => {

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Clock, Eye, EyeOff, Film, Vote, Flame } from 'lucide-react';
 import { MeStats, hoursFromMinutes } from '../../lib/me';
 
@@ -39,8 +39,8 @@ export const UserClubStats: React.FC<UserClubStatsProps> = ({
 }) => {
   const dark = tone === 'dark';
   const cell = dark
-    ? 'bg-black/30 border-white/10 text-[#f5ffe5]'
-    : 'bg-white dark:bg-[#141414] border-neutral-200 dark:border-[#222222] text-neutral-900 dark:text-white';
+    ? 'bg-black/30 border-black/10 text-[#1e1f21]'
+    : 'bg-white dark:bg-white border-neutral-200 dark:border-[#222222] text-neutral-900 dark:text-white';
   const muted = dark ? 'text-white/45' : 'text-neutral-500 dark:text-[#737373]';
 
   return (
@@ -66,7 +66,7 @@ export const UserClubStats: React.FC<UserClubStatsProps> = ({
             {stats.monthly.map((row) => (
               <li
                 key={row.yearMonth}
-                className={`flex items-center justify-between text-xs font-mono ${dark ? 'text-white/70' : 'text-neutral-600 dark:text-[#aaaaaa]'}`}
+                className={`flex items-center justify-between text-xs font-mono ${dark ? 'text-black/70' : 'text-neutral-600 dark:text-[#aaaaaa]'}`}
               >
                 <span>{monthLabel(row.yearMonth)}</span>
                 <span>

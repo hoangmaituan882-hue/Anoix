@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+﻿import React, { useCallback, useEffect, useState } from 'react';
 import { poolAdmin, PoolItem } from '../../lib/poolAdmin';
 import { useToast } from '../../components/ui/Toast';
 import { Button } from '../../components/ui/button';
@@ -16,7 +16,7 @@ const nextSaturday = (): string => {
 };
 
 const STATUS: Record<string, { label: string; cls: string }> = {
-  pending: { label: '待审核', cls: 'bg-white/10 text-white/70' },
+  pending: { label: '待审核', cls: 'bg-white/10 text-black/70' },
   promoted: { label: '已入库', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40' },
   rejected: { label: '已剔除', cls: 'bg-[#ff3650]/15 text-[#ffb3bd]' },
 };
@@ -60,25 +60,25 @@ export const PoolAdmin: React.FC = () => {
         <h2 className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
           <Film className="w-5 h-5 text-[#ff3650]" /> 提名库
         </h2>
-        <button onClick={() => void reload()} className="text-xs font-bold text-white/50 hover:text-[#ff3650] transition-colors cursor-pointer">刷新</button>
+        <button onClick={() => void reload()} className="text-xs font-bold text-black/50 hover:text-[#ff3650] transition-colors cursor-pointer">刷新</button>
       </div>
 
       {error && <p className="text-sm text-[#ffb3bd] bg-[#2a1518] border border-[#ff3650]/40 rounded-xl px-4 py-3">{error}</p>}
 
       {items === null ? (
-        <p className="text-white/40 text-sm py-6">加载中…</p>
+        <p className="text-black/40 text-sm py-6">加载中…</p>
       ) : items.length === 0 ? (
-        <p className="text-white/40 text-sm py-6">提名库暂无内容。</p>
+        <p className="text-black/40 text-sm py-6">提名库暂无内容。</p>
       ) : (
         <div className="space-y-3">
           {items.map((p) => {
             const st = STATUS[p.status] ?? STATUS.pending;
             return (
-              <div key={p.id} className={`rounded-2xl border p-3 flex flex-col sm:flex-row gap-3 ${p.status === 'promoted' ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-white/10 bg-[#1a1a1a]'}`}>
+              <div key={p.id} className={`rounded-2xl border p-3 flex flex-col sm:flex-row gap-3 ${p.status === 'promoted' ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-black/10 bg-white'}`}>
                 {p.image ? (
                   <img src={p.image} alt="" className="w-12 h-16 rounded-md object-cover shrink-0 bg-black/40" />
                 ) : (
-                  <div className="w-12 h-16 rounded-md bg-white/5 shrink-0 flex items-center justify-center text-white/20"><Film className="w-5 h-5" /></div>
+                  <div className="w-12 h-16 rounded-md bg-white/5 shrink-0 flex items-center justify-center text-black/20"><Film className="w-5 h-5" /></div>
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -86,8 +86,8 @@ export const PoolAdmin: React.FC = () => {
                     <Badge variant="secondary" className={st.cls}>{st.label}</Badge>
                     {p.source === 'tmdb' && <Badge variant="outline">TMDB</Badge>}
                   </div>
-                  {p.note && <p className="text-xs text-white/40 mt-0.5 line-clamp-1">「{p.note}」</p>}
-                  <p className="text-[11px] text-white/30 mt-0.5">{p.year || ''}{p.film_id ? ` · 已关联 ${p.film_id}` : p.tmdb_id ? ` · ${p.tmdb_id}` : ''}</p>
+                  {p.note && <p className="text-xs text-black/40 mt-0.5 line-clamp-1">「{p.note}」</p>}
+                  <p className="text-[11px] text-black/30 mt-0.5">{p.year || ''}{p.film_id ? ` · 已关联 ${p.film_id}` : p.tmdb_id ? ` · ${p.tmdb_id}` : ''}</p>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0 flex-wrap">
@@ -114,7 +114,7 @@ export const PoolAdmin: React.FC = () => {
                                 <CalendarDays className="w-3.5 h-3.5" /> 选日期
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-[#1d1d1f] border-white/10">
+                            <PopoverContent className="w-auto p-0 bg-[#1d1d1f] border-black/10">
                               <Calendar
                                 mode="single"
                                 onSelect={(d) => { if (d) schedule(p.film_id!, 'scheduled', d.toISOString().slice(0, 10)); }}
@@ -134,7 +134,7 @@ export const PoolAdmin: React.FC = () => {
       )}
 
       {pending.length > 0 && promoted.length > 0 && (
-        <p className="text-xs text-white/30 flex items-center gap-1.5">
+        <p className="text-xs text-black/30 flex items-center gap-1.5">
           <ArrowRight className="w-3.5 h-3.5" /> 勾选入库后，影片进入影视库，可在此排期或从影视库管理。
         </p>
       )}
