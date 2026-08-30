@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import { WorkItem, Language } from '../../types';
 import { FilmPoster } from '../../components/ui/FilmPoster';
 import { I18N } from '../../data/triggerData';
@@ -25,6 +25,10 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
   onOpenAllWorks,
 }) => {
   const sliderRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  // Scroll parallax on the hero visual (translate slower than the scroll).
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
+  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
   const [films, setFilms] = useState<WorkItem[]>([]);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -90,6 +94,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
   return (
     <section
       id="index_header_content"
+      ref={sectionRef}
       className="relative w-full min-h-screen bg-[#151515] grid grid-cols-1 lg:grid-cols-2 pt-20 lg:pt-0 overflow-hidden"
     >
       {/* LEFT COLUMN: Red Character Visual — slides in from the right, blending with the background */}
@@ -102,10 +107,11 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
       >
         <picture className="w-full h-full flex items-center justify-center">
           <source media="(max-width: 450px)" srcSet={repository.heroImage()} />
-          <img
+          <motion.img
             fetchPriority="high"
             src={repository.heroImage()}
             alt="Anoix 放映会"
+            style={{ y: heroY }}
             className="w-full h-full object-cover object-center lg:object-right transform hover:scale-105 transition-transform duration-700 ease-out select-none"
             draggable={false}
           />
