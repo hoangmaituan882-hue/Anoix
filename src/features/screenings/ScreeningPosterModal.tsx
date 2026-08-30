@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Screening } from '../../types/screening';
 import { Language, WorkItem } from '../../types';
@@ -64,11 +64,11 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
         transition={{ duration: 0.25, ease: TRIGGER_EASE }}
-        className="relative w-full max-w-4xl bg-[#141416] border border-black/15 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-4xl bg-[#141416] border border-white/15 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-black/10 bg-black/40">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-white/10 bg-black/40">
           <div className="flex items-center gap-3">
             {/* View Switcher: Poster vs Ticket Stub via Motion Tabs */}
             <Tabs
@@ -93,7 +93,7 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleShare}
-              className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-black/70 hover:text-white transition-colors cursor-pointer text-[12px] flex items-center gap-1.5 font-bold"
+              className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer text-[12px] flex items-center gap-1.5 font-bold"
               title="分享放映档案"
             >
               <span className="t-icon-swap-slot w-3.5 h-3.5">
@@ -119,7 +119,7 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
               
               {/* Left 5 cols: Cinema Poster Showcase */}
               <div className="md:col-span-5 flex flex-col items-center">
-                <div className="relative w-full rounded-2xl overflow-hidden border border-black/15 bg-black/60 shadow-lg">
+                <div className="relative w-full rounded-2xl overflow-hidden border border-white/15 bg-black/60 shadow-lg">
                   <div className="relative aspect-[27/38]">
                     <img
                       src={posterImage}
@@ -128,7 +128,7 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
                     />
 
                     {/* Date Badge */}
-                    <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white border border-black/15">
+                    <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-sm px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white border border-white/15">
                       {screening.screen_date}
                     </div>
 
@@ -138,7 +138,7 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
                   </div>
                 </div>
 
-                <p className="mt-2 text-center text-[12px] text-black/40">
+                <p className="mt-2 text-center text-[12px] text-white/40">
                   放映海报
                 </p>
               </div>
@@ -153,7 +153,7 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
                     {screening.format_tags?.map((tag, idx) => (
                       <span
                         key={idx}
-                        className="bg-white/5 text-black/80 text-[12px] font-medium px-2.5 py-0.5 rounded-full border border-black/10"
+                        className="bg-white/5 text-white/80 text-[12px] font-medium px-2.5 py-0.5 rounded-full border border-white/10"
                       >
                         {tag}
                       </span>
@@ -174,8 +174,8 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
 
                 {/* Recap */}
                 {recapText && (
-                  <div className="bg-white/[0.03] p-3.5 rounded-2xl border border-black/10">
-                    <h4 className="text-[12px] font-bold text-black/50 mb-1.5">
+                  <div className="bg-white/[0.03] p-3.5 rounded-2xl border border-white/10">
+                    <h4 className="text-[12px] font-bold text-white/50 mb-1.5">
                       放映现场纪事
                     </h4>
                     <p className="text-[14px] text-white/85 leading-[1.55]">
@@ -186,8 +186,8 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
 
                 {/* Info Key-Values */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                  <div className="bg-white/[0.03] p-3 rounded-2xl border border-black/10">
-                    <span className="block text-[11px] font-normal text-black/40 mb-1">
+                  <div className="bg-white/[0.03] p-3 rounded-2xl border border-white/10">
+                    <span className="block text-[11px] font-normal text-white/40 mb-1">
                       放映影院
                     </span>
                     <p className="text-[12px] font-bold text-white flex items-start gap-1.5">
@@ -196,12 +196,12 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
                     </p>
                   </div>
 
-                  <div className="bg-white/[0.03] p-3 rounded-2xl border border-black/10">
-                    <span className="block text-[11px] font-normal text-black/40 mb-1">
+                  <div className="bg-white/[0.03] p-3 rounded-2xl border border-white/10">
+                    <span className="block text-[11px] font-normal text-white/40 mb-1">
                       放映时段
                     </span>
                     <p className="text-[12px] font-bold text-white flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-black/50 shrink-0" />
+                      <Clock className="w-3.5 h-3.5 text-white/50 shrink-0" />
                       <span>{screening.time ?? '19:00 - 21:30'}</span>
                     </p>
                   </div>
@@ -209,8 +209,8 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
 
                 {/* Special Guests */}
                 {screening.special_guests && screening.special_guests.length > 0 && (
-                  <div className="bg-white/[0.03] p-3.5 rounded-2xl border border-black/10">
-                    <span className="block text-[11px] font-normal text-black/40 mb-1.5 flex items-center gap-1">
+                  <div className="bg-white/[0.03] p-3.5 rounded-2xl border border-white/10">
+                    <span className="block text-[11px] font-normal text-white/40 mb-1.5 flex items-center gap-1">
                       <Users className="w-3.5 h-3.5 text-[#ff3650]" />
                       <span>现场特邀主创嘉宾</span>
                     </span>
@@ -218,7 +218,7 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
                       {screening.special_guests.map((guest, idx) => (
                         <span
                           key={idx}
-                          className="bg-white/5 text-white/90 text-[12px] font-bold px-2.5 py-1 rounded-full border border-black/10 shadow-xs"
+                          className="bg-white/5 text-white/90 text-[12px] font-bold px-2.5 py-1 rounded-full border border-white/10 shadow-xs"
                         >
                           {guest}
                         </span>
@@ -229,8 +229,8 @@ export const ScreeningPosterModal: React.FC<ScreeningPosterModalProps> = ({
 
                 {/* Ticket Perks */}
                 {screening.ticket_perks && (
-                  <div className="bg-white/[0.03] p-3.5 rounded-2xl border border-black/10">
-                    <span className="block text-[11px] font-normal text-black/40 mb-1 flex items-center gap-1">
+                  <div className="bg-white/[0.03] p-3.5 rounded-2xl border border-white/10">
+                    <span className="block text-[11px] font-normal text-white/40 mb-1 flex items-center gap-1">
                       <Award className="w-3.5 h-3.5 text-[#ff3650]" />
                       <span>限定入场特典</span>
                     </span>

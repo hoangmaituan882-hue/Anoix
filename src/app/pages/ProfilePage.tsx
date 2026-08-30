@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language, OpenSiteModal } from '../../types';
@@ -167,7 +167,7 @@ export const ProfilePage: React.FC<{
       <Header lang={lang} setLang={setLang} onNavigate={() => navigate('/')} onOpenModal={onOpenModal} />
 
       <motion.main
-        className="relative w-full min-h-screen bg-[#f5ffe5] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#1e1f21]"
+        className="relative w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 pt-14 sm:pt-16 pb-12 text-[#f5ffe5]"
         initial={{ x: 80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: TRIGGER_EASE }}
@@ -184,9 +184,9 @@ export const ProfilePage: React.FC<{
               <Loader variant="comet" size={36} label="加载资料" className="text-[#ff3650]" />
             </div>
           ) : !profile ? (
-            <Card className="border-black/10 bg-white">
+            <Card className="border-white/10 bg-[#1a1a1a]">
               <CardContent className="p-12 text-center space-y-4">
-                <p className="text-black/60 font-bold">未找到账号信息</p>
+                <p className="text-white/60 font-bold">未找到账号信息</p>
                 <Button onClick={() => navigate('/auth?redirect=/profile')}>去登录</Button>
               </CardContent>
             </Card>
@@ -194,7 +194,7 @@ export const ProfilePage: React.FC<{
             <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
               {/* Left: identity card + screening standing card */}
               <div className="space-y-4">
-                <Card className="border-black/10 bg-white">
+                <Card className="border-white/10 bg-[#1a1a1a]">
                   <CardHeader className="items-center text-center">
                     <Avatar className="h-24 w-24 ring-2 ring-[#ff3650]/40">
                       <AvatarImage src={form.avatarUrl || undefined} alt={name} />
@@ -214,32 +214,32 @@ export const ProfilePage: React.FC<{
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <Separator />
-                    <div className="flex items-center gap-2.5 text-black/70">
-                      <UserRound className="w-4 h-4 text-black/40" />
-                      <span className="text-black/40">用户名</span>
+                    <div className="flex items-center gap-2.5 text-white/70">
+                      <UserRound className="w-4 h-4 text-white/40" />
+                      <span className="text-white/40">用户名</span>
                       <span className="ml-auto font-mono">{profile.username || '—'}</span>
                     </div>
-                    <div className="flex items-center gap-2.5 text-black/70">
-                      <Mail className="w-4 h-4 text-black/40" />
-                      <span className="text-black/40">邮箱</span>
+                    <div className="flex items-center gap-2.5 text-white/70">
+                      <Mail className="w-4 h-4 text-white/40" />
+                      <span className="text-white/40">邮箱</span>
                       <span className="ml-auto font-mono truncate max-w-[160px]">{profile.email || '—'}</span>
                     </div>
-                    <div className="flex items-center gap-2.5 text-black/70">
-                      <Calendar className="w-4 h-4 text-black/40" />
-                      <span className="text-black/40">注册时间</span>
+                    <div className="flex items-center gap-2.5 text-white/70">
+                      <Calendar className="w-4 h-4 text-white/40" />
+                      <span className="text-white/40">注册时间</span>
                       <span className="ml-auto font-mono text-xs">{profile.createTime || '—'}</span>
                     </div>
-                    <div className="flex items-center gap-2.5 text-black/70">
-                      <Shield className="w-4 h-4 text-black/40" />
-                      <span className="text-black/40">UID</span>
-                      <span className="ml-auto font-mono text-xs text-black/40 truncate max-w-[140px]">{profile.uid}</span>
+                    <div className="flex items-center gap-2.5 text-white/70">
+                      <Shield className="w-4 h-4 text-white/40" />
+                      <span className="text-white/40">UID</span>
+                      <span className="ml-auto font-mono text-xs text-white/40 truncate max-w-[140px]">{profile.uid}</span>
                     </div>
                     <Separator />
                     <UserClubStats stats={clubStats} tone="dark" signedIn />
                     <Separator />
                     <button
                       onClick={doLogout}
-                      className="w-full py-2.5 rounded-full border border-black/20 hover:border-[#ff3650] hover:bg-[#ff3650]/10 text-black/70 hover:text-[#ff3650] font-black text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full py-2.5 rounded-full border border-white/20 hover:border-[#ff3650] hover:bg-[#ff3650]/10 text-white/70 hover:text-[#ff3650] font-black text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       <span>退出登录</span>
@@ -251,7 +251,7 @@ export const ProfilePage: React.FC<{
               </div>
 
               {/* Right: tabs */}
-              <Card className="border-black/10 bg-white">
+              <Card className="border-white/10 bg-[#1a1a1a]">
                 <CardContent className="p-6">
                   {/* Credentials & Year Review Banners */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
@@ -264,7 +264,7 @@ export const ProfilePage: React.FC<{
                       </div>
                       <span className="flex-1 min-w-0">
                         <span className="block text-sm font-black text-white truncate">我的放映资历档案</span>
-                        <span className="block text-xs text-black/50 truncate">3D 高光展台与打卡票根</span>
+                        <span className="block text-xs text-white/50 truncate">3D 高光展台与打卡票根</span>
                       </span>
                       <span className="text-[#ff3650] font-black group-hover:translate-x-1 transition-transform">→</span>
                     </button>
@@ -278,7 +278,7 @@ export const ProfilePage: React.FC<{
                       </div>
                       <span className="flex-1 min-w-0">
                         <span className="block text-sm font-black text-white truncate">2026 年度回顾</span>
-                        <span className="block text-xs text-black/50 truncate">年度选片与观影总览</span>
+                        <span className="block text-xs text-white/50 truncate">年度选片与观影总览</span>
                       </span>
                       <span className="text-[#e0fe3d] font-black group-hover:translate-x-1 transition-transform">→</span>
                     </button>
@@ -295,14 +295,14 @@ export const ProfilePage: React.FC<{
                     {/* Profile tab */}
                     <TabsContent value="profile" className="space-y-5">
                       <div className={field}>
-                        <Label className="text-black/60 uppercase text-xs font-black">昵称</Label>
+                        <Label className="text-white/60 uppercase text-xs font-black">昵称</Label>
                         <Input value={form.nickname} onChange={(e) => setForm({ ...form, nickname: e.target.value })} placeholder="输入昵称" />
                       </div>
 
                       <div className={field}>
-                        <Label className="text-black/60 uppercase text-xs font-black">头像 URL</Label>
+                        <Label className="text-white/60 uppercase text-xs font-black">头像 URL</Label>
                         <Input value={form.avatarUrl} onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })} placeholder="https://…" />
-                        <p className="text-[11px] text-black/30">填写图片直链，留空则使用首字母头像</p>
+                        <p className="text-[11px] text-white/30">填写图片直链，留空则使用首字母头像</p>
                       </div>
 
                       <div className="flex justify-end pt-3">
@@ -328,22 +328,22 @@ export const ProfilePage: React.FC<{
                       ) : (
                         <>
                           <div>
-                            <h4 className="text-xs font-black text-black/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <h4 className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                               <Vote className="w-3.5 h-3.5 text-[#ff3650]" /> 我的投票
                             </h4>
                             {activity.votes.length === 0 ? (
-                              <p className="text-xs text-black/30 py-3">还没有投票记录</p>
+                              <p className="text-xs text-white/30 py-3">还没有投票记录</p>
                             ) : (
                               <div className="space-y-2">
                                 {activity.votes.map((v) => (
-                                  <div key={v.filmId} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${v.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-black/10 bg-black/30'}`}>
+                                  <div key={v.filmId} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${v.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30'}`}>
                                     {v.image ? <img src={v.image} alt="" className="w-9 h-12 rounded-md object-cover shrink-0" /> : <Vote className="w-4 h-4 text-[#ff3650] shrink-0" />}
                                     <div className="min-w-0 flex-1">
                                       <p className="text-sm font-bold text-white truncate flex items-center gap-2">
                                         {v.filmTitle}
                                         {v.planned && <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/40">已通过</Badge>}
                                       </p>
-                                      <p className="text-xs text-black/40 truncate">叠票 {v.count} · {v.weeks} 周</p>
+                                      <p className="text-xs text-white/40 truncate">叠票 {v.count} · {v.weeks} 周</p>
                                     </div>
                                     <div className="text-right shrink-0">
                                       {v.gate === 'screened' ? <Badge variant="secondary">已放映</Badge> : v.gate === 'frozen' ? <Badge>已排期</Badge> : <Badge variant="outline">可投</Badge>}
@@ -355,22 +355,22 @@ export const ProfilePage: React.FC<{
                           </div>
 
                           <div>
-                            <h4 className="text-xs font-black text-black/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <h4 className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                               <KeyRound className="w-3.5 h-3.5 text-[#e0fe3d]" /> 我的提名
                             </h4>
                             {activity.nominations.length === 0 ? (
-                              <p className="text-xs text-black/30 py-3">还没有提名记录</p>
+                              <p className="text-xs text-white/30 py-3">还没有提名记录</p>
                             ) : (
                               <div className="space-y-2">
                                 {activity.nominations.map((n) => (
-                                  <div key={n.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${n.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-black/10 bg-black/30'}`}>
+                                  <div key={n.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 ${n.planned ? 'border-emerald-500/40 ring-1 ring-emerald-400/30 bg-emerald-500/5' : 'border-white/10 bg-black/30'}`}>
                                     {n.image ? <img src={n.image} alt="" className="w-9 h-12 rounded-md object-cover shrink-0" /> : <Vote className="w-4 h-4 text-[#e0fe3d] shrink-0" />}
                                     <div className="min-w-0 flex-1">
                                       <p className="text-sm font-bold text-white truncate flex items-center gap-2">
                                         {n.filmTitle}
                                         {n.planned && <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/40">已通过</Badge>}
                                       </p>
-                                      <p className="text-xs text-black/40 truncate">{n.note || (n.status === 'promoted' ? '已入库' : '提名中')}</p>
+                                      <p className="text-xs text-white/40 truncate">{n.note || (n.status === 'promoted' ? '已入库' : '提名中')}</p>
                                     </div>
                                   </div>
                                 ))}
@@ -388,21 +388,21 @@ export const ProfilePage: React.FC<{
                           <Loader variant="dots" size={24} label="加载收藏" className="text-[#ff3650]" />
                         </div>
                       ) : favorites.length === 0 ? (
-                        <div className="py-12 text-center text-black/40">
-                          <Heart className="w-8 h-8 mx-auto mb-2 text-black/20" />
+                        <div className="py-12 text-center text-white/40">
+                          <Heart className="w-8 h-8 mx-auto mb-2 text-white/20" />
                           <p className="text-sm font-bold">还没有收藏</p>
-                          <p className="text-xs text-black/30 mt-1">在作品上右键「收藏」即可添加</p>
+                          <p className="text-xs text-white/30 mt-1">在作品上右键「收藏」即可添加</p>
                         </div>
                       ) : (
                         <div className="space-y-2">
                           {favorites.map((f) => (
-                            <div key={f.id} className="flex items-center gap-3 rounded-xl border border-black/10 bg-black/30 px-3 py-2.5">
+                            <div key={f.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5">
                               {f.image ? <img src={f.image} alt="" className="w-10 h-14 rounded-md object-cover shrink-0" /> : <div className="w-10 h-14 rounded-md bg-white/5 shrink-0" />}
                               <button onClick={() => navigate(`/films/${f.id}`)} className="min-w-0 flex-1 text-left group">
                                 <p className="text-sm font-bold text-white truncate group-hover:text-[#ff3650] transition-colors">{f.title_zh || f.title_en || f.title}</p>
-                                <p className="text-xs text-black/40">{f.year}{f.category ? ` · ${f.category}` : ''}</p>
+                                <p className="text-xs text-white/40">{f.year}{f.category ? ` · ${f.category}` : ''}</p>
                               </button>
-                              <button onClick={() => removeFavorite(f.id)} className="shrink-0 w-8 h-8 rounded-lg bg-white/5 hover:bg-[#ff3650] text-black/50 hover:text-white inline-flex items-center justify-center transition-colors cursor-pointer" title="取消收藏">
+                              <button onClick={() => removeFavorite(f.id)} className="shrink-0 w-8 h-8 rounded-lg bg-white/5 hover:bg-[#ff3650] text-white/50 hover:text-white inline-flex items-center justify-center transition-colors cursor-pointer" title="取消收藏">
                                 <X className="w-4 h-4" />
                               </button>
                             </div>
@@ -418,24 +418,24 @@ export const ProfilePage: React.FC<{
                           <Loader variant="dots" size={24} label="加载观影记录" className="text-[#ff3650]" />
                         </div>
                       ) : watchLog.length === 0 ? (
-                        <div className="py-12 text-center text-black/40">
-                          <Eye className="w-8 h-8 mx-auto mb-2 text-black/20" />
+                        <div className="py-12 text-center text-white/40">
+                          <Eye className="w-8 h-8 mx-auto mb-2 text-white/20" />
                           <p className="text-sm font-bold">还没有观影记录</p>
-                          <p className="text-xs text-black/30 mt-1">在作品详情页标记「已看过」并评分</p>
+                          <p className="text-xs text-white/30 mt-1">在作品详情页标记「已看过」并评分</p>
                         </div>
                       ) : (
                         <div className="space-y-2">
                           {watchLog.map((w) => (
-                            <div key={w.id} className="flex items-center gap-3 rounded-xl border border-black/10 bg-black/30 px-3 py-2.5">
+                            <div key={w.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5">
                               {w.image ? <img src={w.image} alt="" className="w-10 h-14 rounded-md object-cover shrink-0" /> : <div className="w-10 h-14 rounded-md bg-white/5 shrink-0" />}
                               <div className="min-w-0 flex-1">
                                 <button onClick={() => navigate(`/films/${w.film_id}`)} className="text-left group">
                                   <p className="text-sm font-bold text-white truncate group-hover:text-[#ff3650] transition-colors">{w.film_title}</p>
                                 </button>
                                 <Rating value={w.rating} readOnly size={14} className="mt-0.5" />
-                                {w.review && <p className="text-xs text-black/40 mt-1 line-clamp-1">「{w.review}」</p>}
+                                {w.review && <p className="text-xs text-white/40 mt-1 line-clamp-1">「{w.review}」</p>}
                               </div>
-                              <span className="shrink-0 text-[10px] text-black/30 font-mono">{w.watched_at ? w.watched_at.slice(0, 10) : ''}</span>
+                              <span className="shrink-0 text-[10px] text-white/30 font-mono">{w.watched_at ? w.watched_at.slice(0, 10) : ''}</span>
                             </div>
                           ))}
                         </div>
@@ -446,18 +446,18 @@ export const ProfilePage: React.FC<{
                     <TabsContent value="security" className="space-y-5">
                       <div className="space-y-1.5">
                         <h3 className="font-black flex items-center gap-2"><KeyRound className="w-4 h-4 text-[#ff3650]" /> 修改密码</h3>
-                        <p className="text-xs text-black/40">修改后需重新登录。</p>
+                        <p className="text-xs text-white/40">修改后需重新登录。</p>
                       </div>
                       <div className={field}>
-                        <Label className="text-black/60 uppercase text-xs font-black">当前密码</Label>
+                        <Label className="text-white/60 uppercase text-xs font-black">当前密码</Label>
                         <Input type="password" value={pwd.current} onChange={(e) => setPwd({ ...pwd, current: e.target.value })} placeholder="当前密码" />
                       </div>
                       <div className={field}>
-                        <Label className="text-black/60 uppercase text-xs font-black">新密码（至少 6 位）</Label>
+                        <Label className="text-white/60 uppercase text-xs font-black">新密码（至少 6 位）</Label>
                         <Input type="password" value={pwd.next} onChange={(e) => setPwd({ ...pwd, next: e.target.value })} placeholder="新密码" />
                       </div>
                       <div className={field}>
-                        <Label className="text-black/60 uppercase text-xs font-black">确认新密码</Label>
+                        <Label className="text-white/60 uppercase text-xs font-black">确认新密码</Label>
                         <Input type="password" value={pwd.confirm} onChange={(e) => setPwd({ ...pwd, confirm: e.target.value })} placeholder="再次输入新密码" />
                       </div>
                       <div className="flex justify-end pt-3">

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { Star, MapPin, Award, Vote, ExternalLink } from 'lucide-react';
 
@@ -36,10 +36,10 @@ export const CredentialCard: React.FC<CredentialCardProps> = ({ data, onClick })
       className="group relative flex flex-col cursor-pointer select-none"
     >
       {/* Dual-Layer Card Cover */}
-      <div className="relative w-full aspect-[4/3] sm:aspect-[16/11] bg-neutral-100 dark:bg-white rounded-xl overflow-hidden mb-2.5 border border-neutral-200 dark:border-[#202020] group-hover:border-neutral-400 dark:group-hover:border-[#383838] shadow-sm transition-all duration-500">
+      <div className="relative w-full aspect-[4/3] sm:aspect-[16/11] bg-neutral-100 dark:bg-[#141414] rounded-xl overflow-hidden mb-2.5 border border-neutral-200 dark:border-[#202020] group-hover:border-neutral-400 dark:group-hover:border-[#383838] shadow-sm transition-all duration-500">
         
         {/* Backing Reveal Layer (Revealed on hover) */}
-        <div className="absolute inset-0 bg-neutral-50 dark:bg-[#f5ffe5] p-4 flex flex-col justify-between text-neutral-900 dark:text-white transition-colors">
+        <div className="absolute inset-0 bg-neutral-50 dark:bg-[#121212] p-4 flex flex-col justify-between text-neutral-900 dark:text-white transition-colors">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[9px] font-bold text-neutral-500 dark:text-[#888888] uppercase tracking-widest">
               // ARCHIVE #{data.id.slice(-4)}
@@ -55,7 +55,7 @@ export const CredentialCard: React.FC<CredentialCardProps> = ({ data, onClick })
               </p>
             )}
             {data.quote && (
-              <p className="text-xs text-neutral-600 dark:text-[#999999] italic line-clamp-2 leading-relaxed bg-white dark:bg-white p-2 rounded border border-neutral-200 dark:border-[#242424]">
+              <p className="text-xs text-neutral-600 dark:text-[#999999] italic line-clamp-2 leading-relaxed bg-white dark:bg-[#181818] p-2 rounded border border-neutral-200 dark:border-[#242424]">
                 "{data.quote}"
               </p>
             )}
@@ -88,21 +88,21 @@ export const CredentialCard: React.FC<CredentialCardProps> = ({ data, onClick })
 
           {/* Front Badges in Minimal Flat Monochrome */}
           <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-white/80 dark:bg-black/70 backdrop-blur-md text-neutral-800 dark:text-[#d4d4d4] border border-black/10 dark:border-black/10">
+            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-white/80 dark:bg-black/70 backdrop-blur-md text-neutral-800 dark:text-[#d4d4d4] border border-black/10 dark:border-white/10">
               {data.tag}
             </span>
           </div>
 
           {/* Rating stars or Votes if available */}
           {data.rating !== undefined && (
-            <div className="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold text-white border border-black/10">
-              <Star className="w-2.5 h-2.5 fill-current text-black/80" />
+            <div className="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold text-white border border-white/10">
+              <Star className="w-2.5 h-2.5 fill-current text-white/80" />
               <span>{data.rating}.0</span>
             </div>
           )}
 
           {data.votesCount !== undefined && (
-            <div className="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold text-white border border-black/10 font-mono">
+            <div className="absolute top-2.5 right-2.5 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold text-white border border-white/10 font-mono">
               <Vote className="w-2.5 h-2.5" />
               <span>{data.votesCount} 票</span>
             </div>
@@ -112,7 +112,7 @@ export const CredentialCard: React.FC<CredentialCardProps> = ({ data, onClick })
 
       {/* Card Info Footer */}
       <div className="space-y-0.5 text-left">
-        <h4 className="text-xs font-semibold text-neutral-900 dark:text-white group-hover:text-neutral-700 dark:group-hover:text-black/80 transition-colors truncate">
+        <h4 className="text-xs font-semibold text-neutral-900 dark:text-white group-hover:text-neutral-700 dark:group-hover:text-white/80 transition-colors truncate">
           {data.titleZh || data.title}
         </h4>
 

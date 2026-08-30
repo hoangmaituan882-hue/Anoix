@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { adminFilms, adminScreenings, FilmRow, ScreeningRow } from '../../lib/pgAdmin';
 import {
   shanghaiDateString,
@@ -174,13 +174,13 @@ export const ScheduleBoard: React.FC<{
   const poster = (id: string) => filmById.get(id);
 
   return (
-    <div className="bg-white border border-black/10 rounded-3xl p-4 sm:p-5 space-y-4">
+    <div className="bg-[#1a1a1a] border border-white/10 rounded-3xl p-4 sm:p-5 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <span className="text-[10px] font-black text-[#ff3650] uppercase tracking-widest flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" /> 首页时刻表
           </span>
-          <p className="text-xs text-black/50 mt-1">
+          <p className="text-xs text-white/50 mt-1">
             拖到某一天即排期。右侧 12 格只含已放过的片子；未来场次会冻结投票，但不上首页。
           </p>
         </div>
@@ -202,12 +202,12 @@ export const ScheduleBoard: React.FC<{
       <div className="grid grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_200px] gap-4">
         {/* Unscheduled */}
         <div className="space-y-2 min-h-[320px]">
-          <p className="text-[10px] font-black text-black/40 uppercase tracking-wider">未排期 ({unscheduled.length})</p>
+          <p className="text-[10px] font-black text-white/40 uppercase tracking-wider">未排期 ({unscheduled.length})</p>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜片库..."
-            className="w-full bg-black/40 border border-black/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder:text-black/30 focus:border-[#ff3650] focus:outline-none"
+            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder:text-white/30 focus:border-[#ff3650] focus:outline-none"
           />
           <div className="space-y-1.5 max-h-[420px] overflow-y-auto pr-1">
             {unscheduled.slice(0, 80).map((f) => (
@@ -215,14 +215,14 @@ export const ScheduleBoard: React.FC<{
                 key={f.id}
                 draggable
                 onDragStart={(e) => setDrag(e, { filmId: f.id, fromDate: null })}
-                className="flex items-center gap-2 bg-black/40 border border-black/10 rounded-xl p-1.5 cursor-grab active:cursor-grabbing"
+                className="flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl p-1.5 cursor-grab active:cursor-grabbing"
               >
-                <GripVertical className="w-3 h-3 text-black/30 shrink-0" />
+                <GripVertical className="w-3 h-3 text-white/30 shrink-0" />
                 {f.image ? (
                   <img src={f.image} alt="" className="w-8 h-11 rounded object-cover shrink-0" />
                 ) : (
                   <div className="w-8 h-11 rounded bg-white/5 shrink-0 flex items-center justify-center">
-                    <Film className="w-3 h-3 text-black/30" />
+                    <Film className="w-3 h-3 text-white/30" />
                   </div>
                 )}
                 <p className="text-[11px] font-bold text-white truncate">{f.title_zh || f.title}</p>
@@ -250,7 +250,7 @@ export const ScheduleBoard: React.FC<{
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-black/40 uppercase">
+          <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-white/40 uppercase">
             {WEEKDAYS.map((d) => (
               <div key={d} className="py-1">{d}</div>
             ))}
@@ -275,15 +275,15 @@ export const ScheduleBoard: React.FC<{
                       ? 'border-[#ff3650] bg-[#ff3650]/15'
                       : isToday
                       ? 'border-[#e0fe3d]/40 bg-[#e0fe3d]/5'
-                      : 'border-black/10 bg-black/30'
+                      : 'border-white/10 bg-black/30'
                   }`}
                 >
                   <div className="flex items-center justify-between px-0.5">
-                    <span className={`text-[10px] font-mono font-bold ${isToday ? 'text-[#e0fe3d]' : 'text-black/50'}`}>
+                    <span className={`text-[10px] font-mono font-bold ${isToday ? 'text-[#e0fe3d]' : 'text-white/50'}`}>
                       {day.slice(8)}
                     </span>
                     {isFuture && ids.length > 0 && (
-                      <span className="text-[8px] font-black text-black/30">未开</span>
+                      <span className="text-[8px] font-black text-white/30">未开</span>
                     )}
                   </div>
                   {ids.map((id, idx) => {
@@ -323,12 +323,12 @@ export const ScheduleBoard: React.FC<{
 
         {/* Featured preview */}
         <div className="space-y-2">
-          <p className="text-[10px] font-black text-black/40 uppercase tracking-wider">首页预览 · 已放映 12</p>
+          <p className="text-[10px] font-black text-white/40 uppercase tracking-wider">首页预览 · 已放映 12</p>
           <div className="grid grid-cols-2 gap-1.5">
             {Array.from({ length: 12 }, (_, i) => {
               const f = preview[i];
               return (
-                <div key={i} className="relative aspect-[2/3] rounded-lg overflow-hidden bg-black/40 border border-black/10">
+                <div key={i} className="relative aspect-[2/3] rounded-lg overflow-hidden bg-black/40 border border-white/10">
                   {f?.image ? (
                     <img src={f.image} alt="" className="w-full h-full object-cover" />
                   ) : (

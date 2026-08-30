@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { WorkItem, Language } from '../../types';
@@ -92,7 +92,7 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
       {prev && (
         <button
           onClick={(e) => { e.stopPropagation(); void goNeighbor(prev); }}
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-black/20 transition-colors cursor-pointer"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
           aria-label="上一个作品"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -101,7 +101,7 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
       {next && (
         <button
           onClick={(e) => { e.stopPropagation(); void goNeighbor(next); }}
-          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-black/20 transition-colors cursor-pointer"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
           aria-label="下一个作品"
         >
           <ChevronRight className="w-5 h-5" />
@@ -113,14 +113,14 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.3, ease: TRIGGER_EASE }}
-        className="relative w-full max-w-4xl bg-white border border-black/20 rounded-3xl overflow-hidden shadow-2xl my-8 text-[#1e1f21]"
+        className="relative w-full max-w-4xl bg-[#1a1a1a] border border-white/20 rounded-3xl overflow-hidden shadow-2xl my-8 text-[#f5ffe5]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close + Favorite */}
         <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
           <button
             onClick={toggleFavorite}
-            className="w-10 h-10 rounded-full bg-black/70 hover:bg-white/20 text-white flex items-center justify-center border border-black/20 transition-colors cursor-pointer"
+            className="w-10 h-10 rounded-full bg-black/70 hover:bg-white/20 text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
             title={favorited ? '取消收藏' : '收藏'}
             aria-label="收藏"
           >
@@ -128,7 +128,7 @@ export const FilmDetailModal: React.FC<FilmDetailModalProps> = ({
           </button>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-black/20 transition-colors cursor-pointer"
+            className="w-10 h-10 rounded-full bg-black/70 hover:bg-[#ff3650] text-white flex items-center justify-center border border-white/20 transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />

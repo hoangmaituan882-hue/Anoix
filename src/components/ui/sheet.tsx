@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
@@ -60,7 +60,7 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-full bg-white/10 p-1.5 text-black/70 opacity-70 transition-opacity hover:opacity-100 hover:bg-white/20 focus:outline-none disabled:pointer-events-none">
+      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-full bg-white/10 p-1.5 text-white/70 opacity-70 transition-opacity hover:opacity-100 hover:bg-white/20 focus:outline-none disabled:pointer-events-none">
         <X className="h-4 w-4" />
         <span className="sr-only">关闭</span>
       </SheetPrimitive.Close>

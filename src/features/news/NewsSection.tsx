@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { NewsItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { repository, useRepo } from '../../lib/repository';
@@ -26,7 +26,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
       <div className="absolute top-4 left-0 right-0 overflow-hidden pointer-events-none opacity-25 flex justify-center">
         <h2
           className="cb_headline text-[130px] sm:text-[200px] lg:text-[280px] font-black tracking-tighter text-white leading-none uppercase whitespace-nowrap"
-          style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
+          style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
         >
           NEWS
         </h2>
@@ -37,7 +37,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
         <div className="mb-12 md:mb-16">
           <h2
             className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight uppercase"
-            style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
+            style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
           >
             {t.news}
           </h2>
@@ -89,7 +89,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                   )}
                 </div>
 
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white group-hover:text-white flex-1 line-clamp-2 md:line-clamp-1 transition-colors">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white group-hover:text-[#f5ffe5] flex-1 line-clamp-2 md:line-clamp-1 transition-colors">
                   {lang === 'zh' && item.titleZh ? item.titleZh : lang === 'en' && item.titleEn ? item.titleEn : item.title}
                 </h3>
 

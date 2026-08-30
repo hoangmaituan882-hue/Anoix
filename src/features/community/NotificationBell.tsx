@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { community, NotificationItem } from '../../lib/community';
 import {
@@ -46,7 +46,7 @@ export const NotificationBell: React.FC = () => {
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 bg-[#1d1d1f] border-black/10 text-white">
+      <DropdownMenuContent align="end" className="w-80 bg-[#1d1d1f] border-white/10 text-white">
         <DropdownMenuLabel className="flex items-center justify-between text-white">
           <span>通知</span>
           {unread > 0 && (
@@ -58,15 +58,15 @@ export const NotificationBell: React.FC = () => {
         <DropdownMenuSeparator />
         <div className="max-h-80 overflow-y-auto">
           {items.length === 0 ? (
-            <p className="px-3 py-8 text-center text-black/40 text-sm">暂无通知</p>
+            <p className="px-3 py-8 text-center text-white/40 text-sm">暂无通知</p>
           ) : (
             items.map((n) => (
               <div key={n.id} className="flex items-start gap-2.5 px-3 py-2.5 hover:bg-white/5 transition-colors">
                 {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-[#ff3650] mt-1.5 shrink-0" />}
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-white truncate">{n.title}</p>
-                  {n.body && <p className="text-xs text-black/50 leading-snug">{n.body}</p>}
-                  <p className="text-[10px] text-black/30 mt-0.5">{rel(n.created_at)}</p>
+                  {n.body && <p className="text-xs text-white/50 leading-snug">{n.body}</p>}
+                  <p className="text-[10px] text-white/30 mt-0.5">{rel(n.created_at)}</p>
                 </div>
               </div>
             ))

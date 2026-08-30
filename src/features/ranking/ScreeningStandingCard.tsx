@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Award, ArrowRight } from 'lucide-react';
 import { AnimatedNumber } from '../../components/motion/AnimatedNumber';
@@ -47,9 +47,9 @@ export const ScreeningStandingCard: React.FC<ScreeningStandingCardProps> = ({
 
   return (
     <div
-      className={`rounded-2xl p-5 bg-white dark:bg-white border border-[#e5e7eb] dark:border-black/10 shadow-sm text-neutral-900 dark:text-white transition-colors ${className}`}
+      className={`rounded-2xl p-5 bg-white dark:bg-[#1a1a1a] border border-[#e5e7eb] dark:border-white/10 shadow-sm text-neutral-900 dark:text-white transition-colors ${className}`}
     >
-      <div className="flex items-center justify-between pb-3.5 border-b border-[#e5e7eb] dark:border-black/10">
+      <div className="flex items-center justify-between pb-3.5 border-b border-[#e5e7eb] dark:border-white/10">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-black text-white dark:bg-white dark:text-black flex items-center justify-center shadow-xs">
             <Trophy className="w-4 h-4" />
@@ -64,13 +64,13 @@ export const ScreeningStandingCard: React.FC<ScreeningStandingCardProps> = ({
           </div>
         </div>
 
-        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-white/10 text-neutral-700 dark:text-white/90 border border-black/5 dark:border-black/10">
+        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-white/10 text-neutral-700 dark:text-white/90 border border-black/5 dark:border-white/10">
           {percentile ?? (ranked ? '' : '未上榜')}
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 py-4 border-b border-[#e5e7eb] dark:border-black/10">
-        <div className="bg-[#f9fafb] dark:bg-white p-3 rounded-xl border border-[#e5e7eb] dark:border-black/5">
+      <div className="grid grid-cols-3 gap-3 py-4 border-b border-[#e5e7eb] dark:border-white/10">
+        <div className="bg-[#f9fafb] dark:bg-[#141414] p-3 rounded-xl border border-[#e5e7eb] dark:border-white/5">
           <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
             全站位次
           </span>
@@ -85,7 +85,7 @@ export const ScreeningStandingCard: React.FC<ScreeningStandingCardProps> = ({
           </div>
         </div>
 
-        <div className="bg-[#f9fafb] dark:bg-white p-3 rounded-xl border border-[#e5e7eb] dark:border-black/5">
+        <div className="bg-[#f9fafb] dark:bg-[#141414] p-3 rounded-xl border border-[#e5e7eb] dark:border-white/5">
           <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
             累计已看时长
           </span>
@@ -99,7 +99,7 @@ export const ScreeningStandingCard: React.FC<ScreeningStandingCardProps> = ({
           </div>
         </div>
 
-        <div className="bg-[#f9fafb] dark:bg-white p-3 rounded-xl border border-[#e5e7eb] dark:border-black/5">
+        <div className="bg-[#f9fafb] dark:bg-[#141414] p-3 rounded-xl border border-[#e5e7eb] dark:border-white/5">
           <span className="text-[10px] font-medium text-neutral-500 dark:text-[#737373] block">
             {ranked ? '已超越' : '上榜人数'}
           </span>
@@ -138,11 +138,11 @@ export const ScreeningStandingCard: React.FC<ScreeningStandingCardProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 mt-3 pt-3 border-t border-[#e5e7eb] dark:border-black/10">
+      <div className="grid grid-cols-2 gap-2.5 mt-3 pt-3 border-t border-[#e5e7eb] dark:border-white/10">
         <button
           type="button"
           onClick={() => openLeaderboardModal()}
-          className="w-full py-2.5 px-3 rounded-xl text-center text-xs font-semibold text-neutral-700 hover:text-black dark:text-[#d4d4d4] dark:hover:text-white bg-neutral-100 hover:bg-neutral-200 dark:bg-white dark:hover:bg-[#202020] border border-[#e5e7eb] dark:border-black/5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          className="w-full py-2.5 px-3 rounded-xl text-center text-xs font-semibold text-neutral-700 hover:text-black dark:text-[#d4d4d4] dark:hover:text-white bg-neutral-100 hover:bg-neutral-200 dark:bg-[#141414] dark:hover:bg-[#202020] border border-[#e5e7eb] dark:border-white/5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
           <Trophy className="w-3.5 h-3.5" />
           <span>查看名人堂总榜</span>

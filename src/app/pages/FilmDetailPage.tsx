@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate, useLocation, useViewTransitionState } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language, OpenSiteModal, WorkItem } from '../../types';
@@ -99,7 +99,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
         <div className="max-w-5xl mx-auto">
           {/* Top Bar: Breadcrumbs & Share */}
           <div className="flex items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-2 text-xs font-bold text-black/60">
+            <div className="flex items-center gap-2 text-xs font-bold text-white/60">
               <Link to="/" className="hover:text-[#ff3650] transition-colors flex items-center gap-1">
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>{lang === 'zh' ? '首页' : 'HOME'}</span>
@@ -122,7 +122,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
             {work && (
               <button
                 onClick={handleShare}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#ff3650] text-xs font-bold text-white transition-all cursor-pointer border border-black/10"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#ff3650] text-xs font-bold text-white transition-all cursor-pointer border border-white/10"
                 title="Share link"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-[#e0fe3d]" /> : <Share2 className="w-3.5 h-3.5" />}
@@ -138,7 +138,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
           ) : work ? (
             <div className="space-y-10">
               {/* Main Film Card */}
-              <div className="bg-white border border-black/20 rounded-3xl overflow-hidden shadow-2xl text-[#1e1f21]">
+              <div className="bg-[#1a1a1a] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-[#f5ffe5]">
                 <FilmDetailBody
                   work={work}
                   lang={lang}
@@ -155,11 +155,11 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
                 {prevWork ? (
                   <Link
                     to={`/films/${prevWork.id}`}
-                    className="p-4 rounded-2xl bg-white border border-black/10 hover:border-[#ff3650] flex items-center gap-3 group transition-all"
+                    className="p-4 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650] flex items-center gap-3 group transition-all"
                   >
                     <ChevronLeft className="w-5 h-5 text-[#ff3650] group-hover:-translate-x-1 transition-transform" />
                     <div>
-                      <span className="text-[10px] font-black text-black/50 uppercase tracking-widest block">
+                      <span className="text-[10px] font-black text-white/50 uppercase tracking-widest block">
                         {lang === 'zh' ? '上一部作品' : 'PREVIOUS WORK'}
                       </span>
                       <p className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-[#ff3650] transition-colors">
@@ -172,10 +172,10 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
                 {nextWork && (
                   <Link
                     to={`/films/${nextWork.id}`}
-                    className="p-4 rounded-2xl bg-white border border-black/10 hover:border-[#ff3650] flex items-center justify-end text-right gap-3 group transition-all sm:col-start-2"
+                    className="p-4 rounded-2xl bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650] flex items-center justify-end text-right gap-3 group transition-all sm:col-start-2"
                   >
                     <div>
-                      <span className="text-[10px] font-black text-black/50 uppercase tracking-widest block">
+                      <span className="text-[10px] font-black text-white/50 uppercase tracking-widest block">
                         {lang === 'zh' ? '下一部作品' : 'NEXT WORK'}
                       </span>
                       <p className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-[#ff3650] transition-colors">
@@ -188,7 +188,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
               </div>
 
               {/* Related Works Recommendations */}
-              <div className="pt-8 border-t border-black/10">
+              <div className="pt-8 border-t border-white/10">
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#ff3650]" />
@@ -208,7 +208,7 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
                       key={item.id}
                       to={`/films/${item.id}`}
                       viewTransition
-                      className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-black/10 hover:border-[#ff3650] transition-all transform hover:-translate-y-1 shadow-lg"
+                      className="group flex flex-col bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/10 hover:border-[#ff3650] transition-all transform hover:-translate-y-1 shadow-lg"
                     >
                       <div className="relative aspect-[27/40] overflow-hidden bg-black/40">
                         <img
@@ -233,9 +233,9 @@ export const FilmDetailPage: React.FC<FilmDetailPageProps> = ({
               </div>
             </div>
           ) : (
-            <div className="bg-white border border-black/20 rounded-3xl p-12 text-center text-[#1e1f21]">
+            <div className="bg-[#1a1a1a] border border-white/20 rounded-3xl p-12 text-center text-[#f5ffe5]">
               <p className="text-4xl font-black text-[#ff3650] uppercase mb-3">404</p>
-              <p className="text-black/70 font-bold mb-6">
+              <p className="text-white/70 font-bold mb-6">
                 {lang === 'zh' ? '找不到该作品条目' : 'Film entry not found'}
               </p>
               <button

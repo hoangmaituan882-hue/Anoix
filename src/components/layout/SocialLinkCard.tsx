@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Language, SocialLink } from '../../types';
 
@@ -41,14 +41,14 @@ export const SocialLinkCard: React.FC<SocialLinkCardProps> = ({
           <ArrowUpRight className="w-4 h-4" />
         </span>
       </div>
-      <p className="text-xs sm:text-sm text-black/60 group-hover:text-white/90 leading-relaxed transition-colors min-h-[2.5rem]">
+      <p className="text-xs sm:text-sm text-white/60 group-hover:text-white/90 leading-relaxed transition-colors min-h-[2.5rem]">
         {socialBlurb(item, locale) || '填写简介后会出现在页脚格子里'}
       </p>
       {children}
     </>
   );
 
-  const chrome = `group p-5 rounded-2xl bg-white hover:bg-white border border-black/10 hover:border-[#ff3650] transition-all duration-300 flex flex-col justify-between ${className}`;
+  const chrome = `group p-5 rounded-2xl bg-[#1a1a1a] hover:bg-[#222222] border border-white/10 hover:border-[#ff3650] transition-all duration-300 flex flex-col justify-between ${className}`;
 
   if (!href) {
     return <div className={chrome}>{inner}</div>;

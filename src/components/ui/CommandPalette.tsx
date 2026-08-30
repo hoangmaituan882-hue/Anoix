@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Tabs, TabsList, TabsTrigger } from './tabs';
 import {
@@ -237,7 +237,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             onMouseMove={handleMouseMove}
             onClick={(e) => e.stopPropagation()}
-            className="command-modal-card relative w-full max-w-3xl bg-[#141416] text-[#1e1f21] border border-black/15 rounded-[26px] shadow-[0_24px_80px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col max-h-[78vh]"
+            className="command-modal-card relative w-full max-w-3xl bg-[#141416] text-[#f5ffe5] border border-white/15 rounded-[26px] shadow-[0_24px_80px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col max-h-[78vh]"
           >
             {/* Dynamic Spotlight Glow Background Effect */}
             <div
@@ -248,7 +248,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             />
 
             {/* Top Search Bar & Category Filter Tabs */}
-            <div className="relative border-b border-black/10 p-3 sm:p-4 space-y-3 shrink-0">
+            <div className="relative border-b border-white/10 p-3 sm:p-4 space-y-3 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-[#ff3650]/15 flex items-center justify-center text-[#ff3650] shrink-0 border border-[#ff3650]/20">
                   <Search className="w-4 h-4" />
@@ -263,13 +263,13 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 {query && (
                   <button
                     onClick={() => setQuery('')}
-                    className="w-6 h-6 rounded-full bg-white/10 hover:bg-[#ff3650] text-black/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs"
+                    className="w-6 h-6 rounded-full bg-white/10 hover:bg-[#ff3650] text-white/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs"
                     title="清空搜索"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
-                <kbd className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-black/40 border border-black/15 rounded-lg px-2 py-1 bg-white/5">
+                <kbd className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-white/40 border border-white/15 rounded-lg px-2 py-1 bg-white/5">
                   <CmdIcon className="w-3 h-3" />K
                 </kbd>
               </div>
@@ -293,7 +293,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       <TabsTrigger
                         key={tab.id}
                         value={tab.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-bold border border-black/10"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-bold border border-white/10"
                       >
                         <Icon className="w-3 h-3" />
                         <span>{tab.label}</span>
@@ -309,21 +309,21 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               {/* Left Column: Result List */}
               <div
                 ref={listContainerRef}
-                className="md:col-span-7 overflow-y-auto divide-y divide-white/5 max-h-[50vh] md:max-h-none border-b md:border-b-0 md:border-r border-black/10"
+                className="md:col-span-7 overflow-y-auto divide-y divide-white/5 max-h-[50vh] md:max-h-none border-b md:border-b-0 md:border-r border-white/10"
               >
                 {/* Zero-State: Recent Searches & Trending Chips when query is empty */}
                 {!query.trim() && activeTab === 'all' && (
-                  <div className="p-3 space-y-3.5 bg-black/20 border-b border-black/10">
+                  <div className="p-3 space-y-3.5 bg-black/20 border-b border-white/10">
                     {/* Recent Searches */}
                     {recentSearches.length > 0 && (
                       <div>
-                        <div className="flex items-center justify-between text-xs font-black text-black/50 mb-2">
+                        <div className="flex items-center justify-between text-xs font-black text-white/50 mb-2">
                           <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
                             <History className="w-3.5 h-3.5 text-[#ff3650]" /> 最近搜索
                           </span>
                           <button
                             onClick={handleClearAllRecents}
-                            className="text-[11px] font-bold text-black/40 hover:text-[#ff3650] transition-colors cursor-pointer flex items-center gap-1"
+                            className="text-[11px] font-bold text-white/40 hover:text-[#ff3650] transition-colors cursor-pointer flex items-center gap-1"
                           >
                             <Trash2 className="w-3 h-3" /> 清空
                           </button>
@@ -333,13 +333,13 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                             <button
                               key={term}
                               onClick={() => setQuery(term)}
-                              className="group inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 hover:bg-white/15 border border-black/10 text-xs font-bold text-black/80 hover:text-white transition-colors cursor-pointer"
+                              className="group inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-xs font-bold text-white/80 hover:text-white transition-colors cursor-pointer"
                             >
-                              <Clock className="w-3 h-3 text-black/40" />
+                              <Clock className="w-3 h-3 text-white/40" />
                               <span>{term}</span>
                               <span
                                 onClick={(e) => handleRemoveRecent(e, term)}
-                                className="w-3.5 h-3.5 rounded-full hover:bg-[#ff3650] hover:text-white flex items-center justify-center text-black/40 ml-0.5"
+                                className="w-3.5 h-3.5 rounded-full hover:bg-[#ff3650] hover:text-white flex items-center justify-center text-white/40 ml-0.5"
                                 title="移除"
                               >
                                 <X className="w-2.5 h-2.5" />
@@ -352,7 +352,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
                     {/* Trending Chips */}
                     <div>
-                      <div className="flex items-center gap-1.5 text-xs font-black text-black/50 mb-2 uppercase tracking-wider text-[11px]">
+                      <div className="flex items-center gap-1.5 text-xs font-black text-white/50 mb-2 uppercase tracking-wider text-[11px]">
                         <Flame className="w-3.5 h-3.5 text-[#ff3650]" /> 热门神作快捷检索
                       </div>
                       <div className="flex flex-wrap gap-1.5">
@@ -360,7 +360,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           <button
                             key={chip}
                             onClick={() => setQuery(chip)}
-                            className="group inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/5 hover:bg-[#ff3650] border border-black/10 hover:border-[#ff3650] text-xs font-bold text-black/80 hover:text-white transition-all cursor-pointer shadow-xs"
+                            className="group inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/5 hover:bg-[#ff3650] border border-white/10 hover:border-[#ff3650] text-xs font-bold text-white/80 hover:text-white transition-all cursor-pointer shadow-xs"
                           >
                             <span className="text-[#ff3650] group-hover:text-white font-mono font-bold">#</span>
                             <span>{chip}</span>
@@ -375,11 +375,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 <div className="p-2 space-y-1">
                   {filtered.length === 0 ? (
                     <div className="py-14 text-center">
-                      <Search className="w-8 h-8 text-black/20 mx-auto mb-2" />
-                      <p className="text-[16px] font-bold text-black/60">
+                      <Search className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                      <p className="text-[16px] font-bold text-white/60">
                         未找到相关结果
                       </p>
-                      <p className="text-[14px] text-black/40 mt-1 leading-[1.55]">
+                      <p className="text-[14px] text-white/40 mt-1 leading-[1.55]">
                         尝试搜索“边缘行者”、“普罗米亚”或“斩服少女”
                       </p>
                     </div>
@@ -402,7 +402,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                             className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                               isSelected
                                 ? 'bg-[#ff3650] text-white'
-                                : 'bg-white/5 text-black/60 group-hover:text-white'
+                                : 'bg-white/5 text-white/60 group-hover:text-white'
                             }`}
                           >
                             {item.icon}
@@ -433,7 +433,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   <div className="space-y-3">
                     {/* Preview Image / Backdrop */}
                     {activeItem.preview.image && (
-                      <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-black/10 shadow-sm">
+                      <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-white/10 shadow-sm">
                         <img
                           src={activeItem.preview.image}
                           alt={activeItem.preview.title}
@@ -459,7 +459,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     </div>
 
                     {/* Meta details: 12px */}
-                    <div className="space-y-1 text-[12px] text-black/60">
+                    <div className="space-y-1 text-[12px] text-white/60">
                       {activeItem.preview.date && (
                         <div className="flex items-center gap-2">
                           <Calendar className="w-3.5 h-3.5 text-[#ff3650]" />
@@ -476,7 +476,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
                     {/* Description: 14px Regular with 1.55 Line-height */}
                     {activeItem.preview.description && (
-                      <p className="text-[14px] font-normal text-black/70 line-clamp-3 leading-[1.55] border-t border-black/10 pt-2">
+                      <p className="text-[14px] font-normal text-white/70 line-clamp-3 leading-[1.55] border-t border-white/10 pt-2">
                         {activeItem.preview.description}
                       </p>
                     )}
@@ -487,7 +487,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                         {activeItem.preview.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="px-2 py-0.5 rounded-full bg-white/5 border border-black/10 text-[11px] text-black/70 font-normal"
+                            className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] text-white/70 font-normal"
                           >
                             {tag}
                           </span>
@@ -496,7 +496,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div className="h-full flex flex-col items-center justify-center text-center py-12 text-black/30 text-[12px]">
+                  <div className="h-full flex flex-col items-center justify-center text-center py-12 text-white/30 text-[12px]">
                     <Sparkles className="w-8 h-8 mb-2 opacity-40 text-[#ff3650]" />
                     <span>即时档案看板</span>
                   </div>
@@ -518,7 +518,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             </div>
 
             {/* Bottom Keyboard Shortcuts Footer */}
-            <div className="border-t border-black/10 px-4 py-2.5 bg-black/40 flex flex-wrap items-center justify-between text-[12px] text-black/50 shrink-0 select-none">
+            <div className="border-t border-white/10 px-4 py-2.5 bg-black/40 flex flex-wrap items-center justify-between text-[12px] text-white/50 shrink-0 select-none">
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1">
                   <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white font-bold">↑</kbd>
@@ -534,7 +534,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   <span>打开详情</span>
                 </span>
               </div>
-              <span className="hidden sm:inline text-black/30">
+              <span className="hidden sm:inline text-white/30">
                 档案聚光灯搜索
               </span>
             </div>

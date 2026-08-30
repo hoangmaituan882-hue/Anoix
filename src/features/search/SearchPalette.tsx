@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Film, Newspaper, CalendarDays, Sparkles, Navigation } from 'lucide-react';
 import { repository, useRepo } from '../../lib/repository';
@@ -175,7 +175,7 @@ export const SearchPalette: React.FC = () => {
         category: 'actions',
         label: r.label,
         hint: r.hint,
-        icon: <Icon className="w-4 h-4 text-black/70" />,
+        icon: <Icon className="w-4 h-4 text-white/70" />,
         action: () => navigate(r.path, { viewTransition: true }),
         preview: {
           type: 'action',

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle } from 'lucide-react';
 
@@ -40,22 +40,22 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.92, opacity: 0, y: 16 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-sm bg-white border border-black/20 rounded-3xl p-6 space-y-4 shadow-2xl text-white"
+            className="w-full max-w-sm bg-[#181818] border border-white/20 rounded-3xl p-6 space-y-4 shadow-2xl text-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
-                danger ? 'bg-[#ff3650]/15 text-[#ff3650] border border-[#ff3650]/30' : 'bg-white/10 text-white border border-black/10'
+                danger ? 'bg-[#ff3650]/15 text-[#ff3650] border border-[#ff3650]/30' : 'bg-white/10 text-white border border-white/10'
               }`}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <h3 className="font-black text-white text-base leading-snug">{title}</h3>
             </div>
-            {description && <p className="text-sm text-black/60 leading-relaxed">{description}</p>}
+            {description && <p className="text-sm text-white/60 leading-relaxed">{description}</p>}
             <div className="flex justify-end gap-3 pt-1">
               <button
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl font-bold text-sm text-black/60 hover:text-white border border-black/15 transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl font-bold text-sm text-white/60 hover:text-white border border-white/15 transition-colors cursor-pointer"
               >
                 {cancelText}
               </button>

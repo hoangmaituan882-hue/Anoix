@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { catalog } from '../../lib/catalog';
 import { nominations, TmdbNominationPayload, BangumiNominationPayload } from '../../lib/nominations';
 import { searchScrape, ScrapeResult, ScrapeSource } from '../../lib/scrape';
@@ -132,8 +132,8 @@ export const NominateDialog: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in" onClick={onClose}>
-      <div className="w-full max-w-2xl max-h-[88vh] flex flex-col bg-white border border-black/20 rounded-3xl p-6 sm:p-8 text-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between border-b border-black/10 pb-4 shrink-0">
+      <div className="w-full max-w-2xl max-h-[88vh] flex flex-col bg-[#181818] border border-white/20 rounded-3xl p-6 sm:p-8 text-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/30 flex items-center justify-center text-[#ff3650]">
               <Plus className="w-5 h-5" />
@@ -141,10 +141,10 @@ export const NominateDialog: React.FC<{
             <div>
               <span className="text-[10px] font-black text-[#ff3650] uppercase tracking-widest block">Nominate</span>
               <h3 className="text-xl font-black">提名一部影片</h3>
-              <p className="text-xs text-black/40">{roundTitle}</p>
+              <p className="text-xs text-white/40">{roundTitle}</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-black/10">
+          <button onClick={onClose} className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -158,7 +158,7 @@ export const NominateDialog: React.FC<{
 
             <TabsContent value="library" className="space-y-3">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-black/40" />
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                 <Input value={libQuery} onChange={(e) => setLibQuery(e.target.value)} placeholder="搜索片库..." className="pl-9" />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-64 overflow-y-auto">
@@ -172,10 +172,10 @@ export const NominateDialog: React.FC<{
                     key={f.id}
                     type="button"
                     onClick={() => { setSelectedFilm(f); setSelectedScrape(null); }}
-                    className={`rounded-xl overflow-hidden border-2 text-left transition-all cursor-pointer ${selectedFilm?.id === f.id ? 'border-[#ff3650]' : 'border-black/10 hover:border-white/30'}`}
+                    className={`rounded-xl overflow-hidden border-2 text-left transition-all cursor-pointer ${selectedFilm?.id === f.id ? 'border-[#ff3650]' : 'border-white/10 hover:border-white/30'}`}
                   >
                     <div className="aspect-[2/3] bg-black/40 overflow-hidden">
-                      {f.image ? <img src={f.image} alt={f.title} className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-black/20"><Film className="w-5 h-5" /></div>}
+                      {f.image ? <img src={f.image} alt={f.title} className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-white/20"><Film className="w-5 h-5" /></div>}
                     </div>
                     <p className="p-1.5 text-xs font-bold truncate">{f.titleZh ?? f.title}</p>
                   </button>
@@ -189,19 +189,19 @@ export const NominateDialog: React.FC<{
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSource('tmdb')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'tmdb' ? 'bg-[#ff3650] text-white' : 'bg-white/5 text-black/60 hover:text-white'}`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'tmdb' ? 'bg-[#ff3650] text-white' : 'bg-white/5 text-white/60 hover:text-white'}`}
                 >
                   TMDB
                 </button>
                 <button
                   onClick={() => setSource('bangumi')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'bangumi' ? 'bg-[#ff3650] text-white' : 'bg-white/5 text-black/60 hover:text-white'}`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'bangumi' ? 'bg-[#ff3650] text-white' : 'bg-white/5 text-white/60 hover:text-white'}`}
                 >
                   Bangumi
                 </button>
               </div>
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-black/40" />
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                 <Input value={scrapeQuery} onChange={(e) => setScrapeQuery(e.target.value)} placeholder={source === 'tmdb' ? '搜索 TMDB（片名/关键词）...' : '搜索 Bangumi（片名/关键词）...'} className="pl-9" />
               </div>
               {searching ? (
@@ -213,20 +213,20 @@ export const NominateDialog: React.FC<{
                       key={`${r.source}-${r.id}`}
                       type="button"
                       onClick={() => { setSelectedScrape(r); setSelectedFilm(null); }}
-                      className={`w-full flex items-center gap-3 rounded-xl border-2 p-2.5 text-left transition-all cursor-pointer ${selectedScrape?.id === r.id && selectedScrape?.source === r.source ? 'border-[#ff3650]' : 'border-black/10 hover:border-white/30'}`}
+                      className={`w-full flex items-center gap-3 rounded-xl border-2 p-2.5 text-left transition-all cursor-pointer ${selectedScrape?.id === r.id && selectedScrape?.source === r.source ? 'border-[#ff3650]' : 'border-white/10 hover:border-white/30'}`}
                     >
-                      {r.posterUrl ? <img src={r.posterUrl} alt={r.title} className="w-10 h-14 rounded-md object-cover shrink-0 bg-black/40" /> : <div className="w-10 h-14 rounded-md bg-white/5 shrink-0 flex items-center justify-center"><Clapperboard className="w-4 h-4 text-black/30" /></div>}
+                      {r.posterUrl ? <img src={r.posterUrl} alt={r.title} className="w-10 h-14 rounded-md object-cover shrink-0 bg-black/40" /> : <div className="w-10 h-14 rounded-md bg-white/5 shrink-0 flex items-center justify-center"><Clapperboard className="w-4 h-4 text-white/30" /></div>}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase bg-white/10 text-black/60">{r.source === 'tmdb' ? 'TMDB' : 'BGM'}</span>
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase bg-white/10 text-white/60">{r.source === 'tmdb' ? 'TMDB' : 'BGM'}</span>
                           <p className="text-sm font-bold truncate">{r.title}</p>
                         </div>
-                        <p className="text-xs text-black/40 truncate">{r.originalTitle}{r.year ? ` · ${r.year}` : ''}</p>
+                        <p className="text-xs text-white/40 truncate">{r.originalTitle}{r.year ? ` · ${r.year}` : ''}</p>
                       </div>
                       {r.rating != null && <span className="inline-flex items-center gap-1 text-xs font-black text-[#ff3650] shrink-0"><Star className="w-3 h-3 fill-current" /> {r.rating}</span>}
                     </button>
                   ))}
-                  {scrapeResults.length === 0 && scrapeQuery.trim().length >= 2 && <p className="text-xs text-black/40 py-4 text-center">没有匹配结果</p>}
+                  {scrapeResults.length === 0 && scrapeQuery.trim().length >= 2 && <p className="text-xs text-white/40 py-4 text-center">没有匹配结果</p>}
                 </div>
               )}
               {selectedScrape && <p className="text-xs text-[#e0fe3d] font-bold">已选：{selectedScrape.title}</p>}
@@ -234,24 +234,24 @@ export const NominateDialog: React.FC<{
           </Tabs>
 
           <div className="space-y-1.5">
-            <Label className="text-black/60 uppercase text-xs font-black">推荐语 *</Label>
+            <Label className="text-white/60 uppercase text-xs font-black">推荐语 *</Label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
               maxLength={200}
               placeholder="为什么推荐这部影片？（必填）"
-              className="w-full bg-black/50 border border-black/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-black/30 resize-none"
+              className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30 resize-none"
             />
-            <p className="text-[11px] text-black/30 text-right">{note.length}/200</p>
+            <p className="text-[11px] text-white/30 text-right">{note.length}/200</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/10 shrink-0">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-full border border-black/20 hover:border-white/40 text-black/70 hover:text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-full border border-white/20 hover:border-white/40 text-white/70 hover:text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
             取消
           </button>

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Language, OpenSiteModal } from '../../types';
@@ -73,16 +73,16 @@ export const ScreeningDetailPage: React.FC<{
   return (
     <>
       <Header lang={lang} setLang={setLang} onNavigate={() => navigate('/')} onOpenModal={onOpenModal} />
-      <main className="w-full min-h-screen bg-[#f5ffe5] px-4 sm:px-8 lg:px-12 py-24 lg:py-28 text-[#1e1f21]">
+      <main className="w-full min-h-screen bg-[#121212] px-4 sm:px-8 lg:px-12 py-24 lg:py-28 text-[#f5ffe5]">
         <div className="max-w-5xl mx-auto">
-          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-black/50 hover:text-[#ff3650] font-bold text-xs uppercase tracking-wider transition-colors mb-6 cursor-pointer">
+          <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-white/50 hover:text-[#ff3650] font-bold text-xs uppercase tracking-wider transition-colors mb-6 cursor-pointer">
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{lang === 'zh' ? '返回' : 'BACK'}</span>
           </button>
 
           {missing ? (
             <div className="py-20 text-center space-y-4">
-              <p className="text-black/50 text-sm font-bold">找不到这场放映。</p>
+              <p className="text-white/50 text-sm font-bold">找不到这场放映。</p>
               <button
                 type="button"
                 onClick={() => navigate('/screenings', { viewTransition: true })}
@@ -96,11 +96,11 @@ export const ScreeningDetailPage: React.FC<{
           ) : (
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: TRIGGER_EASE }} className="space-y-6">
               {/* Header card */}
-              <div className="relative rounded-3xl border border-black/10 bg-gradient-to-br from-[#1a1a1a] to-[#151515] p-6 sm:p-8 overflow-hidden">
+              <div className="relative rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a1a1a] to-[#151515] p-6 sm:p-8 overflow-hidden">
                 <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#ff3650]/10 blur-3xl" />
                 <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest">Screening</span>
                 <h1 className="text-3xl sm:text-4xl font-black mt-1.5">{s.title}</h1>
-                <div className="flex flex-wrap items-center gap-4 mt-4 text-sm font-bold text-black/60">
+                <div className="flex flex-wrap items-center gap-4 mt-4 text-sm font-bold text-white/60">
                   <span className="inline-flex items-center gap-1.5"><CalendarDays className="w-4 h-4 text-[#ff3650]" /> {fmt(s.screen_date)}</span>
                   <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4 text-[#e0fe3d]" /> {s.venue || '待定场地'}</span>
                   {s.theme && <span className="inline-flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-[#ff3650]" /> {s.theme}</span>}
@@ -108,12 +108,12 @@ export const ScreeningDetailPage: React.FC<{
               </div>
 
               {/* Participate */}
-              <div className="rounded-3xl border border-black/10 bg-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
                 <div className="flex items-center gap-4">
                   <AvatarGroup count={count} />
                   <div>
                     <p className="text-2xl font-black text-white flex items-baseline gap-1.5">
-                      <AnimatedNumber value={count} /> <span className="text-sm text-black/40 font-bold">人参与</span>
+                      <AnimatedNumber value={count} /> <span className="text-sm text-white/40 font-bold">人参与</span>
                     </p>
                   </div>
                 </div>
@@ -129,7 +129,7 @@ export const ScreeningDetailPage: React.FC<{
                   <span className="font-extrabold tracking-wider">{rsvped ? '已参与' : '我要参与'}</span>
                   <span
                     className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform group-hover/btn:translate-x-0.5 ${
-                      rsvped ? 'bg-[#f5ffe5] text-[#e0fe3d]' : 'bg-white text-[#ff3650]'
+                      rsvped ? 'bg-[#121212] text-[#e0fe3d]' : 'bg-white text-[#ff3650]'
                     }`}
                   >
                     {rsvped ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Ticket className="w-3.5 h-3.5" />}
@@ -141,7 +141,7 @@ export const ScreeningDetailPage: React.FC<{
               <div>
                 <h2 className="text-xl font-black uppercase tracking-tight mb-4">放映片单</h2>
                 {s.films.length === 0 ? (
-                  <p className="text-black/40 text-sm">片单待定。</p>
+                  <p className="text-white/40 text-sm">片单待定。</p>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     {s.films.map((f, i) => (
@@ -151,14 +151,14 @@ export const ScreeningDetailPage: React.FC<{
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: i * 0.06, ease: TRIGGER_EASE }}
                         onClick={() => navigate(`/films/${f.id}`, { viewTransition: true })}
-                        className="group text-left rounded-2xl overflow-hidden border border-black/10 hover:border-[#ff3650]/50 bg-black/30 transition-all hover:-translate-y-1 cursor-pointer"
+                        className="group text-left rounded-2xl overflow-hidden border border-white/10 hover:border-[#ff3650]/50 bg-black/30 transition-all hover:-translate-y-1 cursor-pointer"
                       >
                         <div className="aspect-[27/40] overflow-hidden bg-black/40">
-                          {f.image ? <img src={f.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-black/20 font-black text-2xl">{f.title.slice(0, 1)}</div>}
+                          {f.image ? <img src={f.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center text-white/20 font-black text-2xl">{f.title.slice(0, 1)}</div>}
                         </div>
                         <div className="p-2.5">
                           <p className="text-sm font-bold text-white truncate group-hover:text-[#ff3650] transition-colors">{f.title_zh || f.title_en || f.title}</p>
-                          <p className="text-[11px] text-black/40">{f.year}</p>
+                          <p className="text-[11px] text-white/40">{f.year}</p>
                         </div>
                       </motion.button>
                     ))}
@@ -167,9 +167,9 @@ export const ScreeningDetailPage: React.FC<{
               </div>
 
               {s.recap && (
-                <div className="rounded-3xl border border-black/10 bg-white p-5">
-                  <h2 className="text-sm font-black uppercase tracking-wider text-black/50 mb-2">回顾</h2>
-                  <p className="text-black/70 text-sm leading-relaxed">{s.recap}</p>
+                <div className="rounded-3xl border border-white/10 bg-[#1a1a1a] p-5">
+                  <h2 className="text-sm font-black uppercase tracking-wider text-white/50 mb-2">回顾</h2>
+                  <p className="text-white/70 text-sm leading-relaxed">{s.recap}</p>
                 </div>
               )}
             </motion.div>

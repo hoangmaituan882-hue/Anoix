@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { fetchChannel, ChannelClip } from '../../lib/channel';
@@ -46,7 +46,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({ lang }) => {
   return (
     <section
       id="cb_content_765"
-      className="relative w-full py-20 md:py-32 px-4 sm:px-8 lg:px-16 overflow-hidden bg-white"
+      className="relative w-full py-20 md:py-32 px-4 sm:px-8 lg:px-16 overflow-hidden bg-[#0a0a0a]"
     >
       <div className="absolute top-4 left-0 right-0 overflow-hidden pointer-events-none opacity-10 flex justify-center">
         <h2
@@ -79,10 +79,10 @@ export const MediaSection: React.FC<MediaSectionProps> = ({ lang }) => {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {items === null && (
-              <p className="text-sm text-black/40 py-16">加载频道…</p>
+              <p className="text-sm text-white/40 py-16">加载频道…</p>
             )}
             {items && items.length === 0 && (
-              <p className="text-sm text-black/40 py-16">频道内容筹备中，请稍后再来。</p>
+              <p className="text-sm text-white/40 py-16">频道内容筹备中，请稍后再来。</p>
             )}
             {(items ?? []).map((video) => {
               const title = lang === 'zh' && video.titleZh ? video.titleZh : video.title;
@@ -99,7 +99,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({ lang }) => {
                   }}
                   className="flex-shrink-0 w-[260px] sm:w-[320px] md:w-[360px] group/video cursor-pointer"
                 >
-                  <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-black/10 group-hover/video:border-[#ff3650] transition-all duration-300">
+                  <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-white/10 group-hover/video:border-[#ff3650] transition-all duration-300">
                     {video.thumbnail ? (
                       <img
                         src={video.thumbnail}
@@ -108,7 +108,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({ lang }) => {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-black/20">
+                      <div className="w-full h-full flex items-center justify-center text-white/20">
                         <Play className="w-10 h-10" />
                       </div>
                     )}
@@ -118,7 +118,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({ lang }) => {
                       </div>
                     </div>
                     {plat && (
-                      <span className="absolute top-2.5 left-2.5 text-[10px] font-black px-2 py-0.5 rounded-md bg-black/70 border border-black/10">
+                      <span className="absolute top-2.5 left-2.5 text-[10px] font-black px-2 py-0.5 rounded-md bg-black/70 border border-white/10">
                         {plat}
                       </span>
                     )}
@@ -141,7 +141,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({ lang }) => {
           <button
             type="button"
             onClick={() => scrollBy(-360)}
-            className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/80 border border-black/20 text-white items-center justify-center opacity-0 group-hover/yt:opacity-100 transition-opacity hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl z-10 cursor-pointer"
+            className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/80 border border-white/20 text-white items-center justify-center opacity-0 group-hover/yt:opacity-100 transition-opacity hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl z-10 cursor-pointer"
             aria-label="Previous Video"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -149,7 +149,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({ lang }) => {
           <button
             type="button"
             onClick={() => scrollBy(360)}
-            className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/80 border border-black/20 text-white items-center justify-center opacity-0 group-hover/yt:opacity-100 transition-opacity hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl z-10 cursor-pointer"
+            className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/80 border border-white/20 text-white items-center justify-center opacity-0 group-hover/yt:opacity-100 transition-opacity hover:bg-[#ff3650] hover:border-[#ff3650] shadow-xl z-10 cursor-pointer"
             aria-label="Next Video"
           >
             <ChevronRight className="w-6 h-6" />
@@ -168,7 +168,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({ lang }) => {
               <span className="label font-extrabold tracking-widest">
                 {t.viewAll}
               </span>
-              <span className="w-7 h-7 rounded-full bg-[#f5ffe5] text-[#1e1f21] group-hover/btn:bg-white group-hover/btn:text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-1 duration-200">
+              <span className="w-7 h-7 rounded-full bg-[#121212] text-[#f5ffe5] group-hover/btn:bg-white group-hover/btn:text-[#ff3650] flex items-center justify-center transition-transform group-hover/btn:translate-x-1 duration-200">
                 <ArrowRight className="w-4 h-4" />
               </span>
             </a>

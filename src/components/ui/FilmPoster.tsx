@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 /**
  * Film poster with a no-image fallback: when `image` is empty, render a
@@ -16,7 +16,7 @@ export const FilmPoster: React.FC<{
   }
   return (
     <div className={`${className ?? ''} bg-gradient-to-br from-[#2a2a2a] to-[#151515] flex items-center justify-center`} style={style}>
-      <span className="text-black/25 font-black tracking-widest select-none">
+      <span className="text-white/25 font-black tracking-widest select-none">
         {(title || '?').slice(0, 2)}
       </span>
     </div>

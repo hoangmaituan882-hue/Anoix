@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { adminSocial, SocialLinkDraft, SocialLinkRow } from '../../lib/social';
 import { repository } from '../../lib/repository';
 import { useToast } from '../../components/ui/Toast';
@@ -10,8 +10,8 @@ import {
   ExternalLink, GripVertical, Pencil, Plus, Save, Share2, Trash2, X,
 } from 'lucide-react';
 
-const FIELD = 'w-full bg-black/50 border border-black/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-black/30';
-const LABEL = 'text-xs font-black text-black/60 uppercase tracking-wider block mb-1';
+const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
+const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
 const DRAG_MIME = 'application/x-anoix-social';
 
 const PRESETS: Array<SocialLinkDraft & { hint: string }> = [
@@ -163,13 +163,13 @@ export const SocialAdmin: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-3xl border border-black/10 shadow-xl space-y-4">
+      <div className="bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 shadow-xl space-y-4">
         <div className="flex items-center gap-2">
           <Share2 className="w-4 h-4 text-[#ff3650]" />
           <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest">Footer Social</span>
         </div>
         <h2 className="text-2xl font-black text-white tracking-tight">页脚社交格子</h2>
-        <p className="text-xs text-black/50">
+        <p className="text-xs text-white/50">
           增删后页脚格子数跟着变。可拖动排序。链接必须是 https。
         </p>
         <div className="flex flex-wrap gap-2">
@@ -181,7 +181,7 @@ export const SocialAdmin: React.FC = () => {
                 id: null,
                 draft: { name: p.name, url: p.url, descZh: p.descZh, descEn: p.descEn, descJa: p.descJa },
               })}
-              className="px-3 py-1.5 rounded-full border border-black/15 bg-white/5 hover:border-[#ff3650] hover:text-[#ff3650] text-xs font-bold text-black/80 cursor-pointer"
+              className="px-3 py-1.5 rounded-full border border-white/15 bg-white/5 hover:border-[#ff3650] hover:text-[#ff3650] text-xs font-bold text-white/80 cursor-pointer"
               title={p.hint}
             >
               + {p.name}
@@ -204,10 +204,10 @@ export const SocialAdmin: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-white uppercase tracking-wider">页脚预览 · 拖动排序</h3>
-          <span className="text-[10px] font-mono text-black/40">{rows.length} 格</span>
+          <span className="text-[10px] font-mono text-white/40">{rows.length} 格</span>
         </div>
         {rows.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-black/15 bg-black/30 p-12 text-center text-sm text-black/40">
+          <div className="rounded-3xl border border-dashed border-white/15 bg-black/30 p-12 text-center text-sm text-white/40">
             还没有格子。用上方快捷按钮加入 X / Instagram 等，或自定义一条。
           </div>
         ) : (
@@ -229,8 +229,8 @@ export const SocialAdmin: React.FC = () => {
                 className="relative"
               >
                 <SocialLinkCard item={toCard(r)} lang="zh" href={false}>
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-black/10">
-                    <span className="text-black/30 cursor-grab" title="拖动排序">
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
+                    <span className="text-white/30 cursor-grab" title="拖动排序">
                       <GripVertical className="w-4 h-4" />
                     </span>
                     <div className="flex gap-1">
@@ -239,7 +239,7 @@ export const SocialAdmin: React.FC = () => {
                           href={r.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-black/70"
+                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-white/70"
                           title="打开链接"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -249,7 +249,7 @@ export const SocialAdmin: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setEditing({ id: r.id, draft: toDraft(r) })}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-black/70 cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-white/70 cursor-pointer"
                         title="编辑"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -269,7 +269,7 @@ export const SocialAdmin: React.FC = () => {
                             }
                           },
                         })}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-[#ff3650] text-black/40 hover:text-white cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-[#ff3650] text-white/40 hover:text-white cursor-pointer"
                         title="删除"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -285,7 +285,7 @@ export const SocialAdmin: React.FC = () => {
 
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl" onClick={() => setEditing(null)}>
-          <div className="w-full max-w-lg bg-white border border-black/20 rounded-3xl p-6 space-y-4 text-white" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg bg-[#181818] border border-white/20 rounded-3xl p-6 space-y-4 text-white" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-black">{editing.id ? '编辑格子' : '新增格子'}</h3>
               <button type="button" onClick={() => setEditing(null)} className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#ff3650] flex items-center justify-center cursor-pointer">
@@ -332,7 +332,7 @@ export const SocialAdmin: React.FC = () => {
               />
             )}
             <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl border border-black/15 text-xs font-bold text-black/60 cursor-pointer">取消</button>
+              <button type="button" onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl border border-white/15 text-xs font-bold text-white/60 cursor-pointer">取消</button>
               <button type="button" onClick={() => void saveDraft()} disabled={busy} className="inline-flex items-center gap-2 bg-[#ff3650] text-white font-black text-xs px-5 py-2 rounded-xl cursor-pointer disabled:opacity-40">
                 <Save className="w-4 h-4" /> 保存
               </button>

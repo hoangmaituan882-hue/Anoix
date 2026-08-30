@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
@@ -33,9 +33,9 @@ const statusBadgeVariants = cva(
 
         // Neutral / Tech Tag
         tag:
-          'bg-white/10 dark:bg-white/5 text-black/80 dark:text-black/80 border border-black/10 dark:border-black/10 hover:border-[#ff3650]/50',
+          'bg-white/10 dark:bg-white/5 text-black/80 dark:text-white/80 border border-black/10 dark:border-white/10 hover:border-[#ff3650]/50',
         outline:
-          'bg-transparent text-black/60 dark:text-black/60 border border-black/20 dark:border-black/20',
+          'bg-transparent text-black/60 dark:text-white/60 border border-black/20 dark:border-white/20',
       },
       size: {
         sm: 'px-2 py-0.5 text-[10px] rounded',

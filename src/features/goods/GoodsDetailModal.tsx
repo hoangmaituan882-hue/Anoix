@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { GoodsItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { X, ExternalLink, ShoppingBag, CheckCircle } from 'lucide-react';
@@ -22,7 +22,7 @@ export const GoodsDetailModal: React.FC<GoodsDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-xl animate-fade-in">
       <div 
-        className="relative w-full max-w-2xl bg-[#1c1c1c] border border-black/20 rounded-3xl overflow-hidden shadow-2xl text-[#1e1f21]"
+        className="relative w-full max-w-2xl bg-[#1c1c1c] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-[#f5ffe5]"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -52,18 +52,18 @@ export const GoodsDetailModal: React.FC<GoodsDetailModalProps> = ({
               <h2 className="text-xl sm:text-2xl font-black text-white leading-snug mb-3">
                 {title}
               </h2>
-              <div className="text-2xl font-black text-[#1e1f21] mb-4">
-                {goods.price} <span className="text-xs text-black/50 font-normal">({lang === 'zh' ? '含税' : lang === 'en' ? 'tax incl.' : '税込'})</span>
+              <div className="text-2xl font-black text-[#f5ffe5] mb-4">
+                {goods.price} <span className="text-xs text-white/50 font-normal">({lang === 'zh' ? '含税' : lang === 'en' ? 'tax incl.' : '税込'})</span>
               </div>
 
               {goods.description && (
-                <p className="text-xs sm:text-sm text-black/80 leading-relaxed mb-6">
+                <p className="text-xs sm:text-sm text-white/80 leading-relaxed mb-6">
                   {goods.description}
                 </p>
               )}
 
-              <div className="space-y-2 text-xs text-black/60 mb-6">
-                <div className="flex items-center gap-1.5 text-black/80 font-semibold">
+              <div className="space-y-2 text-xs text-white/60 mb-6">
+                <div className="flex items-center gap-1.5 text-white/80 font-semibold">
                   <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
                   <span>{lang === 'zh' ? '放映会周边' : 'Club merch'}</span>
                 </div>

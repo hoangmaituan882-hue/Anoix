@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
@@ -48,7 +48,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
       <div className="flex items-center gap-2 mb-1.5">
         <button
           onClick={handleBack}
-          className="group inline-flex items-center gap-1 text-xs font-bold text-black/50 dark:text-black/50 hover:text-[#ff3650] dark:hover:text-[#ff3650] transition-colors cursor-pointer"
+          className="group inline-flex items-center gap-1 text-xs font-bold text-black/50 dark:text-white/50 hover:text-[#ff3650] dark:hover:text-[#ff3650] transition-colors cursor-pointer"
         >
           <div className="w-4.5 h-4.5 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/5 group-hover:bg-[#ff3650] group-hover:text-white transition-all">
             <ArrowLeft className="w-3 h-3 transition-transform group-hover:-translate-x-0.5" />
@@ -66,7 +66,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
           transition={{ duration: 0.35, ease: TRIGGER_EASE }}
           className="max-w-3xl flex-1"
         >
-          <h1 className="text-[24px] font-black text-black dark:text-[#1e1f21] leading-[1.25] tracking-tight mb-1.5">
+          <h1 className="text-[24px] font-black text-black dark:text-[#f5ffe5] leading-[1.25] tracking-tight mb-1.5">
             {title}
           </h1>
 

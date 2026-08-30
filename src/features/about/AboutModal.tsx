@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { TriggerLogo } from '../../components/ui/TriggerLogo';
@@ -15,10 +15,10 @@ export const AboutModal: React.FC<AboutModalProps> = ({ lang, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-xl animate-fade-in overflow-y-auto">
       <div
-        className="relative w-full max-w-3xl bg-white border border-black/20 rounded-3xl overflow-hidden shadow-2xl text-[#1e1f21] my-8 max-h-[90vh] flex flex-col"
+        className="relative w-full max-w-3xl bg-[#1a1a1a] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-[#f5ffe5] my-8 max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 sm:p-8 border-b border-black/10 flex items-center justify-between bg-[#151515]">
+        <div className="p-6 sm:p-8 border-b border-white/10 flex items-center justify-between bg-[#151515]">
           <div>
             <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest">
               {lang === 'zh' ? '社群档案 · CLUB' : 'CLUB'}
@@ -38,12 +38,12 @@ export const AboutModal: React.FC<AboutModalProps> = ({ lang, onClose }) => {
         </div>
 
         <div className="p-6 sm:p-8 overflow-y-auto space-y-8 text-sm sm:text-base leading-relaxed">
-          <div className="bg-black/40 p-6 rounded-2xl border border-black/10 flex flex-col sm:flex-row items-center gap-6">
+          <div className="bg-black/40 p-6 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center gap-6">
             <TriggerLogo className="w-40 text-[#ff3650]" />
             <div>
               <h3 className="text-lg font-black text-white mb-1">{t.companyName}</h3>
-              <p className="text-xs text-black/60 font-bold mb-3">{t.companySub}</p>
-              <p className="text-xs sm:text-sm text-black/80 italic">
+              <p className="text-xs text-white/60 font-bold mb-3">{t.companySub}</p>
+              <p className="text-xs sm:text-sm text-white/80 italic">
                 {lang === 'zh'
                   ? '「一场放映，一张周票，把想看的片子叠上来。」'
                   : lang === 'en'
@@ -60,15 +60,15 @@ export const AboutModal: React.FC<AboutModalProps> = ({ lang, onClose }) => {
             <p className="text-white/90">{t.companyIntro}</p>
           </div>
 
-          <div className="bg-white/5 rounded-2xl p-6 border border-black/10 space-y-4 text-xs sm:text-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-black/10 gap-1 sm:gap-6">
-              <span className="w-32 font-black text-black/50 uppercase">
+          <div className="bg-white/5 rounded-2xl p-6 border border-white/10 space-y-4 text-xs sm:text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-white/10 gap-1 sm:gap-6">
+              <span className="w-32 font-black text-white/50 uppercase">
                 {lang === 'zh' ? '站点' : 'Site'}
               </span>
               <span className="font-bold text-white">Anoix</span>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-black/10 gap-1 sm:gap-6">
-              <span className="w-32 font-black text-black/50 uppercase">
+            <div className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-white/10 gap-1 sm:gap-6">
+              <span className="w-32 font-black text-white/50 uppercase">
                 {lang === 'zh' ? '选片' : 'Picks'}
               </span>
               <span className="font-bold text-white">
@@ -78,7 +78,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ lang, onClose }) => {
               </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center py-2 gap-1 sm:gap-6">
-              <span className="w-32 font-black text-black/50 uppercase">
+              <span className="w-32 font-black text-white/50 uppercase">
                 {lang === 'zh' ? '档案' : 'Archive'}
               </span>
               <span className="font-bold text-white">

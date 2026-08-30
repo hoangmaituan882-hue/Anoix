@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { adminChannel, ChannelVideoRow } from '../../lib/pgAdmin';
 import { resolveChannelUrl } from '../../lib/channel';
 import { useToast } from '../../components/ui/Toast';
@@ -8,14 +8,14 @@ import {
   Clapperboard, ExternalLink, GripVertical, Link2, Pencil, Plus, Save, Trash2, X, Play,
 } from 'lucide-react';
 
-const FIELD = 'w-full bg-black/50 border border-black/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-black/30';
-const LABEL = 'text-xs font-black text-black/60 uppercase tracking-wider block mb-1';
+const FIELD = 'w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30';
+const LABEL = 'text-xs font-black text-white/60 uppercase tracking-wider block mb-1';
 const DRAG_MIME = 'application/x-anoix-channel';
 
 const PLATFORM: Record<string, { label: string; cls: string }> = {
   bilibili: { label: 'B站', cls: 'bg-[#00A1D6]/20 text-[#7fd7f0] border-[#00A1D6]/40' },
   youtube: { label: 'YT', cls: 'bg-[#ff3650]/20 text-[#ff3650] border-[#ff3650]/40' },
-  other: { label: '外链', cls: 'bg-white/10 text-black/60 border-black/15' },
+  other: { label: '外链', cls: 'bg-white/10 text-white/60 border-white/15' },
 };
 
 export const ChannelAdmin: React.FC = () => {
@@ -128,13 +128,13 @@ export const ChannelAdmin: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-3xl border border-black/10 shadow-xl space-y-4">
+      <div className="bg-[#1a1a1a] p-6 rounded-3xl border border-white/10 shadow-xl space-y-4">
         <div className="flex items-center gap-2">
           <Clapperboard className="w-4 h-4 text-[#ff3650]" />
           <span className="text-xs font-black text-[#ff3650] uppercase tracking-widest">Official Channel</span>
         </div>
         <h2 className="text-2xl font-black text-white tracking-tight">官方频道</h2>
-        <p className="text-xs text-black/50">
+        <p className="text-xs text-white/50">
           粘贴 Bilibili / YouTube 链接自动抓封面。首页点卡片会跳到对应站点，不站内播放。
         </p>
 
@@ -161,7 +161,7 @@ export const ChannelAdmin: React.FC = () => {
                 href={hubUrl.trim()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-black/15 text-black/70 hover:text-white text-xs font-bold"
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-white/15 text-white/70 hover:text-white text-xs font-bold"
               >
                 <ExternalLink className="w-3.5 h-3.5" /> 预览
               </a>
@@ -174,11 +174,11 @@ export const ChannelAdmin: React.FC = () => {
         <p className="text-sm font-bold text-[#ff3650] bg-[#ff3650]/10 border border-[#ff3650]/30 rounded-2xl px-4 py-3">{error}</p>
       )}
 
-      <div className="bg-white border border-black/10 rounded-3xl p-4 sm:p-5 space-y-3">
+      <div className="bg-[#181818] border border-white/10 rounded-3xl p-4 sm:p-5 space-y-3">
         <label className={LABEL}>粘贴视频链接加入卡片</label>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <Link2 className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-black/40" />
+            <Link2 className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
             <input
               value={paste}
               onChange={(e) => setPaste(e.target.value)}
@@ -200,10 +200,10 @@ export const ChannelAdmin: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-black text-white uppercase tracking-wider">首页预览 · 拖动排序</h3>
-          <span className="text-[10px] font-mono text-black/40">{rows.length} 张卡片</span>
+          <span className="text-[10px] font-mono text-white/40">{rows.length} 张卡片</span>
         </div>
         {rows.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-black/15 bg-black/30 p-12 text-center text-sm text-black/40">
+          <div className="rounded-3xl border border-dashed border-white/15 bg-black/30 p-12 text-center text-sm text-white/40">
             还没有卡片。在上方粘贴 Bilibili 链接即可。
           </div>
         ) : (
@@ -224,13 +224,13 @@ export const ChannelAdmin: React.FC = () => {
                     const fromId = e.dataTransfer.getData(DRAG_MIME);
                     if (fromId) onDropCard(index, fromId);
                   }}
-                  className="flex-shrink-0 w-[260px] bg-white border border-black/10 hover:border-[#ff3650]/50 rounded-2xl overflow-hidden"
+                  className="flex-shrink-0 w-[260px] bg-[#1a1a1a] border border-white/10 hover:border-[#ff3650]/50 rounded-2xl overflow-hidden"
                 >
                   <div className="relative aspect-video bg-black/60">
                     {r.thumbnail ? (
                       <img src={r.thumbnail} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-black/20">
+                      <div className="w-full h-full flex items-center justify-center text-white/20">
                         <Play className="w-8 h-8" />
                       </div>
                     )}
@@ -242,7 +242,7 @@ export const ChannelAdmin: React.FC = () => {
                         {r.duration}
                       </span>
                     )}
-                    <span className="absolute top-2 right-2 text-black/50 cursor-grab">
+                    <span className="absolute top-2 right-2 text-white/50 cursor-grab">
                       <GripVertical className="w-4 h-4" />
                     </span>
                   </div>
@@ -253,7 +253,7 @@ export const ChannelAdmin: React.FC = () => {
                     <div className="flex justify-end gap-1">
                       <button
                         onClick={() => setEditing(r)}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-black/70 cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-white/70 cursor-pointer"
                         title="编辑"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -271,7 +271,7 @@ export const ChannelAdmin: React.FC = () => {
                             }
                           },
                         })}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-[#ff3650] text-black/40 hover:text-white cursor-pointer"
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-[#ff3650] text-white/40 hover:text-white cursor-pointer"
                         title="删除"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -287,7 +287,7 @@ export const ChannelAdmin: React.FC = () => {
 
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl" onClick={() => setEditing(null)}>
-          <div className="w-full max-w-lg bg-white border border-black/20 rounded-3xl p-6 space-y-4 text-white" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg bg-[#181818] border border-white/20 rounded-3xl p-6 space-y-4 text-white" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-black">编辑卡片</h3>
               <button onClick={() => setEditing(null)} className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#ff3650] flex items-center justify-center cursor-pointer">
@@ -317,7 +317,7 @@ export const ChannelAdmin: React.FC = () => {
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <button onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl border border-black/15 text-xs font-bold text-black/60 cursor-pointer">取消</button>
+              <button onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl border border-white/15 text-xs font-bold text-white/60 cursor-pointer">取消</button>
               <button onClick={() => void saveEdit()} disabled={busy} className="inline-flex items-center gap-2 bg-[#ff3650] text-white font-black text-xs px-5 py-2 rounded-xl cursor-pointer disabled:opacity-40">
                 <Save className="w-4 h-4" /> 保存
               </button>

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { X, Youtube, ExternalLink } from 'lucide-react';
 
 interface VideoModalProps {
@@ -27,11 +27,11 @@ export const VideoModal: React.FC<VideoModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-xl animate-fade-in">
       <div 
-        className="relative w-full max-w-4xl bg-[#111111] border border-black/20 rounded-3xl overflow-hidden shadow-2xl text-white"
+        className="relative w-full max-w-4xl bg-[#111111] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-black/10 flex items-center justify-between bg-black/40">
+        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-black/40">
           <div className="flex items-center gap-2 text-sm font-bold text-white/90 line-clamp-1 pr-4">
             <Youtube className="w-5 h-5 text-[#ff3650] flex-shrink-0" />
             <span>{title || 'Trailer'}</span>
@@ -58,7 +58,7 @@ export const VideoModal: React.FC<VideoModalProps> = ({
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
-              <p className="text-sm text-black/70 mb-4">Click below to watch on official YouTube channel:</p>
+              <p className="text-sm text-white/70 mb-4">Click below to watch on official YouTube channel:</p>
               <a
                 href={videoUrl}
                 target="_blank"

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export interface RiffleRecipeSlide {
@@ -314,7 +314,7 @@ export const CredentialsCoverflow: React.FC<CredentialsCoverflowProps> = ({
                               <p className="text-xl font-bold leading-snug">
                                 <span className="line-clamp-2">{item.title}</span>
                               </p>
-                              <p className="mt-0.5 text-xs font-medium text-black/70 flex items-center gap-1.5">
+                              <p className="mt-0.5 text-xs font-medium text-white/70 flex items-center gap-1.5">
                                 {item.isWatched && (
                                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-white" />
                                 )}

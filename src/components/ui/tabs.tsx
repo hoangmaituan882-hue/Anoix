@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 // beui.dev/components/motion/tabs - Motion-driven Spring Animated Tabs
 
 import React, {
@@ -89,9 +89,9 @@ export function Tabs({
 }
 
 const listClasses: Record<Variant, string> = {
-  pill: "inline-flex items-center gap-1 rounded-full bg-black/40 border border-black/10 p-1 select-none",
-  underline: "inline-flex items-center gap-1 border-b border-black/10 select-none",
-  segment: "inline-flex items-center gap-0.5 rounded-xl bg-black/40 border border-black/10 p-1 select-none",
+  pill: "inline-flex items-center gap-1 rounded-full bg-black/40 border border-white/10 p-1 select-none",
+  underline: "inline-flex items-center gap-1 border-b border-white/10 select-none",
+  segment: "inline-flex items-center gap-0.5 rounded-xl bg-black/40 border border-white/10 p-1 select-none",
 };
 
 export function TabsList({ children, className }: { children: ReactNode; className?: string }) {
@@ -127,7 +127,7 @@ export function TabsTrigger({
         onClick={() => setValue(value)}
         className={cn(
           "relative isolate px-3 pb-2.5 pt-1 -mb-px text-sm font-bold transition-colors min-h-[40px] inline-flex items-center cursor-pointer",
-          active ? "text-white" : "text-black/50 hover:text-white",
+          active ? "text-white" : "text-white/50 hover:text-white",
           className,
         )}
       >
@@ -172,7 +172,7 @@ export function TabsTrigger({
           "transition-colors",
           active
             ? "text-white font-black"
-            : "text-black/60 hover:text-white",
+            : "text-white/60 hover:text-white",
           radius,
           className,
         )}

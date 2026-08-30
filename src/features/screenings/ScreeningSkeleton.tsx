@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 export const ScreeningSkeletonGrid: React.FC<{ viewMode?: string }> = ({ viewMode = 'list_view' }) => {
   if (viewMode === 'list' || viewMode === 'list_view') {
@@ -7,7 +7,7 @@ export const ScreeningSkeletonGrid: React.FC<{ viewMode?: string }> = ({ viewMod
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-black/10 animate-pulse"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-[#181818] border border-white/10 animate-pulse"
           >
             {/* Poster Thumbnail */}
             <div className="w-16 sm:w-20 h-20 sm:h-24 rounded-xl bg-white/5 shrink-0 overflow-hidden relative">
@@ -53,7 +53,7 @@ export const ScreeningSkeletonGrid: React.FC<{ viewMode?: string }> = ({ viewMod
               {[1, 2, 3].map((card) => (
                 <div
                   key={card}
-                  className="rounded-2xl bg-white border border-black/10 p-5 space-y-4 animate-pulse"
+                  className="rounded-2xl bg-[#181818] border border-white/10 p-5 space-y-4 animate-pulse"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-2 flex-1">
@@ -62,7 +62,7 @@ export const ScreeningSkeletonGrid: React.FC<{ viewMode?: string }> = ({ viewMod
                     </div>
                     <div className="w-12 h-16 rounded-lg bg-white/5 shrink-0" />
                   </div>
-                  <div className="space-y-2 pt-2 border-t border-black/5">
+                  <div className="space-y-2 pt-2 border-t border-white/5">
                     <div className="h-3.5 w-2/3 bg-white/5 rounded" />
                     <div className="h-3.5 w-1/2 bg-white/5 rounded" />
                   </div>
@@ -81,7 +81,7 @@ export const ScreeningSkeletonGrid: React.FC<{ viewMode?: string }> = ({ viewMod
       {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
         <div
           key={i}
-          className="rounded-3xl bg-white border border-black/10 overflow-hidden animate-pulse flex flex-col"
+          className="rounded-3xl bg-[#181818] border border-white/10 overflow-hidden animate-pulse flex flex-col"
         >
           {/* Poster Area Skeleton */}
           <div className="aspect-[16/10] sm:aspect-[16/11] bg-white/5 relative overflow-hidden">
@@ -96,7 +96,7 @@ export const ScreeningSkeletonGrid: React.FC<{ viewMode?: string }> = ({ viewMod
               <div className="h-3.5 w-1/2 bg-white/5 rounded" />
             </div>
 
-            <div className="space-y-2 pt-3 border-t border-black/5">
+            <div className="space-y-2 pt-3 border-t border-white/5">
               <div className="flex items-center justify-between">
                 <div className="h-3.5 w-28 bg-white/5 rounded" />
                 <div className="h-3.5 w-16 bg-white/5 rounded" />

@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
 import { searchScrape, detailScrape, ScrapeResult, ScrapeSource } from '../../lib/scrape';
@@ -115,11 +115,11 @@ export const TmdbImportModal: React.FC<{
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in" onClick={onClose}>
       <div
-        className="w-full max-w-2xl max-h-[88vh] flex flex-col bg-white border border-black/20 rounded-3xl p-6 sm:p-8 shadow-2xl text-white"
+        className="w-full max-w-2xl max-h-[88vh] flex flex-col bg-[#181818] border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-black/10 pb-4 shrink-0">
+        <div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/30 flex items-center justify-center text-[#ff3650]">
               {isEnrich ? <Database className="w-5 h-5" /> : <Search className="w-5 h-5" />}
@@ -135,7 +135,7 @@ export const TmdbImportModal: React.FC<{
           </div>
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-black/10"
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff3650] text-white flex items-center justify-center transition-colors cursor-pointer border border-white/10"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -145,12 +145,12 @@ export const TmdbImportModal: React.FC<{
         {/* Search bar + source pills */}
         <div className="flex flex-col gap-3 pt-4 shrink-0">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-black/40" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="搜索片名(中文 / 原名 / 关键词)..."
-              className="w-full bg-black/50 border border-black/15 rounded-xl pl-10 pr-4 py-3 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-black/30"
+              className="w-full bg-black/50 border border-white/15 rounded-xl pl-10 pr-4 py-3 text-white text-sm font-medium focus:border-[#ff3650] focus:ring-1 focus:ring-[#ff3650] focus:outline-none transition-all placeholder:text-white/30"
               autoFocus
             />
           </div>
@@ -159,13 +159,13 @@ export const TmdbImportModal: React.FC<{
             {/* Source toggle */}
             <button
               onClick={() => setSource('tmdb')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'tmdb' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/5 text-black/60 hover:text-white hover:bg-white/10'}`}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'tmdb' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'}`}
             >
               TMDB
             </button>
             <button
               onClick={() => setSource('bangumi')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'bangumi' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/5 text-black/60 hover:text-white hover:bg-white/10'}`}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'bangumi' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'}`}
             >
               Bangumi
             </button>
@@ -176,7 +176,7 @@ export const TmdbImportModal: React.FC<{
                 key={key}
                 onClick={() => setMediaType(key)}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  mediaType === key ? 'bg-[#e0fe3d] text-[#121212] shadow-md' : 'bg-white/5 text-black/60 hover:text-white hover:bg-white/10'
+                  mediaType === key ? 'bg-[#e0fe3d] text-[#121212] shadow-md' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -202,8 +202,8 @@ export const TmdbImportModal: React.FC<{
             </div>
           ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center gap-2">
-              <Search className="w-7 h-7 text-black/20" />
-              <p className="text-sm font-bold text-black/40">
+              <Search className="w-7 h-7 text-white/20" />
+              <p className="text-sm font-bold text-white/40">
                 {query.trim().length < 2 ? '输入至少 2 个字符开始搜索' : '没有匹配的结果'}
               </p>
             </div>
@@ -214,23 +214,23 @@ export const TmdbImportModal: React.FC<{
                   key={`${item.source}-${item.id}`}
                   onClick={() => pick(item)}
                   disabled={loadingDetail !== null}
-                  className="flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-2xl p-2.5 transition-colors cursor-pointer disabled:opacity-50 text-left border border-black/5 hover:border-black/15"
+                  className="flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-2xl p-2.5 transition-colors cursor-pointer disabled:opacity-50 text-left border border-white/5 hover:border-white/15"
                 >
                   {item.posterUrl ? (
                     <img
                       src={item.posterUrl}
                       alt={item.title}
-                      className="w-14 h-[84px] rounded-xl object-cover shrink-0 bg-black/40 border border-black/10"
+                      className="w-14 h-[84px] rounded-xl object-cover shrink-0 bg-black/40 border border-white/10"
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-14 h-[84px] rounded-xl bg-black/40 border border-black/10 shrink-0 flex items-center justify-center">
-                      <Clapperboard className="w-5 h-5 text-black/20" />
+                    <div className="w-14 h-[84px] rounded-xl bg-black/40 border border-white/10 shrink-0 flex items-center justify-center">
+                      <Clapperboard className="w-5 h-5 text-white/20" />
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider bg-white/10 text-black/60">
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider bg-white/10 text-white/60">
                         {item.source === 'tmdb' ? (item.mediaType === 'movie' ? 'TMDB·电影' : 'TMDB·剧集') : 'BGM'}
                       </span>
                       {item.rating != null && (
@@ -239,14 +239,14 @@ export const TmdbImportModal: React.FC<{
                         </span>
                       )}
                     </div>
-                    <p className="font-bold text-[#1e1f21] text-sm truncate">{item.title}</p>
-                    <p className="text-xs text-black/50 truncate">{item.originalTitle}{item.year ? ` · ${item.year}` : ''}</p>
+                    <p className="font-bold text-[#f5ffe5] text-sm truncate">{item.title}</p>
+                    <p className="text-xs text-white/50 truncate">{item.originalTitle}{item.year ? ` · ${item.year}` : ''}</p>
                   </div>
                   <div className="shrink-0">
                     {loadingDetail === String(item.id) ? (
                       <Loader variant="spinner" size={16} label="获取详情" className="text-[#ff3650]" />
                     ) : (
-                      <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-black/60 group-hover:text-[#ff3650] transition-colors">
+                      <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/60 group-hover:text-[#ff3650] transition-colors">
                         <Import className="w-3.5 h-3.5" />
                       </span>
                     )}
@@ -258,7 +258,7 @@ export const TmdbImportModal: React.FC<{
         </div>
 
         {/* Footer hint */}
-        <p className="text-[10px] text-black/30 font-bold mt-3 pt-2 border-t border-black/10 shrink-0">
+        <p className="text-[10px] text-white/30 font-bold mt-3 pt-2 border-t border-white/10 shrink-0">
           TMDB 海报走 image.tmdb.org · Bangumi 走 bgmimg.anibt.net（国内可达）
         </p>
       </div>

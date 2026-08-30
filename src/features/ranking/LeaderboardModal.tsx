@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Trophy, Share2, LogIn } from 'lucide-react';
@@ -85,7 +85,7 @@ export const LeaderboardModal: React.FC = () => {
           initial={{ opacity: 0, scale: 0.97, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.97, y: 10 }}
-          className="relative w-full max-w-lg bg-white dark:bg-[#f5ffe5] border border-[#e5e7eb] dark:border-[#242424] rounded-2xl overflow-hidden shadow-2xl z-10 text-neutral-900 dark:text-white transition-colors"
+          className="relative w-full max-w-lg bg-white dark:bg-[#121212] border border-[#e5e7eb] dark:border-[#242424] rounded-2xl overflow-hidden shadow-2xl z-10 text-neutral-900 dark:text-white transition-colors"
         >
           <div className="p-5 border-b border-[#e5e7eb] dark:border-[#202020] flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -168,7 +168,7 @@ export const LeaderboardModal: React.FC = () => {
             )}
           </div>
 
-          <div className="p-3.5 bg-[#f5f5f7] dark:bg-white border-t border-[#e5e7eb] dark:border-[#262626] flex items-center justify-between">
+          <div className="p-3.5 bg-[#f5f5f7] dark:bg-[#181818] border-t border-[#e5e7eb] dark:border-[#262626] flex items-center justify-between">
             {guest ? (
               <button
                 type="button"
@@ -217,7 +217,7 @@ export const LeaderboardModal: React.FC = () => {
             )}
           </div>
 
-          <div className="p-3.5 bg-white dark:bg-[#f5ffe5] border-t border-[#e5e7eb] dark:border-[#202020] flex items-center justify-between gap-2.5">
+          <div className="p-3.5 bg-white dark:bg-[#121212] border-t border-[#e5e7eb] dark:border-[#202020] flex items-center justify-between gap-2.5">
             <button
               type="button"
               onClick={handleCopyShare}
@@ -229,7 +229,7 @@ export const LeaderboardModal: React.FC = () => {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="px-4 py-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 dark:bg-white dark:hover:bg-white text-neutral-700 dark:text-[#888888] dark:hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 dark:bg-[#1a1a1a] dark:hover:bg-[#222222] text-neutral-700 dark:text-[#888888] dark:hover:text-white text-xs font-semibold transition-colors cursor-pointer"
             >
               关闭
             </button>
