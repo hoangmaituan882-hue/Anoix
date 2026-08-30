@@ -46,12 +46,12 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
 
         {/* Latest news ticker */}
         {news.length > 0 && (
-          <div className="mb-10 border-y border-black/15 py-3 overflow-hidden">
+          <div className="mb-10 border-y border-white/15 py-3 overflow-hidden">
             <Marquee duration={26} pauseOnHover>
               {news.map((item) => (
                 <span key={item.id} className="inline-flex items-center gap-2 px-5 text-sm font-bold text-white/90 whitespace-nowrap">
                   <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0" />
-                  <span className="font-mono text-xs text-black/60">{item.date}</span>
+                  <span className="font-mono text-xs text-white/60">{item.date}</span>
                   <span>{lang === 'zh' && item.titleZh ? item.titleZh : item.title}</span>
                 </span>
               ))}
@@ -60,7 +60,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
         )}
 
         {/* News List */}
-        <div className="news_list divide-y divide-white/20 border-t border-b border-black/20">
+        <div className="news_list divide-y divide-white/20 border-t border-b border-white/20">
           {news.map((item) => (
             <article
               key={item.id}
@@ -71,13 +71,13 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                 <img
                   src={item.image}
                   alt={lang === 'zh' && item.titleZh ? item.titleZh : item.title}
-                  className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 border border-black/10 bg-black/40"
+                  className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl object-cover shrink-0 border border-white/10 bg-black/40"
                   loading="lazy"
                 />
               ) : null}
 
               <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6">
-                <div className="flex items-center gap-4 text-sm md:text-base font-bold text-black/80">
+                <div className="flex items-center gap-4 text-sm md:text-base font-bold text-white/80">
                   <time className="font-mono tracking-wider text-white">
                     {item.date}
                   </time>
@@ -89,7 +89,7 @@ export const NewsSection: React.FC<NewsSectionProps> = ({
                   )}
                 </div>
 
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white group-hover:text-[#1e1f21] flex-1 line-clamp-2 md:line-clamp-1 transition-colors">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white group-hover:text-white flex-1 line-clamp-2 md:line-clamp-1 transition-colors">
                   {lang === 'zh' && item.titleZh ? item.titleZh : lang === 'en' && item.titleEn ? item.titleEn : item.title}
                 </h3>
 
