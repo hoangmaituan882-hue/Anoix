@@ -126,7 +126,7 @@ export const UpcomingSection: React.FC<UpcomingSectionProps> = ({ lang }) => {
       <div className="absolute top-8 left-0 right-0 overflow-hidden pointer-events-none opacity-10 flex justify-center z-0">
         <h2
           className="text-[120px] sm:text-[190px] lg:text-[280px] font-black tracking-tighter text-[#e0fe3d] leading-none uppercase whitespace-nowrap"
-          style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
+          style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
         >
           NEXT
         </h2>
@@ -143,7 +143,7 @@ export const UpcomingSection: React.FC<UpcomingSectionProps> = ({ lang }) => {
           </div>
           <h2
             className="text-5xl sm:text-7xl lg:text-8xl font-black text-[#e0fe3d] tracking-tight uppercase leading-none mb-4"
-            style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
+            style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
           >
             NEXT
           </h2>
@@ -193,7 +193,7 @@ export const UpcomingSection: React.FC<UpcomingSectionProps> = ({ lang }) => {
                         </p>
                         <p
                           className="text-4xl sm:text-5xl font-black text-white leading-none group-hover/node:text-[#e0fe3d] transition-colors"
-                          style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
+                          style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
                         >
                           {parts.md}
                         </p>

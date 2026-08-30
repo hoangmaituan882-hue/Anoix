@@ -341,7 +341,7 @@ export const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = 
         <div className="absolute top-2 left-0 right-0 overflow-hidden pointer-events-none opacity-25 flex justify-center">
           <h2
             className="text-[72px] sm:text-[110px] lg:text-[140px] font-black tracking-tighter text-white leading-none uppercase whitespace-nowrap"
-            style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
+            style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
           >
             NEWS
           </h2>
@@ -351,7 +351,7 @@ export const NewsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = 
             <div>
               <h3
                 className="text-3xl sm:text-5xl font-black text-white tracking-tight uppercase"
-                style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
+                style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
               >
                 最新动态
               </h3>

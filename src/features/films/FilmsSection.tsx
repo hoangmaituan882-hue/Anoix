@@ -141,7 +141,7 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
               transition={{ duration: 0.95, delay: 0.62, ease: TRIGGER_EASE }}
               style={{
                 color: '#ff3650',
-                fontFamily: "'Anton', 'Montserrat', sans-serif"
+                fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif"
               }}
             >
               {introStarted ? <TextAnimation text="WORKS" stagger={0.05} /> : ''}

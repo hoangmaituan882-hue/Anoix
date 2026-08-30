@@ -41,7 +41,7 @@ export const GoodsSection: React.FC<GoodsSectionProps> = ({
       <div className="absolute top-4 left-0 right-0 overflow-hidden pointer-events-none opacity-10 flex justify-center">
         <h2
           className="text-[120px] sm:text-[200px] lg:text-[280px] font-black tracking-tighter text-white leading-none uppercase whitespace-nowrap"
-          style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
+          style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
         >
           GOODS
         </h2>
@@ -56,7 +56,7 @@ export const GoodsSection: React.FC<GoodsSectionProps> = ({
           </div>
           <h2
             className="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight uppercase"
-            style={{ fontFamily: "'Anton', 'Montserrat', sans-serif" }}
+            style={{ fontFamily: "'Fjordic-Heavy', 'Arial Black', sans-serif" }}
           >
             {t.goodsHeadline}
           </h2>
