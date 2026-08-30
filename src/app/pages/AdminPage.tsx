@@ -412,6 +412,7 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'TV Series' | 'Movie' | 'Original Animation'>('all');
   const [tmdbOpen, setTmdbOpen] = useState(false);
+  const [enrichTarget, setEnrichTarget] = useState<{ id: string; title: string } | null>(null);
   const [confirm, setConfirm] = useState<{ title: string; desc?: string; action: () => void } | null>(null);
 
   const reload = useCallback(async () => {
@@ -623,6 +624,14 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
                   <span className="font-mono text-[10px] text-white/30 truncate max-w-[100px]">{r.id}</span>
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={() => setEnrichTarget({ id: r.id, title: r.title_zh ?? r.title })}
+                      className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-[#e0fe3d] hover:text-[#121212] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1"
+                      title="刮削补全（TMDB/Bangumi）"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>补全</span>
+                    </button>
+                    <button
                       onClick={() => setEditing(rowToFilm(r))}
                       className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1"
                     >
@@ -716,6 +725,28 @@ const FilmsAdmin: React.FC<{ onCountChange?: (count: number) => void }> = ({ onC
         <TmdbImportModal
           onClose={() => setTmdbOpen(false)}
           onSelect={(work) => { setTmdbOpen(false); setEditing(work); }}
+        />
+      )}
+
+      {/* Manual scrape enrich modal (fill an existing film) */}
+      {enrichTarget && (
+        <TmdbImportModal
+          enrichTarget={enrichTarget}
+          onClose={() => setEnrichTarget(null)}
+          onSelect={() => {}}
+          onEnrich={(patch) => {
+            void adminFilms
+              .update(enrichTarget.id, {
+                title_zh: patch.titleZh ?? null,
+                title_en: patch.titleEn ?? null,
+                year: patch.year ?? null,
+                image: patch.image ?? null,
+                description: patch.description ?? null,
+                rating: patch.rating ?? null,
+                director: patch.director ?? null,
+              })
+              .then(() => { setEnrichTarget(null); void reload(); });
+          }}
         />
       )}
 

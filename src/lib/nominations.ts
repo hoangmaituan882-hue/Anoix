@@ -54,10 +54,19 @@ export interface TmdbNominationPayload {
   director?: string;
 }
 
+export interface BangumiNominationPayload {
+  bgmId: number;
+  title: string;
+  originalTitle: string;
+  year: string;
+  overview: string;
+  posterUrl: string | null;
+}
+
 export const nominations = {
   quota: () => api<Quota>('/api/quota'),
 
-  nominate: (payload: { filmId?: string; tmdb?: TmdbNominationPayload; note: string }) =>
+  nominate: (payload: { filmId?: string; tmdb?: TmdbNominationPayload; bangumi?: BangumiNominationPayload; note: string }) =>
     api<{ ok: boolean }>(`/api/nominations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

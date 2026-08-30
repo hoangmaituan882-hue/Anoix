@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { catalog } from '../../lib/catalog';
-import { nominations, TmdbNominationPayload } from '../../lib/nominations';
+import { nominations, TmdbNominationPayload, BangumiNominationPayload } from '../../lib/nominations';
+import { searchScrape, ScrapeResult, ScrapeSource } from '../../lib/scrape';
 import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
 import { Input } from '../../components/ui/input';
@@ -11,16 +12,6 @@ import { Search, X, Clapperboard, Film, Star, Plus } from 'lucide-react';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
 
-interface TmdbResult {
-  tmdbId: number;
-  title: string;
-  originalTitle: string;
-  year: string;
-  overview: string;
-  posterUrl: string | null;
-  rating: number | null;
-}
-
 export const NominateDialog: React.FC<{
   roundTitle?: string;
   open: boolean;
@@ -30,7 +21,7 @@ export const NominateDialog: React.FC<{
 }> = ({ roundTitle, open, onClose, onSubmitted, initialFilmId }) => {
   const { success, error: toastError } = useToast();
 
-  const [tab, setTab] = useState<'library' | 'tmdb'>('library');
+  const [tab, setTab] = useState<'library' | 'scrape'>('library');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -39,16 +30,17 @@ export const NominateDialog: React.FC<{
   const [libLoading, setLibLoading] = useState(false);
   const [selectedFilm, setSelectedFilm] = useState<WorkItem | null>(null);
 
-  const [tmdbQuery, setTmdbQuery] = useState('');
-  const [tmdbResults, setTmdbResults] = useState<TmdbResult[]>([]);
+  const [source, setSource] = useState<ScrapeSource>('tmdb');
+  const [scrapeQuery, setScrapeQuery] = useState('');
+  const [scrapeResults, setScrapeResults] = useState<ScrapeResult[]>([]);
   const [searching, setSearching] = useState(false);
-  const [selectedTmdb, setSelectedTmdb] = useState<TmdbResult | null>(null);
+  const [selectedScrape, setSelectedScrape] = useState<ScrapeResult | null>(null);
 
   // reset on open (pre-select a film when opened from the plaza)
   useEffect(() => {
     if (open) {
-      setNote(''); setSelectedTmdb(null);
-      setLibQuery(''); setTmdbQuery(''); setTmdbResults([]);
+      setNote(''); setSelectedScrape(null);
+      setLibQuery(''); setScrapeQuery(''); setScrapeResults([]); setSource('tmdb');
       if (initialFilmId) {
         setTab('library');
         catalog.get(initialFilmId).then((f) => setSelectedFilm(f)).catch(() => setSelectedFilm(null));
@@ -81,39 +73,49 @@ export const NominateDialog: React.FC<{
     };
   }, [open, tab, libQuery]);
 
-  // TMDB search (debounced)
+  // scrape search (debounced): TMDB or Bangumi
   useEffect(() => {
-    if (!open || tab !== 'tmdb' || tmdbQuery.trim().length < 2) { setTmdbResults([]); return; }
+    if (!open || tab !== 'scrape' || scrapeQuery.trim().length < 2) { setScrapeResults([]); return; }
     let alive = true;
     setSearching(true);
     const t = setTimeout(() => {
-      fetch(`${API_BASE}/api/tmdb/search?q=${encodeURIComponent(tmdbQuery.trim())}&media_type=multi`)
-        .then((r) => r.json())
-        .then((d) => { if (alive) setTmdbResults(d.results ?? []); })
-        .catch(() => { if (alive) setTmdbResults([]); })
+      searchScrape(scrapeQuery.trim(), source)
+        .then((r) => { if (alive) setScrapeResults(r); })
+        .catch(() => { if (alive) setScrapeResults([]); })
         .finally(() => { if (alive) setSearching(false); });
     }, 450);
     return () => { alive = false; clearTimeout(t); };
-  }, [open, tab, tmdbQuery]);
+  }, [open, tab, scrapeQuery, source]);
 
-  const canSubmit = Boolean(selectedFilm || selectedTmdb) && note.trim().length > 0;
+  const canSubmit = Boolean(selectedFilm || selectedScrape) && note.trim().length > 0;
 
   const submit = async () => {
     if (!canSubmit || busy) return;
     setBusy(true);
     try {
-      const payload: { filmId?: string; tmdb?: TmdbNominationPayload; note: string } = { note: note.trim() };
+      const payload: { filmId?: string; tmdb?: TmdbNominationPayload; bangumi?: BangumiNominationPayload; note: string } = { note: note.trim() };
       if (selectedFilm) {
         payload.filmId = selectedFilm.id;
-      } else if (selectedTmdb) {
-        payload.tmdb = {
-          tmdbId: selectedTmdb.tmdbId,
-          title: selectedTmdb.title,
-          originalTitle: selectedTmdb.originalTitle,
-          year: selectedTmdb.year,
-          overview: selectedTmdb.overview,
-          posterUrl: selectedTmdb.posterUrl,
-        };
+      } else if (selectedScrape) {
+        if (selectedScrape.source === 'tmdb') {
+          payload.tmdb = {
+            tmdbId: Number(selectedScrape.id),
+            title: selectedScrape.title,
+            originalTitle: selectedScrape.originalTitle,
+            year: selectedScrape.year,
+            overview: selectedScrape.overview,
+            posterUrl: selectedScrape.posterUrl,
+          };
+        } else {
+          payload.bangumi = {
+            bgmId: Number(selectedScrape.id),
+            title: selectedScrape.title,
+            originalTitle: selectedScrape.originalTitle,
+            year: selectedScrape.year,
+            overview: selectedScrape.overview,
+            posterUrl: selectedScrape.posterUrl,
+          };
+        }
       }
       await nominations.nominate(payload);
       success('提名已提交');
@@ -148,10 +150,10 @@ export const NominateDialog: React.FC<{
         </div>
 
         <div className="flex-1 overflow-y-auto mt-4 space-y-5">
-          <Tabs value={tab} onValueChange={(v) => setTab(v as 'library' | 'tmdb')}>
+          <Tabs value={tab} onValueChange={(v) => setTab(v as 'library' | 'scrape')}>
             <TabsList className="w-full sm:w-auto">
               <TabsTrigger value="library" className="flex-1 sm:flex-none">从片库选</TabsTrigger>
-              <TabsTrigger value="tmdb" className="flex-1 sm:flex-none">TMDB 刮削</TabsTrigger>
+              <TabsTrigger value="scrape" className="flex-1 sm:flex-none">刮削（TMDB/Bangumi）</TabsTrigger>
             </TabsList>
 
             <TabsContent value="library" className="space-y-3">
@@ -169,7 +171,7 @@ export const NominateDialog: React.FC<{
                   <button
                     key={f.id}
                     type="button"
-                    onClick={() => { setSelectedFilm(f); setSelectedTmdb(null); }}
+                    onClick={() => { setSelectedFilm(f); setSelectedScrape(null); }}
                     className={`rounded-xl overflow-hidden border-2 text-left transition-all cursor-pointer ${selectedFilm?.id === f.id ? 'border-[#ff3650]' : 'border-white/10 hover:border-white/30'}`}
                   >
                     <div className="aspect-[2/3] bg-black/40 overflow-hidden">
@@ -183,34 +185,51 @@ export const NominateDialog: React.FC<{
               {selectedFilm && <p className="text-xs text-[#e0fe3d] font-bold">已选：{selectedFilm.titleZh ?? selectedFilm.title}</p>}
             </TabsContent>
 
-            <TabsContent value="tmdb" className="space-y-3">
+            <TabsContent value="scrape" className="space-y-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSource('tmdb')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'tmdb' ? 'bg-[#ff3650] text-white' : 'bg-white/5 text-white/60 hover:text-white'}`}
+                >
+                  TMDB
+                </button>
+                <button
+                  onClick={() => setSource('bangumi')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'bangumi' ? 'bg-[#ff3650] text-white' : 'bg-white/5 text-white/60 hover:text-white'}`}
+                >
+                  Bangumi
+                </button>
+              </div>
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
-                <Input value={tmdbQuery} onChange={(e) => setTmdbQuery(e.target.value)} placeholder="搜索 TMDB（片名/关键词）..." className="pl-9" />
+                <Input value={scrapeQuery} onChange={(e) => setScrapeQuery(e.target.value)} placeholder={source === 'tmdb' ? '搜索 TMDB（片名/关键词）...' : '搜索 Bangumi（片名/关键词）...'} className="pl-9" />
               </div>
               {searching ? (
                 <div className="py-8 flex justify-center"><Loader variant="dots" size={24} label="搜索中" className="text-[#ff3650]" /></div>
               ) : (
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {tmdbResults.map((r) => (
+                  {scrapeResults.map((r) => (
                     <button
-                      key={`${r.tmdbId}`}
+                      key={`${r.source}-${r.id}`}
                       type="button"
-                      onClick={() => { setSelectedTmdb(r); setSelectedFilm(null); }}
-                      className={`w-full flex items-center gap-3 rounded-xl border-2 p-2.5 text-left transition-all cursor-pointer ${selectedTmdb?.tmdbId === r.tmdbId ? 'border-[#ff3650]' : 'border-white/10 hover:border-white/30'}`}
+                      onClick={() => { setSelectedScrape(r); setSelectedFilm(null); }}
+                      className={`w-full flex items-center gap-3 rounded-xl border-2 p-2.5 text-left transition-all cursor-pointer ${selectedScrape?.id === r.id && selectedScrape?.source === r.source ? 'border-[#ff3650]' : 'border-white/10 hover:border-white/30'}`}
                     >
                       {r.posterUrl ? <img src={r.posterUrl} alt={r.title} className="w-10 h-14 rounded-md object-cover shrink-0 bg-black/40" /> : <div className="w-10 h-14 rounded-md bg-white/5 shrink-0 flex items-center justify-center"><Clapperboard className="w-4 h-4 text-white/30" /></div>}
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold truncate">{r.title}</p>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase bg-white/10 text-white/60">{r.source === 'tmdb' ? 'TMDB' : 'BGM'}</span>
+                          <p className="text-sm font-bold truncate">{r.title}</p>
+                        </div>
                         <p className="text-xs text-white/40 truncate">{r.originalTitle}{r.year ? ` · ${r.year}` : ''}</p>
                       </div>
                       {r.rating != null && <span className="inline-flex items-center gap-1 text-xs font-black text-[#ff3650] shrink-0"><Star className="w-3 h-3 fill-current" /> {r.rating}</span>}
                     </button>
                   ))}
-                  {tmdbResults.length === 0 && tmdbQuery.trim().length >= 2 && <p className="text-xs text-white/40 py-4 text-center">没有匹配结果</p>}
+                  {scrapeResults.length === 0 && scrapeQuery.trim().length >= 2 && <p className="text-xs text-white/40 py-4 text-center">没有匹配结果</p>}
                 </div>
               )}
-              {selectedTmdb && <p className="text-xs text-[#e0fe3d] font-bold">已选：{selectedTmdb.title}</p>}
+              {selectedScrape && <p className="text-xs text-[#e0fe3d] font-bold">已选：{selectedScrape.title}</p>}
             </TabsContent>
           </Tabs>
 

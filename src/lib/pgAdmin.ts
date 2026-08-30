@@ -58,6 +58,9 @@ export interface FilmRow {
   year: string | null;
   release_date: string | null;
   duration: number | null;
+  rating: string | null;
+  watch_url: string | null;
+  watch_type: string | null;
   category: string | null;
   image: string | null;
   landscape_image: string | null;

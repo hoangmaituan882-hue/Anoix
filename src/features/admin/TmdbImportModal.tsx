@@ -1,29 +1,22 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { WorkItem } from '../../types';
 import { Loader } from '../../components/motion/loader';
-import { getAccessToken } from '../../lib/session';
-import { Search, X, Import, Clapperboard, Tv, Layers, Star, AlertCircle } from 'lucide-react';
+import { searchScrape, detailScrape, ScrapeResult, ScrapeSource } from '../../lib/scrape';
+import { Search, X, Import, Clapperboard, Tv, Layers, Star, AlertCircle, Database } from 'lucide-react';
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
-
-/** Bearer header for the server-side admin gate on the TMDB proxy. */
-const authHeaders = async (): Promise<Record<string, string>> => {
-  const token = await getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
-interface TmdbSearchResult {
-  tmdbId: number;
-  mediaType: 'movie' | 'tv';
-  title: string;
-  originalTitle: string;
-  year: string;
-  overview: string;
-  posterUrl: string | null;
-  rating: number | null;
+/** Fields an enrich (补全) pick fills back onto an existing film. */
+export interface EnrichPatch {
+  title?: string;
+  titleZh?: string;
+  titleEn?: string;
+  year?: string;
+  image?: string;
+  description?: string;
+  rating?: string;
+  director?: string;
 }
 
-interface TmdbDetail extends TmdbSearchResult {
+interface TmdbDetail extends ScrapeResult {
   tagline: string;
   director?: string;
 }
@@ -37,7 +30,7 @@ const MEDIA_TYPES = [
 /** Map a TMDB detail into a WorkItem, admin edits before saving. */
 function tmdbToWork(d: TmdbDetail): WorkItem {
   return {
-    id: `tmdb-${d.tmdbId}`,
+    id: `tmdb-${d.id}`,
     title: d.originalTitle || d.title,
     titleZh: d.title || undefined,
     titleEn: d.originalTitle || undefined,
@@ -52,30 +45,44 @@ function tmdbToWork(d: TmdbDetail): WorkItem {
   };
 }
 
+/** Map a scrape result/detail into an EnrichPatch (fill existing film). */
+function toEnrichPatch(d: Record<string, any>): EnrichPatch {
+  return {
+    title: d.originalTitle || d.title || undefined,
+    titleZh: d.title || undefined,
+    titleEn: d.originalTitle || undefined,
+    year: d.year || undefined,
+    image: d.posterUrl ?? undefined,
+    description: d.overview || d.summary || undefined,
+    rating: d.rating != null ? String(d.rating) : undefined,
+    director: d.director || undefined,
+  };
+}
+
 export const TmdbImportModal: React.FC<{
   onClose: () => void;
   onSelect: (work: WorkItem) => void;
-}> = ({ onClose, onSelect }) => {
-  const [query, setQuery] = useState('');
+  /** When set → enrich mode: pick fills this existing film instead of importing a new one. */
+  enrichTarget?: { id: string; title: string };
+  onEnrich?: (patch: EnrichPatch) => void;
+}> = ({ onClose, onSelect, enrichTarget, onEnrich }) => {
+  const isEnrich = Boolean(enrichTarget);
+  const [query, setQuery] = useState(enrichTarget?.title ?? '');
+  const [source, setSource] = useState<ScrapeSource>('tmdb');
   const [mediaType, setMediaType] = useState<'movie' | 'tv' | 'multi'>('multi');
-  const [results, setResults] = useState<TmdbSearchResult[]>([]);
+  const [results, setResults] = useState<ScrapeResult[]>([]);
   const [searching, setSearching] = useState(false);
-  const [loadingDetail, setLoadingDetail] = useState<number | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState<string | null>(null);
   const [error, setError] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const doSearch = useCallback(async (q: string, mt: string) => {
+  const doSearch = useCallback(async (q: string, src: ScrapeSource, mt: string) => {
     if (q.trim().length < 2) { setResults([]); return; }
     setSearching(true);
     setError('');
     try {
-      const r = await fetch(`${API_BASE}/api/tmdb/search?q=${encodeURIComponent(q.trim())}&media_type=${mt}`, {
-        headers: await authHeaders(),
-      });
-      if (r.status === 401 || r.status === 403) throw new Error('需要管理员权限才能使用 TMDB 导入');
-      if (!r.ok) throw new Error(r.status === 503 ? '未配置 TMDB Key,或上游不可达' : `搜索失败 (${r.status})`);
-      const data = await r.json();
-      setResults(data.results ?? []);
+      const r = await searchScrape(q.trim(), src, mt as 'movie' | 'tv' | 'multi');
+      setResults(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : '搜索失败');
       setResults([]);
@@ -87,21 +94,17 @@ export const TmdbImportModal: React.FC<{
   // 450ms debounce
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => { void doSearch(query, mediaType); }, 450);
+    debounceRef.current = setTimeout(() => { void doSearch(query, source, mediaType); }, 450);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [query, mediaType, doSearch]);
+  }, [query, source, mediaType, doSearch]);
 
-  const pick = async (item: TmdbSearchResult) => {
-    setLoadingDetail(item.tmdbId);
+  const pick = async (item: ScrapeResult) => {
+    setLoadingDetail(String(item.id));
     setError('');
     try {
-      const r = await fetch(`${API_BASE}/api/tmdb/detail/${item.tmdbId}?media_type=${item.mediaType}`, {
-        headers: await authHeaders(),
-      });
-      if (r.status === 401 || r.status === 403) throw new Error('需要管理员权限才能使用 TMDB 导入');
-      if (!r.ok) throw new Error(`获取详情失败 (${r.status})`);
-      const d: TmdbDetail = await r.json();
-      onSelect(tmdbToWork(d));
+      const d = await detailScrape(item);
+      if (isEnrich && onEnrich) onEnrich(toEnrichPatch(d));
+      else onSelect(tmdbToWork({ ...d, id: item.id, mediaType: item.mediaType ?? 'movie' } as TmdbDetail));
     } catch (e) {
       setError(e instanceof Error ? e.message : '获取详情失败');
     } finally {
@@ -119,13 +122,15 @@ export const TmdbImportModal: React.FC<{
         <div className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#ff3650]/15 border border-[#ff3650]/30 flex items-center justify-center text-[#ff3650]">
-              <Search className="w-5 h-5" />
+              {isEnrich ? <Database className="w-5 h-5" /> : <Search className="w-5 h-5" />}
             </div>
             <div>
               <span className="text-[10px] font-black text-[#ff3650] uppercase tracking-widest block">
-                TMDB SCRAPE IMPORT
+                {isEnrich ? 'MANUAL SCRAPE ENRICH' : 'SCRAPE IMPORT'}
               </span>
-              <h3 className="text-xl font-black text-white">刮削导入作品</h3>
+              <h3 className="text-xl font-black text-white">
+                {isEnrich ? `刮削补全《${enrichTarget?.title}》` : '刮削导入作品'}
+              </h3>
             </div>
           </div>
           <button
@@ -137,7 +142,7 @@ export const TmdbImportModal: React.FC<{
           </button>
         </div>
 
-        {/* Search bar + media type pills */}
+        {/* Search bar + source pills */}
         <div className="flex flex-col gap-3 pt-4 shrink-0">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
@@ -150,15 +155,28 @@ export const TmdbImportModal: React.FC<{
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            {MEDIA_TYPES.map(({ key, label, icon: Icon }) => (
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Source toggle */}
+            <button
+              onClick={() => setSource('tmdb')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'tmdb' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'}`}
+            >
+              TMDB
+            </button>
+            <button
+              onClick={() => setSource('bangumi')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${source === 'bangumi' ? 'bg-[#ff3650] text-white shadow-md' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'}`}
+            >
+              Bangumi
+            </button>
+
+            {/* Media type pills (TMDB only) */}
+            {source === 'tmdb' && MEDIA_TYPES.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => setMediaType(key)}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  mediaType === key
-                    ? 'bg-[#ff3650] text-white shadow-md'
-                    : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                  mediaType === key ? 'bg-[#e0fe3d] text-[#121212] shadow-md' : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -193,7 +211,7 @@ export const TmdbImportModal: React.FC<{
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {results.map((item) => (
                 <button
-                  key={`${item.mediaType}-${item.tmdbId}`}
+                  key={`${item.source}-${item.id}`}
                   onClick={() => pick(item)}
                   disabled={loadingDetail !== null}
                   className="flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-2xl p-2.5 transition-colors cursor-pointer disabled:opacity-50 text-left border border-white/5 hover:border-white/15"
@@ -212,10 +230,8 @@ export const TmdbImportModal: React.FC<{
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider ${
-                        item.mediaType === 'movie' ? 'bg-[#ff3650]/20 text-[#ff3650]' : 'bg-[#e0fe3d]/15 text-[#e0fe3d]'
-                      }`}>
-                        {item.mediaType === 'movie' ? '电影' : '剧集'}
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider bg-white/10 text-white/60">
+                        {item.source === 'tmdb' ? (item.mediaType === 'movie' ? 'TMDB·电影' : 'TMDB·剧集') : 'BGM'}
                       </span>
                       {item.rating != null && (
                         <span className="inline-flex items-center gap-0.5 text-[11px] font-black text-[#ff3650]">
@@ -227,7 +243,7 @@ export const TmdbImportModal: React.FC<{
                     <p className="text-xs text-white/50 truncate">{item.originalTitle}{item.year ? ` · ${item.year}` : ''}</p>
                   </div>
                   <div className="shrink-0">
-                    {loadingDetail === item.tmdbId ? (
+                    {loadingDetail === String(item.id) ? (
                       <Loader variant="spinner" size={16} label="获取详情" className="text-[#ff3650]" />
                     ) : (
                       <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/60 group-hover:text-[#ff3650] transition-colors">
@@ -243,7 +259,7 @@ export const TmdbImportModal: React.FC<{
 
         {/* Footer hint */}
         <p className="text-[10px] text-white/30 font-bold mt-3 pt-2 border-t border-white/10 shrink-0">
-          海报走 image.tmdb.org(国内可达)· API 需在服务端配置 TMDB_API_KEY 与可达的 TMDB_API_BASE_URL
+          TMDB 海报走 image.tmdb.org · Bangumi 走 bgmimg.anibt.net（国内可达）
         </p>
       </div>
     </div>

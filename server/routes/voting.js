@@ -1,4 +1,4 @@
-﻿import { asyncHandler } from '../lib/middleware.js';
+import { asyncHandler } from '../lib/middleware.js';
 import { issueVoterCookie, allowRate, clientIp } from '../auth.js';
 import { pgGet, pgWrite } from '../lib/db.js';
 import { resolveIdentity } from '../lib/identity.js';
@@ -71,7 +71,7 @@ export function votingRoutes(app) {
     if (!ident) return res.status(401).json({ error: 'identity_required' });
     if (!allowRate(`nom:${clientIp(req)}`, 20, 60_000)) return res.status(429).json({ error: 'rate_limited' });
 
-    const { filmId, tmdb, note } = req.body ?? {};
+    const { filmId, tmdb, bangumi, note } = req.body ?? {};
     if (typeof note !== 'string' || note.trim().length === 0) {
       return res.status(400).json({ error: 'note_required' });
     }
@@ -96,6 +96,13 @@ export function votingRoutes(app) {
       row.image = tmdb.posterUrl || '';
       row.overview = tmdb.overview || '';
       row.director = tmdb.director || null;
+    } else if (bangumi && bangumi.bgmId) {
+      row.tmdb_id = `bgm-${bangumi.bgmId}`;
+      row.title = bangumi.title || bangumi.originalTitle || `bgm-${bangumi.bgmId}`;
+      row.original_title = bangumi.originalTitle || null;
+      row.year = bangumi.year || '';
+      row.image = bangumi.posterUrl || '';
+      row.overview = bangumi.overview || '';
     } else if (typeof filmId === 'string' && filmId.trim()) {
       const fid = filmId.trim();
       const films = await pgGet(`/films?id=eq.${encodeURIComponent(fid)}&select=id,title,title_zh,title_en,year,image`);
