@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WorkItem, Language } from '../../types';
+import { FilmPoster } from '../../components/ui/FilmPoster';
 import { I18N } from '../../data/triggerData';
 import { catalog } from '../../lib/catalog';
 import { community, WatchItem } from '../../lib/community';
@@ -467,9 +468,16 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                           }`}
                         >
                           <div className="relative aspect-[27/40] overflow-hidden bg-black/40">
-                            <img
-                              src={work.image}
+                            <FilmPoster
+                              image={work.image}
                               alt={
+                                lang === 'zh' && work.titleZh
+                                  ? work.titleZh
+                                  : lang === 'en' && work.titleEn
+                                  ? work.titleEn
+                                  : work.title
+                              }
+                              title={
                                 lang === 'zh' && work.titleZh
                                   ? work.titleZh
                                   : lang === 'en' && work.titleEn
@@ -479,7 +487,6 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                               className={`w-full h-full object-cover transition-transform duration-500 ${
                                 isBatchMode ? '' : 'group-hover/item:scale-108'
                               }`}
-                              loading="lazy"
                             />
 
                             {/* Batch Selection Checkbox Indicator */}

@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { WorkItem, Language } from '../../types';
+import { FilmPoster } from '../../components/ui/FilmPoster';
 import { I18N } from '../../data/triggerData';
 import { catalog } from '../../lib/catalog';
 import { repository } from '../../lib/repository';
@@ -175,11 +176,11 @@ export const FilmsSection: React.FC<FilmsSectionProps> = ({
                   {/* Hover lift/shadow lives on this inner frame so CSS transitions
                       never overlap with the motion entrance above. */}
                   <div className="relative aspect-[27/40] rounded-2xl overflow-hidden bg-black/40 border-2 border-white/10 group-hover/card:border-[#ff3650] group-hover/card:-translate-y-2 group-hover/card:shadow-[0_12px_30px_rgba(255,54,80,0.35)] transition-all duration-300">
-                    <img
-                      src={work.image}
+                    <FilmPoster
+                      image={work.image}
                       alt={lang === 'zh' && work.titleZh ? work.titleZh : lang === 'en' && work.titleEn ? work.titleEn : work.title}
+                      title={lang === 'zh' && work.titleZh ? work.titleZh : work.title}
                       className="w-full h-full object-cover group-hover/card:scale-108 transition-transform duration-500 ease-out"
-                      loading="lazy"
                     />
 
                     {/* Gradient Overlay & Hover Play Icon */}

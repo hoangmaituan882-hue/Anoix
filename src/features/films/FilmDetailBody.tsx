@@ -1,4 +1,5 @@
 import React from 'react';
+import { FilmPoster } from '../../components/ui/FilmPoster';
 import { WorkItem, Language } from '../../types';
 import { I18N } from '../../data/triggerData';
 import { Play, ExternalLink, Film, User, Users, Calendar, Tv, Sparkles } from 'lucide-react';
@@ -33,18 +34,20 @@ export const FilmDetailBody: React.FC<FilmDetailBodyProps> = ({
     <>
       {/* Hero Header */}
       <div className="relative aspect-video sm:aspect-[21/9] w-full bg-black overflow-hidden">
-        <img
-          src={work.landscapeImage || work.image}
+        <FilmPoster
+          image={work.landscapeImage || work.image}
           alt={title}
+          title={title}
           className="w-full h-full object-cover object-center blur-xs opacity-50 scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/60 to-transparent" />
 
         <div className="absolute inset-0 p-6 sm:p-8 flex items-end">
           <div className="flex gap-5 sm:gap-6 items-end w-full">
-            <img
-              src={work.image}
+            <FilmPoster
+              image={work.image}
               alt={title}
+              title={title}
               className="hidden sm:block w-28 md:w-36 lg:w-40 aspect-[27/40] rounded-2xl object-cover shadow-2xl border-2 border-[#ff3650] flex-shrink-0"
               style={posterViewTransitionName ? { viewTransitionName: posterViewTransitionName } : undefined}
             />
