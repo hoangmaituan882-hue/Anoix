@@ -81,6 +81,7 @@ html.light {
 html,
 body {
   overflow-x: clip;
+  scroll-behavior: smooth;
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
   line-height: 1.55;
   letter-spacing: normal;
