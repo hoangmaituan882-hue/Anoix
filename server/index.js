@@ -1,7 +1,8 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
 import { tmdbRouter } from './tmdb.js';
+import { bangumiRouter } from './bangumi.js';
 import { allowRate, clientIp } from './auth.js';
 import { corsMiddleware, securityHeaders, errorHandler } from './lib/middleware.js';
 import { DIST_DIR, PORT, ENV_ID } from './lib/config.js';
@@ -32,6 +33,15 @@ function tmdbGate(req, res, next) {
   next();
 }
 app.use('/api/tmdb', tmdbGate, tmdbRouter);
+
+// ---- Bangumi proxy (open to all for anime/subject scraping; rate-limited) ----
+function bangumiGate(req, res, next) {
+  if (!allowRate(`bangumi:${clientIp(req)}`, 20, 60_000)) {
+    return res.status(429).json({ error: 'rate_limited' });
+  }
+  next();
+}
+app.use('/api/bangumi', bangumiGate, bangumiRouter);
 
 // ---- Static frontend + SPA fallback (after API routes) ----
 app.use(express.static(DIST_DIR));
