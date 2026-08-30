@@ -217,7 +217,7 @@ export const FilmsLibraryModal: React.FC<FilmsLibraryModalProps> = ({
                 <Sparkles className="w-3 h-3" />
                 FANSHI ANIMATION ARCHIVE
               </span>
-              <h2 className="text-xl sm:text-3xl font-black text-white uppercase tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-headline uppercase tracking-tight text-white">
                 {t.allWorksModalTitle}
               </h2>
             </div>
